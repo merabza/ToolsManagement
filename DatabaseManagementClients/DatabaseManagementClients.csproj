@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OneOf" Version="3.0.243" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\DatabaseTools\DbToolsFabric\DbToolsFabric.csproj" />
+        <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts\WebAgentContracts.csproj" />
+    </ItemGroup>
+
+</Project>
