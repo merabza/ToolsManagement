@@ -6,18 +6,16 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction
 {
-    private readonly string? _actionDescription;
     private readonly string _actionName;
     protected readonly ILogger Logger;
     protected readonly bool UseConsole;
 
 
-    protected ToolAction(ILogger logger, bool useConsole, string actionName, string? actionDescription)
+    protected ToolAction(ILogger logger, bool useConsole, string actionName)
     {
         UseConsole = useConsole;
         Logger = logger;
         _actionName = actionName;
-        _actionDescription = actionDescription;
     }
 
     public bool Run()

@@ -20,7 +20,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     public GetLatestParametersFileBodyAction(ILogger logger, bool useConsole, FileStorageData fileStorageForDownload,
         string projectName, string serverName, string dateMask, string parametersFileExtension) : base(logger,
-        useConsole, "Get latest Parameters File Body", null)
+        useConsole, "Get latest Parameters File Body")
     {
         _useConsole = useConsole;
         _fileStorageForDownload = fileStorageForDownload;
@@ -72,10 +72,9 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     }
 
 
-    private string GetPrefix(string projectName, string serverName, string? runtime)
+    private static string GetPrefix(string projectName, string serverName, string? runtime)
     {
-        var hostName = serverName; //.Capitalize();
-        var prefix = $"{hostName}-{projectName}-{(runtime == null ? "" : $"{runtime}-")}";
+        var prefix = $"{serverName}-{projectName}-{(runtime == null ? "" : $"{runtime}-")}";
         return prefix;
     }
 }

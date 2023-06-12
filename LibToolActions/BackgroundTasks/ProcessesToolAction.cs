@@ -9,7 +9,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
     protected readonly ProcessManager? ProcessManager;
 
     protected ProcessesToolAction(ILogger logger, bool useConsole, ProcessManager? processManager, string actionName,
-        string? actionDescription, int procLineId = 0) : base(logger, useConsole, actionName, actionDescription)
+        int procLineId = 0) : base(logger, useConsole, actionName)
     {
         ProcessManager = processManager;
         ProcLineId = procLineId;
