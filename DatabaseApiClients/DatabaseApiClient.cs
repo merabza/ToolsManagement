@@ -56,7 +56,6 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     public override async Task<BackupFileParameters?> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName)
     {
-
         if (string.IsNullOrWhiteSpace(backupBaseName))
         {
             Logger.LogError("Database Name does Not Specified For Backup");
@@ -132,7 +131,6 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     public override async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, string? restoreFromFolderPath = null)
     {
-
         var bodyApiKeyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
         {
             Prefix = backupFileParameters.Prefix, Suffix = backupFileParameters.Suffix,
