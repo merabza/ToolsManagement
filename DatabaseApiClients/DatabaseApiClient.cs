@@ -15,6 +15,7 @@ using OneOf;
 using SystemToolsShared;
 using WebAgentContracts.V1.Requests;
 using WebAgentContracts.V1.Responses;
+using WebAgentDbContracts.V1.Requests;
 
 namespace DatabaseApiClients;
 
@@ -55,23 +56,13 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     public override async Task<BackupFileParameters?> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName)
     {
-        //var serverName = databaseBackupParametersModel.DbServerName;
-        var databaseName = backupBaseName; //databaseBackupParametersModel.BackupBaseName;
 
-        if (string.IsNullOrWhiteSpace(databaseName))
+        if (string.IsNullOrWhiteSpace(backupBaseName))
         {
             Logger.LogError("Database Name does Not Specified For Backup");
             return null;
         }
 
-        //if (string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey))
-        //{
-        //    Logger.LogError("_apiClientSettingsDomain.ApiKey does Not Specified For Backup");
-        //    return null;
-        //}
-
-        //ApiKeyWithDatabaseBackupParametersModel body = new(_apiClientSettingsDomain.ApiKey,
-        //    databaseBackupParametersModel);
         var bodyApiKeyJsonData = JsonConvert.SerializeObject(new CreateBackupRequest
         {
             BackupNamePrefix = databaseBackupParametersModel.BackupNamePrefix,
@@ -85,7 +76,7 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         });
 
         Uri uri = new(
-            $"{_apiClientSettingsDomain.Server}database/createbackup/{databaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
+            $"{_apiClientSettingsDomain.Server}database/createbackup/{backupBaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
 
         var response = _client
             .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
@@ -118,17 +109,6 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         return JsonConvert.DeserializeObject<List<DatabaseInfoModel>>(responseBody) ?? new List<DatabaseInfoModel>();
     }
 
-    ////ხელმისაწვდომი სერვერების სახელების მიღება
-    //public override List<string>? GetDatabaseServerNames()
-    //{
-    //    Uri uri = new(
-    //        $"{_apiClientSettingsDomain.Server}database/getdatabaseservernames?apikey={_apiClientSettingsDomain.ApiKey}");
-    //    var response = _client.GetAsync(uri).Result;
-    //    response.EnsureSuccessStatusCode();
-    //    var responseBody = response.Content.ReadAsStringAsync().Result;
-    //    return JsonConvert.DeserializeObject<List<string>>(responseBody);
-    //}
-
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
@@ -152,11 +132,6 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     public override async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, string? restoreFromFolderPath = null)
     {
-        //if (string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey))
-        //{
-        //    Logger.LogError("_apiClientSettingsDomain.ApiKey does Not Specified For RestoreDatabaseFromBackup");
-        //    return false;
-        //}
 
         var bodyApiKeyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
         {
