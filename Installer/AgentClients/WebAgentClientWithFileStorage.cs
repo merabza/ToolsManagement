@@ -14,16 +14,16 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
     {
     }
 
-    public bool UpdateAppParametersFile(string projectName, string? serviceName, string appSettingsFileName,
-        string parametersFileDateMask, string parametersFileExtension)
+    public bool UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
+        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension)
     {
         var uri = new Uri(
             $"{Server}projects/updatesettings{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
         var body = new UpdateSettingsRequest
         {
-            //ApiKey = ApiKey,
             ProjectName = projectName,
+            EnvironmentName = environmentName,
             ServiceName = serviceName,
             AppSettingsFileName = appSettingsFileName,
             ParametersFileDateMask = parametersFileDateMask,
@@ -42,14 +42,14 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
         return false;
     }
 
-    public string? InstallProgram(string projectName, string programArchiveDateMask, string programArchiveExtension,
-        string parametersFileDateMask, string parametersFileExtension)
+    public string? InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
         var uri = new Uri($"{Server}projects/update");
         var body = new ProjectUpdateRequest
         {
-            //ApiKey = ApiKey,
             ProjectName = projectName,
+            EnvironmentName = environmentName,
             ProgramArchiveDateMask = programArchiveDateMask,
             ProgramArchiveExtension = programArchiveExtension,
             ParametersFileDateMask = parametersFileDateMask,
@@ -68,17 +68,16 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
         return null;
     }
 
-    public string? InstallService(string projectName, string? serviceName, string serviceUserName,
-        string appSettingsFileName,
-        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
-        string parametersFileExtension)
+    public string? InstallService(string projectName, string environmentName, string? serviceName,
+        string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
+        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
         var uri = new Uri(
             $"{Server}projects/updateservice{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
         var body = new UpdateServiceRequest
         {
-            //ApiKey = ApiKey,
             ProjectName = projectName,
+            EnvironmentName = environmentName,
             ServiceUserName = serviceUserName,
             ServiceName = serviceName,
             AppSettingsFileName = appSettingsFileName,

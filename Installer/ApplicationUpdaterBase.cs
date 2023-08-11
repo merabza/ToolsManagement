@@ -16,12 +16,12 @@ public /*open*/ class ApplicationUpdaterBase
         UseConsole = useConsole;
     }
 
-    protected string? GetParametersFileBody(string projectName, FileStorageData fileStorageForDownload,
-        string parametersFileDateMask, string parametersFileExtension)
+    protected string? GetParametersFileBody(string projectName, string environmentName,
+        FileStorageData fileStorageForDownload, string parametersFileDateMask, string parametersFileExtension)
     {
-        var getLatestParametersFileBodyAction =
-            new GetLatestParametersFileBodyAction(Logger, UseConsole, fileStorageForDownload, projectName,
-                Environment.MachineName, parametersFileDateMask, parametersFileExtension);
+        var getLatestParametersFileBodyAction = new GetLatestParametersFileBodyAction(Logger, UseConsole,
+            fileStorageForDownload, projectName, Environment.MachineName, environmentName, parametersFileDateMask,
+            parametersFileExtension);
         var result = getLatestParametersFileBodyAction.Run();
         var appSettingsFileBody = getLatestParametersFileBodyAction.LatestParametersFileContent;
         if (!result || string.IsNullOrWhiteSpace(appSettingsFileBody))

@@ -58,7 +58,8 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     }
 
 
-    public bool UpdateParameters(string projectName, string? serviceName, string appSettingsFileName)
+    public bool UpdateParameters(string projectName, string environmentName, string? serviceName,
+        string appSettingsFileName)
     {
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
         {
@@ -67,7 +68,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         }
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
-        var appSettingsFileBody = GetParametersFileBody(projectName,
+        var appSettingsFileBody = GetParametersFileBody(projectName, environmentName,
             _applicationUpdaterParameters.ProgramExchangeFileStorage,
             _applicationUpdaterParameters.ParametersFileDateMask,
             _applicationUpdaterParameters.ParametersFileExtension);

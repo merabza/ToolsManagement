@@ -16,16 +16,18 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     private readonly string _projectName;
     private readonly string _serverName;
+    private readonly string _environmentName;
     private readonly bool _useConsole;
 
     public GetLatestParametersFileBodyAction(ILogger logger, bool useConsole, FileStorageData fileStorageForDownload,
-        string projectName, string serverName, string dateMask, string parametersFileExtension) : base(logger,
-        useConsole, "Get latest Parameters File Body")
+        string projectName, string serverName, string environmentName, string dateMask, string parametersFileExtension)
+        : base(logger, useConsole, "Get latest Parameters File Body")
     {
         _useConsole = useConsole;
         _fileStorageForDownload = fileStorageForDownload;
         _projectName = projectName;
         _serverName = serverName;
+        _environmentName = environmentName;
         _dateMask = dateMask;
         _parametersFileExtension = parametersFileExtension;
     }
@@ -53,7 +55,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     private string? GetParametersFileBody()
     {
-        var prefix = GetPrefix(_projectName, _serverName, null);
+        var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 
         var exchangeFileManager =
             FileManagersFabric.CreateFileManager(_useConsole, Logger, null, _fileStorageForDownload, true);
@@ -72,9 +74,9 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     }
 
 
-    private static string GetPrefix(string projectName, string serverName, string? runtime)
+    private static string GetPrefix(string projectName, string serverName, string environmentName, string? runtime)
     {
-        var prefix = $"{serverName}-{projectName}-{(runtime == null ? "" : $"{runtime}-")}";
+        var prefix = $"{serverName}-{environmentName}-{projectName}-{(runtime == null ? "" : $"{runtime}-")}";
         return prefix;
     }
 }

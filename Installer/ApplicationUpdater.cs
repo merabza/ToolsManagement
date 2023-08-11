@@ -86,9 +86,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         return new ApplicationUpdater(logger, applicationUpdaterParameters, serviceInstaller, useConsole);
     }
 
-    public string? UpdateProgram(string projectName)
+    public string? UpdateProgram(string projectName, string environmentName)
     {
-        Logger.LogInformation($"starting UpdateProgramWithParameters with parameters: projectName={projectName}");
+        Logger.LogInformation(
+            $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}");
 
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
@@ -108,9 +109,9 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         }
 
         Logger.LogInformation(
-            $"GetFileParameters with parameters: projectName={projectName}, _serviceInstaller.Runtime={_installer.Runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={_applicationUpdaterParameters.ProgramArchiveExtension}");
+            $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={_installer.Runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={_applicationUpdaterParameters.ProgramArchiveExtension}");
 
-        var (prefix, dateMask, suffix) = GetFileParameters(projectName, _installer.Runtime,
+        var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
         Logger.LogInformation($"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}");
@@ -145,15 +146,15 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        Logger.LogError($"Cannot Update {projectName}");
+        Logger.LogError($"Cannot Update {projectName}/{environmentName}");
         return null;
     }
 
-    public string? UpdateServiceWithParameters(string projectName, string serviceUserName, string? serviceName,
-        string? appSettingsFileName)
+    public string? UpdateServiceWithParameters(string projectName, string environmentName, string serviceUserName,
+        string? serviceName, string? appSettingsFileName)
     {
         Logger.LogInformation(
-            $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, serviceUserName={serviceUserName}, serviceName={serviceName}");
+            $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}");
 
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
@@ -173,9 +174,9 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         }
 
         Logger.LogInformation(
-            $"GetFileParameters with parameters: projectName={projectName}, _serviceInstaller.Runtime={_installer.Runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={_applicationUpdaterParameters.ProgramArchiveExtension}");
+            $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={_installer.Runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={_applicationUpdaterParameters.ProgramArchiveExtension}");
 
-        var (prefix, dateMask, suffix) = GetFileParameters(projectName, _installer.Runtime,
+        var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
         Logger.LogInformation($"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}");
@@ -208,7 +209,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (!string.IsNullOrWhiteSpace(appSettingsFileName))
         {
             //მოვქაჩოთ ბოლო პარამეტრების ფაილი
-            var appSettingsFileBody = GetParametersFileBody(projectName,
+            var appSettingsFileBody = GetParametersFileBody(projectName, environmentName,
                 _applicationUpdaterParameters.ProgramExchangeFileStorage,
                 _applicationUpdaterParameters.ParametersFileDateMask,
                 _applicationUpdaterParameters.ParametersFileExtension);
@@ -235,15 +236,16 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        Logger.LogError($"Cannot Update {projectName}");
+        Logger.LogError($"Cannot Update {projectName}/{environmentName}");
         return null;
     }
 
-    private (string, string, string) GetFileParameters(string projectName, string runtime, string fleExtension)
+    private (string, string, string) GetFileParameters(string projectName, string environmentName, string runtime,
+        string fleExtension)
     {
         var hostName = Environment.MachineName; //.Capitalize();
         //string prefix = $"{hostName}-{projectName}-{(runtime == null ? "-" : $"{runtime}-")}";
-        var prefix = $"{hostName}-{projectName}-{runtime}-";
+        var prefix = $"{hostName}-{environmentName}-{projectName}-{runtime}-";
         var dateMask = _applicationUpdaterParameters.ProgramArchiveDateMask;
         var suffix = fleExtension;
         return (prefix, dateMask, suffix);

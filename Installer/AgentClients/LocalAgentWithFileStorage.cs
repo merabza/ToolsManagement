@@ -21,17 +21,19 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
         _useConsole = useConsole;
     }
 
-    public bool UpdateAppParametersFile(string projectName, string? serviceName, string appSettingsFileName,
-        string parametersFileDateMask, string parametersFileExtension)
+    public bool UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
+        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension)
     {
-        var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole,
-            parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
-            _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
-            _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner);
-        return applicationUpdater?.UpdateParameters(projectName, serviceName, appSettingsFileName) ?? false;
+        var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
+            parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
+            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
+            _localInstallerSettings.DotnetRunner);
+        return applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
+               false;
     }
 
-    public string? InstallProgram(string projectName, string programArchiveDateMask, string programArchiveExtension,
+    public string? InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+        string programArchiveExtension,
         string parametersFileDateMask, string parametersFileExtension)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
@@ -40,10 +42,11 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner);
-        return applicationUpdater?.UpdateProgram(projectName);
+        return applicationUpdater?.UpdateProgram(projectName, environmentName);
     }
 
-    public string? InstallService(string projectName, string? serviceName, string serviceUserName,
+    public string? InstallService(string projectName, string environmentName, string? serviceName,
+        string serviceUserName,
         string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
         string parametersFileDateMask, string parametersFileExtension)
     {
@@ -53,8 +56,8 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner);
-        return applicationUpdater?.UpdateServiceWithParameters(projectName, serviceUserName, serviceName,
-            appSettingsFileName);
+        return applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
+            serviceName, appSettingsFileName);
     }
 
     public async Task<bool> CheckValidation()
