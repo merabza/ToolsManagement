@@ -59,23 +59,23 @@ public /*open*/ class InstallerBase
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
             var serviceExists = IsServiceExists(serviceName);
-            Logger.LogInformation(serviceExists
-                ? $"Service {serviceName} is exists"
-                : $"Service {serviceName} does not exists");
+            Logger.LogInformation(
+                serviceExists ? "Service {serviceName} is exists" : "Service {serviceName} does not exists",
+                serviceName);
 
             if (!serviceExists)
             {
                 //ეს არის პარამეტრების განახლების პროცესი, ამიტომ თუ პროგრამა სერვისია და ეს სერვისი არ არსებობს განახლება ვერ მოხდება
                 //ასეთ შემთხვევაში უნდა გაეშვას უკვე მთლიანი პროგრამის განახლების პროცესი
-                Logger.LogError($"Service {serviceName} does not exists, cannot update settings file");
+                Logger.LogError("Service {serviceName} does not exists, cannot update settings file", serviceName);
                 return false;
             }
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            Logger.LogInformation($"Try to stop Service {serviceName}");
+            Logger.LogInformation("Try to stop Service {serviceName}", serviceName);
             if (!Stop(serviceName))
             {
-                Logger.LogError($"Service {serviceName} does not stopped");
+                Logger.LogError("Service {serviceName} does not stopped", serviceName);
                 return false;
             }
         }
@@ -87,7 +87,7 @@ public /*open*/ class InstallerBase
                 //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
                 //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
                 //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
-                Logger.LogError($"Process {projectName} is running and cannot be updated.");
+                Logger.LogError("Process {projectName} is running and cannot be updated.", projectName);
                 return false;
             }
         }
@@ -97,7 +97,7 @@ public /*open*/ class InstallerBase
         if (File.Exists(appSettingsFileFullPath))
         {
             appSettingsFileDeletedSuccess = false;
-            Logger.LogInformation($"File {appSettingsFileFullPath} is exists");
+            Logger.LogInformation("File {appSettingsFileFullPath} is exists", appSettingsFileFullPath);
 
             var tryCount = 0;
             while (!appSettingsFileDeletedSuccess && tryCount < 3)
@@ -105,14 +105,17 @@ public /*open*/ class InstallerBase
                 tryCount++;
                 try
                 {
-                    Logger.LogInformation($"Try to delete File {appSettingsFileFullPath} {tryCount}...");
+                    Logger.LogInformation("Try to delete File {appSettingsFileFullPath} {tryCount}...",
+                        appSettingsFileFullPath, tryCount);
                     File.Delete(appSettingsFileFullPath);
-                    Logger.LogInformation($"File {appSettingsFileFullPath} deleted successfully");
+                    Logger.LogInformation("File {appSettingsFileFullPath} deleted successfully",
+                        appSettingsFileFullPath);
                     appSettingsFileDeletedSuccess = true;
                 }
                 catch
                 {
-                    Logger.LogWarning($"File {appSettingsFileFullPath} could not deleted on try {tryCount}");
+                    Logger.LogWarning("File {appSettingsFileFullPath} could not deleted on try {tryCount}",
+                        appSettingsFileFullPath, tryCount);
                     Logger.LogInformation("waiting for 3 seconds...");
                     Thread.Sleep(3000);
                 }
@@ -123,7 +126,7 @@ public /*open*/ class InstallerBase
         {
             //თუ მიმდინარე დაინსტალირებული პარამეტრების ფაილის წაშლა ვერ მოხერხდა,
             //მაშინ პარამეტრების ფაილის განახლების პროცესი წყდება
-            Logger.LogError($"File {appSettingsFileFullPath} can not Deleted");
+            Logger.LogError("File {appSettingsFileFullPath} can not Deleted", appSettingsFileFullPath);
             return false;
         }
 
@@ -133,7 +136,7 @@ public /*open*/ class InstallerBase
         //შეიცვალოს პარამეტრების ფაილზე უფლებები საჭიროების მიხედვით.
         if (!ChangeOneFileOwner(appSettingsFileFullPath, filesUserName, filesUsersGroupName))
         {
-            Logger.LogError($"File {appSettingsFileFullPath} owner can not be changed");
+            Logger.LogError("File {appSettingsFileFullPath} owner can not be changed", appSettingsFileFullPath);
             return false;
         }
 
@@ -146,7 +149,7 @@ public /*open*/ class InstallerBase
             return true;
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
-        Logger.LogError($"Service {projectName} can not started");
+        Logger.LogError("Service {projectName} can not started", projectName);
         return false;
     }
 
@@ -162,20 +165,20 @@ public /*open*/ class InstallerBase
     {
         if (!Directory.Exists(installFolder))
         {
-            Logger.LogError($"Installer install folder {installFolder} does not exists");
+            Logger.LogError("Installer install folder {installFolder} does not exists", installFolder);
             return null;
         }
 
-        Logger.LogInformation($"Installer install folder is {installFolder}");
+        Logger.LogInformation("Installer install folder is {installFolder}", installFolder);
 
         var projectInstallFullPath = Path.Combine(installFolder, projectName);
         if (!Directory.Exists(projectInstallFullPath))
         {
-            Logger.LogError($"Project install folder {projectInstallFullPath} does not exists");
+            Logger.LogError("Project install folder {projectInstallFullPath} does not exists", projectInstallFullPath);
             return null;
         }
 
-        Logger.LogInformation($"Project install folder is {projectInstallFullPath}");
+        Logger.LogInformation("Project install folder is {projectInstallFullPath}", projectInstallFullPath);
         return projectInstallFullPath;
     }
 
@@ -188,18 +191,18 @@ public /*open*/ class InstallerBase
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
         {
-            Logger.LogError($"Installer work folder {installWorkFolder} does not created");
+            Logger.LogError("Installer work folder {installWorkFolder} does not created", installWorkFolder);
             return null;
         }
 
         var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
         {
-            Logger.LogError($"Installer install folder {installFolder} does not created");
+            Logger.LogError("Installer install folder {installFolder} does not created", installFolder);
             return null;
         }
 
-        Logger.LogInformation($"Installer install folder is {checkedInstallFolder}");
+        Logger.LogInformation("Installer install folder is {checkedInstallFolder}", checkedInstallFolder);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
@@ -210,13 +213,14 @@ public /*open*/ class InstallerBase
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
-            Logger.LogInformation($"Delete Existing Project files in {projectFilesFolderFullName}");
+            Logger.LogInformation("Delete Existing Project files in {projectFilesFolderFullName}",
+                projectFilesFolderFullName);
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
         ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
 
-        Logger.LogInformation($"Project files is extracted to {projectFilesFolderFullName}");
+        Logger.LogInformation("Project files is extracted to {projectFilesFolderFullName}", projectFilesFolderFullName);
 
         //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger);
         //zipClassArchiver.ArchiveToPath(archiveFileFullName, projectFilesFolderFullName);
@@ -225,14 +229,14 @@ public /*open*/ class InstallerBase
         //(შეიძლება ისე გავაკეთო, რომ არ წავშალო არქივი, რადგან მოქაჩვას შეიძლება დრო სჭირდებოდეს
         //ასეთ შემთხვევაში უნდა შევინარჩუნო არქივების ლიმიტირებული რაოდენობა
         //და ამ რაოდენობაზე მეტი რაც იქნება, უნდა წაიშალოს)
-        Logger.LogInformation($"Deleting {archiveFileFullName} file...");
+        Logger.LogInformation("Deleting {archiveFileFullName} file...", archiveFileFullName);
         //წაიშალოს ლოკალური ფაილი
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
         var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{serviceName}.dll");
         var version = Assembly.LoadFile(projectMainExeFileName).GetName().Version;
-        var assemblyVersion = version == null ? null : version.ToString();
+        var assemblyVersion = version?.ToString();
 
         var serviceExists = false;
         if (!string.IsNullOrWhiteSpace(serviceName))
@@ -240,33 +244,33 @@ public /*open*/ class InstallerBase
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceName}
             serviceExists = IsServiceExists(serviceName);
             Logger.LogInformation(serviceExists
-                ? $"Service {serviceName} is exists"
-                : $"Service {serviceName} does not exists");
+                ? "Service {serviceName} is exists"
+                : "Service {serviceName} does not exists", serviceName);
 
 
             //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
             var serviceIsRunning = IsServiceRunning(serviceName);
             Logger.LogInformation(serviceIsRunning
-                ? $"Service {serviceName} is running"
-                : $"Service {serviceName} does not running");
+                ? "Service {serviceName} is running"
+                : "Service {serviceName} does not running", serviceName);
 
             if (!serviceExists && serviceIsRunning)
             {
-                Logger.LogError($"Service {serviceName} does not exists, but process is running");
+                Logger.LogError("Service {serviceName} does not exists, but process is running", serviceName);
                 return null;
             }
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            Logger.LogInformation($"Try to stop Service {serviceName}");
+            Logger.LogInformation("Try to stop Service {serviceName}", serviceName);
             if (!Stop(serviceName))
             {
-                Logger.LogError($"Service {serviceName} does not stopped");
+                Logger.LogError("Service {serviceName} does not stopped", serviceName);
                 return null;
             }
 
             if (IsProcessRunning(serviceName))
             {
-                Logger.LogError($"Process {serviceName} is running and cannot be updated.");
+                Logger.LogError("Process {serviceName} is running and cannot be updated.", serviceName);
                 return null;
             }
         }
@@ -282,7 +286,7 @@ public /*open*/ class InstallerBase
         if (Directory.Exists(projectInstallFullPath))
         {
             deleteSuccess = false;
-            Logger.LogInformation($"Folder {projectInstallFullPath} already exists");
+            Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 3)
@@ -290,14 +294,17 @@ public /*open*/ class InstallerBase
                 tryCount++;
                 try
                 {
-                    Logger.LogInformation($"Try to delete folder {projectInstallFullPath} {tryCount}...");
+                    Logger.LogInformation("Try to delete folder {projectInstallFullPath} {tryCount}...",
+                        projectInstallFullPath, tryCount);
                     Directory.Delete(projectInstallFullPath, true);
-                    Logger.LogInformation($"Folder {projectInstallFullPath} deleted successfully");
+                    Logger.LogInformation("Folder {projectInstallFullPath} deleted successfully",
+                        projectInstallFullPath);
                     deleteSuccess = true;
                 }
                 catch
                 {
-                    Logger.LogWarning($"Folder {projectInstallFullPath} could not deleted on try {tryCount}");
+                    Logger.LogWarning("Folder {projectInstallFullPath} could not deleted on try {tryCount}",
+                        projectInstallFullPath, tryCount);
                     Logger.LogInformation("waiting for 3 seconds...");
                     Thread.Sleep(3000);
                 }
@@ -306,20 +313,20 @@ public /*open*/ class InstallerBase
 
         if (!deleteSuccess)
         {
-            Logger.LogError($"folder {projectInstallFullPath} can not Deleted");
+            Logger.LogError("folder {projectInstallFullPath} can not Deleted", projectInstallFullPath);
             return null;
         }
 
-        Logger.LogInformation($"Install {projectName} files to {projectInstallFullPath}...");
+        Logger.LogInformation("Install {projectName} files to {projectInstallFullPath}...", projectName,
+            projectInstallFullPath);
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
-        if (appSettingsFile is not null)
-            appSettingsFile.WriteAllTextToPath(projectInstallFullPath);
+        appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
 
         if (!ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName))
         {
-            Logger.LogError($"folder {projectInstallFullPath} owner can not be changed");
+            Logger.LogError("folder {projectInstallFullPath} owner can not be changed", projectInstallFullPath);
             return null;
         }
 
@@ -336,10 +343,10 @@ public /*open*/ class InstallerBase
         //თუ სერვისი არ არის დარეგისტრირებული და პლატფორმა მოითხოვს დარეგისტრირებას, დავარეგისტრიროთ
         if (!serviceExists)
         {
-            Logger.LogInformation($"registering service {serviceName}...");
+            Logger.LogInformation("registering service {serviceName}...", serviceName);
             if (!RegisterService(projectName, serviceName, serviceUserName, projectInstallFullPath))
             {
-                Logger.LogError($"cannot register Service {serviceName}");
+                Logger.LogError("cannot register Service {serviceName}", serviceName);
                 return null;
             }
         }
@@ -348,7 +355,7 @@ public /*open*/ class InstallerBase
         if (Start(serviceName))
             return assemblyVersion;
 
-        Logger.LogError($"Service {serviceName} can not started");
+        Logger.LogError("Service {serviceName} can not started", serviceName);
         return null;
     }
 
@@ -360,18 +367,18 @@ public /*open*/ class InstallerBase
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
         {
-            Logger.LogError($"Installer work folder {installWorkFolder} does not created");
+            Logger.LogError("Installer work folder {installWorkFolder} does not created", installWorkFolder);
             return null;
         }
 
         var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
         {
-            Logger.LogError($"Installer install folder {installFolder} does not created");
+            Logger.LogError("Installer install folder {installFolder} does not created", installFolder);
             return null;
         }
 
-        Logger.LogInformation($"Installer install folder is {checkedInstallFolder}");
+        Logger.LogInformation("Installer install folder is {checkedInstallFolder}", checkedInstallFolder);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
@@ -382,13 +389,14 @@ public /*open*/ class InstallerBase
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
-            Logger.LogInformation($"Delete Existing Project files in {projectFilesFolderFullName}");
+            Logger.LogInformation("Delete Existing Project files in {projectFilesFolderFullName}",
+                projectFilesFolderFullName);
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
         ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
 
-        Logger.LogInformation($"Project files is extracted to {projectFilesFolderFullName}");
+        Logger.LogInformation("Project files is extracted to {projectFilesFolderFullName}", projectFilesFolderFullName);
 
         //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger);
         //zipClassArchiver.ArchiveToPath(archiveFileFullName, projectFilesFolderFullName);
@@ -397,14 +405,14 @@ public /*open*/ class InstallerBase
         //(შეიძლება ისე გავაკეთო, რომ არ წავშალო არქივი, რადგან მოქაჩვას შეიძლება დრო სჭირდებოდეს
         //ასეთ შემთხვევაში უნდა შევინარჩუნო არქივების ლიმიტირებული რაოდენობა
         //და ამ რაოდენობაზე მეტი რაც იქნება, უნდა წაიშალოს)
-        Logger.LogInformation($"Deleting {archiveFileFullName} file...");
+        Logger.LogInformation("Deleting {archiveFileFullName} file...", archiveFileFullName);
         //წაიშალოს ლოკალური ფაილი
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
         var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
         var version = Assembly.LoadFile(projectMainExeFileName).GetName().Version;
-        var assemblyVersion = version == null ? null : version.ToString();
+        var assemblyVersion = version?.ToString();
 
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
@@ -418,7 +426,7 @@ public /*open*/ class InstallerBase
         if (Directory.Exists(projectInstallFullPath))
         {
             deleteSuccess = false;
-            Logger.LogInformation($"Folder {projectInstallFullPath} already exists");
+            Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 3)
@@ -426,14 +434,17 @@ public /*open*/ class InstallerBase
                 tryCount++;
                 try
                 {
-                    Logger.LogInformation($"Try to delete folder {projectInstallFullPath} {tryCount}...");
+                    Logger.LogInformation("Try to delete folder {projectInstallFullPath} {tryCount}...",
+                        projectInstallFullPath, tryCount);
                     Directory.Delete(projectInstallFullPath, true);
-                    Logger.LogInformation($"Folder {projectInstallFullPath} deleted successfully");
+                    Logger.LogInformation("Folder {projectInstallFullPath} deleted successfully",
+                        projectInstallFullPath);
                     deleteSuccess = true;
                 }
                 catch
                 {
-                    Logger.LogWarning($"Folder {projectInstallFullPath} could not deleted on try {tryCount}");
+                    Logger.LogWarning("Folder {projectInstallFullPath} could not deleted on try {tryCount}",
+                        projectInstallFullPath, tryCount);
                     Logger.LogInformation("waiting for 3 seconds...");
                     Thread.Sleep(3000);
                 }
@@ -442,22 +453,20 @@ public /*open*/ class InstallerBase
 
         if (!deleteSuccess)
         {
-            Logger.LogError($"folder {projectInstallFullPath} can not Deleted");
+            Logger.LogError("folder {projectInstallFullPath} can not Deleted", projectInstallFullPath);
             return null;
         }
 
-        Logger.LogInformation($"Install {projectName} files to {projectInstallFullPath}...");
+        Logger.LogInformation("Install {projectName} files to {projectInstallFullPath}...", projectName,
+            projectInstallFullPath);
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
 
-        if (!ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName))
-        {
-            Logger.LogError($"folder {projectInstallFullPath} owner can not be changed");
-            return null;
-        }
+        if (ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName))
+            return assemblyVersion;
 
-
-        return assemblyVersion;
+        Logger.LogError("folder {projectInstallFullPath} owner can not be changed", projectInstallFullPath);
+        return null;
     }
 
     protected virtual bool IsServiceRegisteredProperly(string projectName, string serviceName, string userName,
@@ -485,15 +494,15 @@ public /*open*/ class InstallerBase
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceName}
         var serviceExists = IsServiceExists(serviceName);
         Logger.LogInformation(serviceExists
-            ? $"Service {serviceName} is exists"
-            : $"Service {serviceName} does not exists");
+            ? "Service {serviceName} is exists"
+            : "Service {serviceName} does not exists", serviceName);
         if (!serviceExists)
             return true;
 
         var serviceIsRunning = IsServiceRunning(serviceName);
         Logger.LogInformation(serviceIsRunning
-            ? $"Service {serviceName} is running"
-            : $"Service {serviceName} does not running");
+            ? "Service {serviceName} is running"
+            : "Service {serviceName} does not running", serviceName);
 
         if (!serviceIsRunning)
             return true;
@@ -501,7 +510,7 @@ public /*open*/ class InstallerBase
         if (StopService(serviceName))
             return true;
 
-        Logger.LogError($"Service {serviceName} can not stopped");
+        Logger.LogError("Service {serviceName} can not stopped", serviceName);
         return false;
     }
 
@@ -509,8 +518,8 @@ public /*open*/ class InstallerBase
     {
         var serviceIsRunning = IsServiceRunning(serviceName);
         Logger.LogInformation(serviceIsRunning
-            ? $"Service {serviceName} is running"
-            : $"Service {serviceName} does not running");
+            ? "Service {serviceName} is running"
+            : "Service {serviceName} does not running", serviceName);
 
         if (serviceIsRunning)
             return true;
@@ -518,49 +527,49 @@ public /*open*/ class InstallerBase
         if (StartService(serviceName))
             return true;
 
-        Logger.LogError($"Service {serviceName} can not started");
+        Logger.LogError("Service {serviceName} can not started", serviceName);
         return false;
     }
 
     public bool RemoveProjectAndService(string projectName, string serviceName, string installFolder)
     {
-        Logger.LogInformation($"Remove service {serviceName} started...");
+        Logger.LogInformation("Remove service {serviceName} started...", serviceName);
 
         var serviceExists = IsServiceExists(serviceName);
         Logger.LogInformation(serviceExists
-            ? $"Service {serviceName} is exists"
-            : $"Service {serviceName} does not exists");
+            ? "Service {serviceName} is exists"
+            : "Service {serviceName} does not exists", serviceName);
 
         var serviceIsRunning = false;
         if (serviceExists)
         {
             serviceIsRunning = IsServiceRunning(serviceName);
             Logger.LogInformation(serviceIsRunning
-                ? $"Service {serviceName} is running"
-                : $"Service {serviceName} does not running");
+                ? "Service {serviceName} is running"
+                : "Service {serviceName} does not running", serviceName);
         }
 
 
         if (serviceIsRunning)
             if (!Stop(serviceName))
             {
-                Logger.LogError($"Service {serviceName} can not be stopped");
+                Logger.LogError("Service {serviceName} can not be stopped", serviceName);
                 return false;
             }
 
-        if (serviceExists)
-            if (!RemoveService(serviceName))
-            {
-                Logger.LogError($"Service {serviceName} can not be Removed");
-                return false;
-            }
+        if (!serviceExists)
+            return RemoveProject(projectName, installFolder);
 
-        return RemoveProject(projectName, installFolder);
+        if (RemoveService(serviceName))
+            return RemoveProject(projectName, installFolder);
+
+        Logger.LogError("Service {serviceName} can not be Removed", serviceName);
+        return false;
     }
 
     public bool RemoveProject(string projectName, string installFolder)
     {
-        Logger.LogInformation($"Remove project {projectName} started...");
+        Logger.LogInformation("Remove project {projectName} started...", projectName);
         var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
         {
@@ -571,7 +580,7 @@ public /*open*/ class InstallerBase
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName);
 
-        Logger.LogInformation($"Deleting files {projectName}...");
+        Logger.LogInformation("Deleting files {projectName}...", projectName);
 
         if (Directory.Exists(projectInstallFullPath))
             Directory.Delete(projectInstallFullPath, true);
@@ -611,7 +620,7 @@ public /*open*/ class InstallerBase
         return false;
     }
 
-    private bool IsProcessRunning(string processName)
+    private static bool IsProcessRunning(string processName)
     {
         return Process.GetProcessesByName(processName).Length > 1;
     }

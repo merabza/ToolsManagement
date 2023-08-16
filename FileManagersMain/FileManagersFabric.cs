@@ -20,7 +20,7 @@ public static class FileManagersFabric
         //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
         if (localPatchChecked == null)
         {
-            logger.LogError($"local path {localPatch} can not created");
+            logger.LogError("local path {localPatch} can not created", localPatch);
             return null;
         }
 
@@ -40,14 +40,11 @@ public static class FileManagersFabric
             fileStorageData = fileStorages?.GetFileStorageDataByKey(fileStorageName);
 
         if (fileStorageData == null)
-            logger.LogError($"File storage with name {fileStorageName} not found");
+            logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
 
-        if (fileStorageData == null)
-            return null;
-        //else if (localPatch is null)
-        //    return CreateFileManagerWithNoLocalPath(useConsole, logger, fileStorageData);
-        //else
-        return CreateFileManager(useConsole, logger, localPatch, fileStorageData, allowLocalPathNull);
+        return fileStorageData == null
+            ? null
+            : CreateFileManager(useConsole, logger, localPatch, fileStorageData, allowLocalPathNull);
     }
 
     public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string? localPatch,
@@ -91,7 +88,8 @@ public static class FileManagersFabric
         var fileStoragePathChecked = FileStat.CreateFolderIfNotExists(fileStorageData.FileStoragePath, useConsole);
         if (fileStoragePathChecked is null)
         {
-            logger.LogError($"local path {fileStorageData.FileStoragePath} can not created");
+            var fileStoragePath = fileStorageData.FileStoragePath;
+            logger.LogError("local path {fileStoragePath} can not created", fileStoragePath);
             return null;
         }
 
