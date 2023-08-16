@@ -66,7 +66,7 @@ public static class FileManagersFabric
             //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
             if (localPatchChecked == null)
             {
-                logger.LogError($"local path {localPatch} can not created");
+                logger.LogError("local path {localPatch} can not created", localPatch);
                 return null;
             }
         }
