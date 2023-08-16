@@ -33,8 +33,7 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
     }
 
     public string? InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
-        string programArchiveExtension,
-        string parametersFileDateMask, string parametersFileExtension)
+        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
