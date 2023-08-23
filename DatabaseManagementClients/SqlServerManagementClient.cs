@@ -9,7 +9,7 @@ using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
-using WebAgentContracts.V1.Responses;
+using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabaseManagementClients;
 

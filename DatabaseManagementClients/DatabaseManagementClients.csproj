@@ -12,7 +12,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\DatabaseTools\DbToolsFabric\DbToolsFabric.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
-        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts\WebAgentContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
     </ItemGroup>
 
 </Project>

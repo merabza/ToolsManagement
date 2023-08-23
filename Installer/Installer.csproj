@@ -21,7 +21,7 @@
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\FileManagersMain\FileManagersMain.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\LibToolActions\LibToolActions.csproj" />
-        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts\WebAgentContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SystemToolsShared;
-using WebAgentContracts.V1.Requests;
+using WebAgentProjectsApiContracts.V1.Requests;
 
 namespace Installer.AgentClients;
 

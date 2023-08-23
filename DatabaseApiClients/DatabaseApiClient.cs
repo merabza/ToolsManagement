@@ -13,9 +13,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
-using WebAgentContracts.V1.Requests;
-using WebAgentContracts.V1.Responses;
-using WebAgentDbContracts.V1.Requests;
+using WebAgentDatabasesApiContracts.V1.Requests;
+using WebAgentProjectsApiContracts.V1.Requests;
+using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabaseApiClients;
 
