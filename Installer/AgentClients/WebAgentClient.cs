@@ -17,6 +17,7 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
         Uri uri = new(
             $"{Server}projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
+        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server);
         var response = Client.DeleteAsync(uri).Result;
 
         if (response.IsSuccessStatusCode)
