@@ -9,6 +9,8 @@ public sealed class WebAgentMessageHubClient
     private readonly string _server;
 
     private readonly string? _apiKey;
+
+    private HubConnection? _connection;
     //private static WebAgentMessageHubClient? _instance;
     //private static readonly object SyncRoot = new();
 
@@ -27,19 +29,23 @@ public sealed class WebAgentMessageHubClient
 
     //        Uri uri = new($"{Server}projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
-    public Task RunMessages()
+    public async Task RunMessages()
     {
-        return Task.Run(async () =>
-        {
-            var connection = new HubConnectionBuilder()
-                .WithUrl($"{_server}messages{(string.IsNullOrWhiteSpace(_apiKey) ? "" : $"?apikey={_apiKey}")}")
-                .Build();
+        _connection = new HubConnectionBuilder()
+            .WithUrl($"{_server}messages{(string.IsNullOrWhiteSpace(_apiKey) ? "" : $"?apikey={_apiKey}")}")
+            .Build();
 
+        //connection.On<string, string>(Events.MessageSent, (user, message) => Console.WriteLine($"{user}: {message}"));
+        _connection.On<string>(Events.MessageSent,
+            message => Console.WriteLine($"[{_server}]: {message}"));
 
-            connection.On<string>(Events.MessageSent, Console.WriteLine);
+        await _connection.StartAsync();
+    }
 
-            await connection.StartAsync();
-        });
+    public async Task StopMessages()
+    {
+        if (_connection is not null)
+            await _connection.StopAsync();
     }
 
     //public static WebAgentMessageHubClient Instance

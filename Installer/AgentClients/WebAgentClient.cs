@@ -20,9 +20,7 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
         var mht = webAgentMessageHubClient.RunMessages();
         var clt = Client.DeleteAsync(uri);
         await Task.WhenAll(mht, clt);
-
         var response = clt.Result;
-
         if (response.IsSuccessStatusCode)
             return true;
 
@@ -35,12 +33,14 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
         Uri uri = new(
             $"{Server}projects/removeservice/{projectName}/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
-        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server, ApiKey);
-        var mht = webAgentMessageHubClient.RunMessages();
-        var clt = Client.DeleteAsync(uri);
-        await Task.WhenAll(mht, clt);
 
-        var response = clt.Result;
+        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server, ApiKey);
+        await webAgentMessageHubClient.RunMessages();
+        var response = await Client.DeleteAsync(uri);
+        //await Task.WhenAll(mht, clt);
+
+        //var response = clt.Result;
+        await webAgentMessageHubClient.StopMessages();
 
         if (response.IsSuccessStatusCode)
             return true;
