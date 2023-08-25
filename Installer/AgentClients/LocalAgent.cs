@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Installer.ServiceInstaller;
 using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
+using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 

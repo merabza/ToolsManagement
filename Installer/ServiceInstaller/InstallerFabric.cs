@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
+using WebAgentMessagesContracts;
 
 namespace Installer.ServiceInstaller;
 

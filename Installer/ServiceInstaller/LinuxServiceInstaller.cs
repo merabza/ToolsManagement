@@ -2,6 +2,7 @@
 using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+using WebAgentMessagesContracts;
 
 namespace Installer.ServiceInstaller;
 

@@ -7,6 +7,7 @@ using System.ServiceProcess;
 using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using WebAgentMessagesContracts;
 
 namespace Installer.ServiceInstaller;
 

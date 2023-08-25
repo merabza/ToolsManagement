@@ -3,6 +3,7 @@ using Installer.Models;
 using LibFileParameters.Models;
 using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
+using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 
