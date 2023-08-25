@@ -27,13 +27,10 @@ public static class AgentClientsFabric
     public static IAgentClient? CreateAgentClient(ILogger logger, bool useConsole, string? installFolder,
         IMessagesDataManager messagesDataManager, string? userName)
     {
-        if (string.IsNullOrWhiteSpace(installFolder))
-        {
-            logger.LogError("installFolder name in parameters is empty");
-            return null;
-        }
+        if (!string.IsNullOrWhiteSpace(installFolder))
+            return new LocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
 
-
-        return new LocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
+        logger.LogError("installFolder name in parameters is empty");
+        return null;
     }
 }
