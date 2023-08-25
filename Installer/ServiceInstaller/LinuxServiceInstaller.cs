@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -8,13 +9,15 @@ public sealed class LinuxServiceInstaller : InstallerBase
 {
     private readonly string _dotnetRunner;
 
-    public LinuxServiceInstaller(bool useConsole, ILogger logger, string dotnetRunner) : base(useConsole, logger,
-        "linux-x64")
+    public LinuxServiceInstaller(bool useConsole, ILogger logger, string dotnetRunner,
+        IMessagesDataManager messagesDataManager, string? userName) : base(useConsole, logger, "linux-x64",
+        messagesDataManager, userName)
     {
         _dotnetRunner = dotnetRunner;
     }
 
-    public LinuxServiceInstaller(bool useConsole, ILogger logger) : base(useConsole, logger, "linux-x64")
+    public LinuxServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager messagesDataManager,
+        string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
     {
         _dotnetRunner = "";
     }

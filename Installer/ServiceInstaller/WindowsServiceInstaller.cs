@@ -4,6 +4,7 @@ using System.Management.Automation;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.ServiceProcess;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 
@@ -11,7 +12,8 @@ namespace Installer.ServiceInstaller;
 
 public sealed class WindowsServiceInstaller : InstallerBase
 {
-    public WindowsServiceInstaller(bool useConsole, ILogger logger) : base(useConsole, logger, "win10-x64")
+    public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager messagesDataManager,
+        string? userName) : base(useConsole, logger, "win10-x64", messagesDataManager, userName)
     {
     }
 

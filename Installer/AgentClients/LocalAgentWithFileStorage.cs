@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Installer.Domain;
 using LibFileParameters.Models;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 
 namespace Installer.AgentClients;
@@ -9,15 +10,19 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
+    private readonly IMessagesDataManager _messagesDataManager;
+    private readonly string? _userName;
     private readonly ILogger _logger;
     private readonly bool _useConsole;
 
     public LocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
-        LocalInstallerSettingsDomain localInstallerSettings)
+        LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager messagesDataManager, string? userName)
     {
         _logger = logger;
         _fileStorageForUpload = fileStorageForUpload;
         _localInstallerSettings = localInstallerSettings;
+        _messagesDataManager = messagesDataManager;
+        _userName = userName;
         _useConsole = useConsole;
     }
 
@@ -27,7 +32,7 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
         var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner);
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
         return applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
                false;
     }
@@ -40,7 +45,7 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner);
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
         return applicationUpdater?.UpdateProgram(projectName, environmentName);
     }
 
@@ -54,7 +59,7 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner);
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
         return applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
             serviceName, appSettingsFileName);
     }

@@ -5,6 +5,7 @@ using FileManagersMain;
 using Installer.Domain;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -13,22 +14,28 @@ namespace Installer;
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {
     private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
+
     private readonly InstallerBase _installer;
+    //private readonly IMessagesDataManager _messagesDataManager;
+    //private readonly string? _userName;
 
     private ApplicationUpdater(ILogger logger, ApplicationUpdaterParameters applicationUpdaterParameters,
         InstallerBase serviceInstaller, bool useConsole) : base(logger, useConsole)
     {
         _applicationUpdaterParameters = applicationUpdaterParameters;
         _installer = serviceInstaller;
+        //_messagesDataManager = messagesDataManager;
+        //_userName = userName;
     }
 
     public static ApplicationUpdater? Create(ILogger logger, bool useConsole, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         FileStorageData fileStorageForUpload, string? installerWorkFolder, string? filesUserName,
         string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension, string? installFolder,
-        string? dotnetRunner)
+        string? dotnetRunner, IMessagesDataManager messagesDataManager, string? userName)
     {
-        var serviceInstaller = InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner);
+        var serviceInstaller =
+            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner, messagesDataManager, userName);
 
         if (serviceInstaller == null)
         {

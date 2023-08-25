@@ -1,6 +1,7 @@
 ﻿using Installer.Domain;
 using Installer.Models;
 using LibFileParameters.Models;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 
 namespace Installer.AgentClients;
@@ -8,30 +9,31 @@ namespace Installer.AgentClients;
 public static class AgentClientsFabric
 {
     public static IAgentClientWithFileStorage? CreateAgentClientWithFileStorage(ILogger logger,
-        InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload,
-        bool useConsole)
+        InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
+        IMessagesDataManager messagesDataManager, string? userName)
     {
         var localInstallerSettingsDomain =
             LocalInstallerSettingsDomain.Create(logger, useConsole, webAgentInstallerSettings);
 
         if (localInstallerSettingsDomain is not null)
-            return new LocalAgentWithFileStorage(logger, useConsole, fileStorageForUpload,
-                localInstallerSettingsDomain);
+            return new LocalAgentWithFileStorage(logger, useConsole, fileStorageForUpload, localInstallerSettingsDomain,
+                messagesDataManager, userName);
 
         logger.LogError("localInstallerSettingsDomain does not created");
         return null;
     }
 
 
-    public static IAgentClient? CreateAgentClient(ILogger logger, bool useConsole, string? installFolder)
+    public static IAgentClient? CreateAgentClient(ILogger logger, bool useConsole, string? installFolder,
+        IMessagesDataManager messagesDataManager, string? userName)
     {
         if (string.IsNullOrWhiteSpace(installFolder))
         {
-            logger.LogError("downloadTempExtension is empty");
+            logger.LogError("installFolder name in parameters is empty");
             return null;
         }
 
 
-        return new LocalAgent(logger, useConsole, installFolder);
+        return new LocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
     }
 }

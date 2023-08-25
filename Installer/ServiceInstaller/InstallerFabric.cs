@@ -1,24 +1,27 @@
 ﻿using System.Runtime.InteropServices;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 
 namespace Installer.ServiceInstaller;
 
 public static class InstallerFabric
 {
-    public static InstallerBase? CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner)
+    public static InstallerBase? CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
+        IMessagesDataManager messagesDataManager, string? userName)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return new WindowsServiceInstaller(useConsole, logger);
+            return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
         if (!string.IsNullOrWhiteSpace(dotnetRunner))
-            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner);
+            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner, messagesDataManager, userName);
         logger.LogError("Installer dotnetRunner does not specified");
         return null;
     }
 
-    public static InstallerBase CreateInstaller(ILogger logger, bool useConsole)
+    public static InstallerBase CreateInstaller(ILogger logger, bool useConsole,
+        IMessagesDataManager messagesDataManager, string? userName)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return new WindowsServiceInstaller(useConsole, logger);
-        return new LinuxServiceInstaller(useConsole, logger);
+            return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
+        return new LinuxServiceInstaller(useConsole, logger, messagesDataManager, userName);
     }
 }

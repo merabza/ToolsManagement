@@ -2,8 +2,10 @@
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.ServiceProcess;
 using System.Threading;
 using Installer.Domain;
+using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SystemToolsShared;
@@ -14,12 +16,17 @@ public /*open*/ class InstallerBase
 {
     protected readonly ILogger Logger;
     public readonly string Runtime;
+    private readonly IMessagesDataManager _messagesDataManager;
+    private readonly string? _userName;
     protected readonly bool UseConsole;
 
-    protected InstallerBase(bool useConsole, ILogger logger, string runtime)
+    protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager messagesDataManager,
+        string? userName)
     {
         Logger = logger;
         Runtime = runtime;
+        _messagesDataManager = messagesDataManager;
+        _userName = userName;
         UseConsole = useConsole;
     }
 
@@ -533,26 +540,44 @@ public /*open*/ class InstallerBase
 
     public bool RemoveProjectAndService(string projectName, string serviceName, string installFolder)
     {
+        _messagesDataManager.SendMessage(_userName, $"Remove service {serviceName} started...").Wait();
         Logger.LogInformation("Remove service {serviceName} started...", serviceName);
 
         var serviceExists = IsServiceExists(serviceName);
-        Logger.LogInformation(serviceExists
-            ? "Service {serviceName} is exists"
-            : "Service {serviceName} does not exists", serviceName);
+        if (serviceExists)
+        {
+            _messagesDataManager.SendMessage(_userName, $"Service {serviceName} is exists").Wait();
+            Logger.LogInformation("Service {serviceName} is exists", serviceName);
+        }
+        else
+        {
+            _messagesDataManager.SendMessage(_userName, $"Service {serviceName} does not exists").Wait();
+            Logger.LogInformation("Service {serviceName} does not exists", serviceName);
+        }
 
         var serviceIsRunning = false;
         if (serviceExists)
         {
             serviceIsRunning = IsServiceRunning(serviceName);
-            Logger.LogInformation(serviceIsRunning
-                ? "Service {serviceName} is running"
-                : "Service {serviceName} does not running", serviceName);
+
+
+            if (serviceIsRunning)
+            {
+                _messagesDataManager.SendMessage(_userName, $"Service {serviceName} is running").Wait();
+                Logger.LogInformation("Service {serviceName} is running", serviceName);
+            }
+            else
+            {
+                _messagesDataManager.SendMessage(_userName, $"Service {serviceName} does not running").Wait();
+                Logger.LogInformation("Service {serviceName} does not running", serviceName);
+            }
         }
 
 
         if (serviceIsRunning)
             if (!Stop(serviceName))
             {
+                _messagesDataManager.SendMessage(_userName, $"Service {serviceName} can not be stopped").Wait();
                 Logger.LogError("Service {serviceName} can not be stopped", serviceName);
                 return false;
             }
@@ -563,23 +588,27 @@ public /*open*/ class InstallerBase
         if (RemoveService(serviceName))
             return RemoveProject(projectName, installFolder);
 
+        _messagesDataManager.SendMessage(_userName, $"Service {serviceName} can not be Removed").Wait();
         Logger.LogError("Service {serviceName} can not be Removed", serviceName);
         return false;
     }
 
     public bool RemoveProject(string projectName, string installFolder)
     {
+        _messagesDataManager.SendMessage(_userName, $"Remove project {projectName} started...").Wait();
         Logger.LogInformation("Remove project {projectName} started...", projectName);
         var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
         {
-            Logger.LogError("Installation folder not found");
+            _messagesDataManager.SendMessage(_userName, "Installation folder does not found").Wait();
+            Logger.LogError("Installation folder does not found");
             return false;
         }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName);
 
+        _messagesDataManager.SendMessage(_userName, $"Deleting files {projectName}...").Wait();
         Logger.LogInformation("Deleting files {projectName}...", projectName);
 
         if (Directory.Exists(projectInstallFullPath))

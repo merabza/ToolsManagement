@@ -24,6 +24,7 @@
         <ProjectReference Include="..\..\ToolsManagement\LibToolActions\LibToolActions.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentMessagesContracts\WebAgentMessagesContracts.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentShared\LibWebAgentMessages\LibWebAgentMessages.csproj" />
     </ItemGroup>
 
 </Project>
