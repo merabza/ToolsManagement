@@ -1,21 +1,45 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Installer.AgentClients;
 
 public sealed class WebAgentMessageHubClient
 {
+    private readonly string _server;
+
+    private readonly string? _apiKey;
     //private static WebAgentMessageHubClient? _instance;
     //private static readonly object SyncRoot = new();
 
 
-    private readonly HubConnection _connection;
+    //private readonly HubConnection _connection;
 
     // ReSharper disable once MemberCanBePrivate.Global
-    public WebAgentMessageHubClient(string server)
+    public WebAgentMessageHubClient(string server, string? apiKey)
     {
-        _connection = new HubConnectionBuilder()
-            .WithUrl($"{server}messages")
-            .Build();
+        _server = server;
+        _apiKey = apiKey;
+        //_connection = new HubConnectionBuilder()
+        //    .WithUrl($"{server}messages")
+        //    .Build();
+    }
+
+    //        Uri uri = new($"{Server}projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+
+    public Task RunMessages()
+    {
+        return Task.Run(async () =>
+        {
+            var connection = new HubConnectionBuilder()
+                .WithUrl($"{_server}messages{(string.IsNullOrWhiteSpace(_apiKey) ? "" : $"?apikey={_apiKey}")}")
+                .Build();
+
+
+            connection.On<string>(Events.MessageSent, Console.WriteLine);
+
+            await connection.StartAsync();
+        });
     }
 
     //public static WebAgentMessageHubClient Instance

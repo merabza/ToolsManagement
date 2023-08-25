@@ -17,28 +17,28 @@ public sealed class LocalAgent : IAgentClient
         _installFolder = installFolder;
     }
 
-    public bool RemoveProject(string projectName)
+    public async Task<bool> RemoveProject(string projectName)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole);
 
         if (serviceInstaller.RemoveProject(projectName, _installFolder))
-            return true;
+            return await Task.FromResult(true);
 
-        _logger.LogError($"Project {projectName} can not removed");
-        return false;
+        _logger.LogError("Project {projectName} can not removed", projectName);
+        return await Task.FromResult(false);
     }
 
-    public bool RemoveProjectAndService(string projectName, string serviceName)
+    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole);
 
         if (serviceInstaller.RemoveProjectAndService(projectName, serviceName, _installFolder))
-            return true;
+            return await Task.FromResult(true);
 
-        _logger.LogError($"Project {projectName} => service {serviceName} can not removed");
-        return false;
+        _logger.LogError("Project {projectName} => service {serviceName} can not removed", projectName, serviceName);
+        return await Task.FromResult(false);
     }
 
     public bool StopService(string serviceName)

@@ -11,14 +11,17 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
     {
     }
 
-
-    public bool RemoveProject(string projectName)
+    public async Task<bool> RemoveProject(string projectName)
     {
         Uri uri = new(
             $"{Server}projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
-        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server);
-        var response = Client.DeleteAsync(uri).Result;
+        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server, ApiKey);
+        var mht = webAgentMessageHubClient.RunMessages();
+        var clt = Client.DeleteAsync(uri);
+        await Task.WhenAll(mht, clt);
+
+        var response = clt.Result;
 
         if (response.IsSuccessStatusCode)
             return true;
@@ -27,12 +30,17 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
         return false;
     }
 
-    public bool RemoveProjectAndService(string projectName, string serviceName)
+    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName)
     {
         Uri uri = new(
             $"{Server}projects/removeservice/{projectName}/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
-        var response = Client.DeleteAsync(uri).Result;
+        var webAgentMessageHubClient = new WebAgentMessageHubClient(Server, ApiKey);
+        var mht = webAgentMessageHubClient.RunMessages();
+        var clt = Client.DeleteAsync(uri);
+        await Task.WhenAll(mht, clt);
+
+        var response = clt.Result;
 
         if (response.IsSuccessStatusCode)
             return true;
