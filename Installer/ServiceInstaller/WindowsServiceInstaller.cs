@@ -4,7 +4,6 @@ using System.Management.Automation;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.ServiceProcess;
-using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using WebAgentMessagesContracts;
@@ -13,7 +12,7 @@ namespace Installer.ServiceInstaller;
 
 public sealed class WindowsServiceInstaller : InstallerBase
 {
-    public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager messagesDataManager,
+    public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName) : base(useConsole, logger, "win10-x64", messagesDataManager, userName)
     {
     }
@@ -69,14 +68,15 @@ public sealed class WindowsServiceInstaller : InstallerBase
             sc.Status.Equals(ServiceControllerStatus.StopPending))
             return true;
 
-        Logger.LogInformation($"Stopping the {serviceName} service...");
+        Logger.LogInformation("Stopping the {serviceName} service...", serviceName);
         sc.Stop();
         sc.WaitForStatus(ServiceControllerStatus.Stopped);
 
         // Refresh and display the current service status.
         sc.Refresh();
 
-        Logger.LogInformation($"The {serviceName} service status is now set to {sc.Status}.");
+        var status = sc.Status;
+        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
         return true;
@@ -92,13 +92,14 @@ public sealed class WindowsServiceInstaller : InstallerBase
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
             return true;
 
-        Logger.LogInformation($"Starting the {serviceName} service...");
+        Logger.LogInformation("Starting the {serviceName} service...", serviceName);
         sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running);
         // Refresh and display the current service status.
         sc.Refresh();
 
-        Logger.LogInformation($"The {serviceName} service status is now set to {sc.Status}.");
+        var status = sc.Status;
+        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
         return true;
@@ -135,7 +136,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
-        Logger.LogError($"Error changing owner to file {filePath}");
+        Logger.LogError("Error changing owner to file {filePath}", filePath);
         return false;
     }
 
@@ -170,7 +171,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
-        Logger.LogError($"Error changing owner to folder {folderPath}");
+        Logger.LogError("Error changing owner to folder {folderPath}", folderPath);
         return false;
     }
 
@@ -229,130 +230,4 @@ public sealed class WindowsServiceInstaller : InstallerBase
         //Collection<PSObject> obj = GetPsResults(ps, CreateCredential());
         return IsServiceExists(serviceName);
     }
-
-    //private PSCredential CreateCredential()
-    //{
-    //  //var v = new Impersonator("", "", "");
-
-
-    //  SecureString password = new SecureString();
-    //  Array.ForEach("password".ToCharArray(), password.AppendChar);
-    //  return new PSCredential("username", password);
-    //}
-
-    //public static Collection<PSObject> GetPsResults(PowerShell ps, PSCredential credential, bool throwErrors = true)
-    //{
-    //  WSManConnectionInfo connectionInfo = new WSManConnectionInfo() { Credential = credential };
-
-    //  using Runspace runSpace = RunspaceFactory.CreateRunspace(connectionInfo);
-    //  runSpace.Open();
-    //  ps.Runspace = runSpace;
-    //  Collection<PSObject> toReturn = ps.Invoke();
-    //  if (throwErrors)
-    //  {
-    //    if (ps.HadErrors)
-    //    {
-    //      throw ps.Streams.Error.ElementAt(0).Exception;
-    //    }
-    //  }
-    //  runSpace.Close();
-
-    //  return toReturn;
-    //}
-
-
-    //public void RunWithParameters()
-    //{
-    //  // create empty pipeline
-    //  PowerShell ps = PowerShell.Create();
-
-    //  // add command
-    //  ps.AddCommand("test-path").AddParameter("Path", Environment.CurrentDirectory); ;
-
-    //  var obj = ps.Invoke();
-    //}
-
-    //private string RunScript(string scriptText)
-    //{
-    //  // create Powershell runspace
-
-    //  Runspace runspace = RunspaceFactory.CreateRunspace();
-
-    //  // open it
-
-    //  runspace.Open();
-
-    //  // create a pipeline and feed it the script text
-
-    //  Pipeline pipeline = runspace.CreatePipeline();
-    //  pipeline.Commands.AddScript(scriptText);
-
-    //  // add an extra command to transform the script
-    //  // output objects into nicely formatted strings
-
-    //  // remove this line to get the actual objects
-    //  // that the script returns. For example, the script
-
-    //  // "Get-Process" returns a collection
-    //  // of System.Diagnostics.Process instances.
-
-    //  pipeline.Commands.Add("Out-String");
-
-    //  // execute the script
-
-    //  Collection<PSObject> results = pipeline.Invoke();
-
-    //  // close the runspace
-
-    //  runspace.Close();
-
-    //  // convert the script result into a single string
-
-    //  StringBuilder stringBuilder = new StringBuilder();
-    //  foreach (PSObject obj in results)
-    //  {
-    //    stringBuilder.AppendLine(obj.ToString());
-    //  }
-
-    //  return stringBuilder.ToString();
-    //}
-
-
-    //public static int RunPowershellScript(string ps)
-    //{
-    //  int errorLevel;
-    //  ProcessStartInfo processInfo;
-    //  Process process;
-
-    //  processInfo = new ProcessStartInfo("powershell.exe", "-File " + ps);
-    //  processInfo.CreateNoWindow = true;
-    //  processInfo.UseShellExecute = false;
-
-    //  process = Process.Start(processInfo);
-    //  process.WaitForExit();
-
-    //  errorLevel = process.ExitCode;
-    //  process.Close();
-
-    //  return errorLevel;
-    //}
-
-
-    //{
-    //  System.Diagnostics.Process proc = new System.Diagnostics.Process();
-    //  System.Security.SecureString ssPwd = new System.Security.SecureString();
-    //  proc.StartInfo.UseShellExecute = false;
-    //  proc.StartInfo.FileName = "filename";
-    //  proc.StartInfo.Arguments = "args...";
-    //  proc.StartInfo.Domain = "domainname";
-    //  proc.StartInfo.UserName = "username";
-    //  string password = "user entered password";
-    //  for (int x = 0; x<password.Length; x++)
-    //  {
-    //    ssPwd.AppendChar(password[x]);
-    //  }
-    //  password = "";
-    //  proc.StartInfo.Password = ssPwd;
-    //  proc.Start();
-    //}
 }

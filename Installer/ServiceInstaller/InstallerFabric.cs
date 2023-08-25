@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using WebAgentMessagesContracts;
 
@@ -8,7 +7,7 @@ namespace Installer.ServiceInstaller;
 public static class InstallerFabric
 {
     public static InstallerBase? CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
-        IMessagesDataManager messagesDataManager, string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
@@ -19,7 +18,7 @@ public static class InstallerFabric
     }
 
     public static InstallerBase CreateInstaller(ILogger logger, bool useConsole,
-        IMessagesDataManager messagesDataManager, string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);

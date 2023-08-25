@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Installer.Domain;
 using LibFileParameters.Models;
-using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using WebAgentMessagesContracts;
 
@@ -11,13 +10,14 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
-    private readonly IMessagesDataManager _messagesDataManager;
+    private readonly IMessagesDataManager? _messagesDataManager;
     private readonly string? _userName;
     private readonly ILogger _logger;
     private readonly bool _useConsole;
 
     public LocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
-        LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager messagesDataManager, string? userName)
+        LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager? messagesDataManager,
+        string? userName)
     {
         _logger = logger;
         _fileStorageForUpload = fileStorageForUpload;

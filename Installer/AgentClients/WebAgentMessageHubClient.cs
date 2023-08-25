@@ -11,23 +11,13 @@ public sealed class WebAgentMessageHubClient
     private readonly string? _apiKey;
 
     private HubConnection? _connection;
-    //private static WebAgentMessageHubClient? _instance;
-    //private static readonly object SyncRoot = new();
-
-
-    //private readonly HubConnection _connection;
 
     // ReSharper disable once MemberCanBePrivate.Global
     public WebAgentMessageHubClient(string server, string? apiKey)
     {
         _server = server;
         _apiKey = apiKey;
-        //_connection = new HubConnectionBuilder()
-        //    .WithUrl($"{server}messages")
-        //    .Build();
     }
-
-    //        Uri uri = new($"{Server}projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
 
     public async Task RunMessages()
     {
@@ -35,9 +25,7 @@ public sealed class WebAgentMessageHubClient
             .WithUrl($"{_server}messages{(string.IsNullOrWhiteSpace(_apiKey) ? "" : $"?apikey={_apiKey}")}")
             .Build();
 
-        //connection.On<string, string>(Events.MessageSent, (user, message) => Console.WriteLine($"{user}: {message}"));
-        _connection.On<string>(Events.MessageSent,
-            message => Console.WriteLine($"[{_server}]: {message}"));
+        _connection.On<string>(Events.MessageSent, message => Console.WriteLine($"[{_server}]: {message}"));
 
         await _connection.StartAsync();
     }
@@ -47,27 +35,4 @@ public sealed class WebAgentMessageHubClient
         if (_connection is not null)
             await _connection.StopAsync();
     }
-
-    //public static WebAgentMessageHubClient Instance
-    //{
-    //    get
-    //    {
-    //        //ეს ატრიბუტები სესიაზე არ არის დამოკიდებული და იქმნება პროგრამის გაშვებისთანავე, 
-    //        //შემდგომში მასში ცვლილებები არ შედის,
-    //        //მაგრამ შეიძლება პროგრამამ თავისი მუშაობის განმავლობაში რამდენჯერმე გამოიყენოს აქ არსებული ინფორმაცია
-    //        if (_instance != null)
-    //            return _instance;
-    //        lock (SyncRoot) //thread safe singleton
-    //        {
-    //            _instance ??= new WebAgentMessageHubClient();
-    //        }
-
-    //        return _instance;
-    //    }
-    //}
-
-    //public static void SetTestInstance(WebAgentMessageHubClient newInstance)
-    //{
-    //    _instance = newInstance;
-    //}
 }

@@ -1,7 +1,5 @@
-﻿using System.ServiceProcess;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Installer.ServiceInstaller;
-using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using WebAgentMessagesContracts;
 
@@ -10,12 +8,12 @@ namespace Installer.AgentClients;
 public sealed class LocalAgent : IAgentClient
 {
     private readonly string _installFolder;
-    private readonly IMessagesDataManager _messagesDataManager;
+    private readonly IMessagesDataManager? _messagesDataManager;
     private readonly string? _userName;
     private readonly ILogger _logger;
     private readonly bool _useConsole;
 
-    public LocalAgent(ILogger logger, bool useConsole, string installFolder, IMessagesDataManager messagesDataManager,
+    public LocalAgent(ILogger logger, bool useConsole, string installFolder, IMessagesDataManager? messagesDataManager,
         string? userName)
     {
         _logger = logger;
@@ -33,7 +31,8 @@ public sealed class LocalAgent : IAgentClient
         if (serviceInstaller.RemoveProject(projectName, _installFolder))
             return await Task.FromResult(true);
 
-        await _messagesDataManager.SendMessage(_userName, $"Project {projectName} can not removed");
+        if (_messagesDataManager is not null)
+            await _messagesDataManager.SendMessage(_userName, $"Project {projectName} can not removed");
         _logger.LogError("Project {projectName} can not removed", projectName);
         return await Task.FromResult(false);
     }
@@ -46,8 +45,9 @@ public sealed class LocalAgent : IAgentClient
         if (serviceInstaller.RemoveProjectAndService(projectName, serviceName, _installFolder))
             return await Task.FromResult(true);
 
-        await _messagesDataManager.SendMessage(_userName,
-            $"Project {projectName} => service {serviceName} can not removed");
+        if (_messagesDataManager is not null)
+            await _messagesDataManager.SendMessage(_userName,
+                $"Project {projectName} => service {serviceName} can not removed");
         _logger.LogError("Project {projectName} => service {serviceName} can not removed", projectName, serviceName);
         return await Task.FromResult(false);
     }

@@ -1,7 +1,6 @@
 ﻿using Installer.Domain;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
-using LibWebAgentMessages;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 using WebAgentMessagesContracts;
@@ -24,7 +23,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     public static AppParametersFileUpdater? Create(ILogger logger, bool useConsole, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? filesUserName,
         string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
-        IMessagesDataManager messagesDataManager, string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         if (string.IsNullOrWhiteSpace(installFolder))
         {
