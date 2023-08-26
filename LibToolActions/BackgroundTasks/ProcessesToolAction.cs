@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using WebAgentMessagesContracts;
 
 namespace LibToolActions.BackgroundTasks;
 
@@ -8,8 +9,9 @@ public /*open*/ class ProcessesToolAction : ToolAction
 {
     protected readonly ProcessManager? ProcessManager;
 
-    protected ProcessesToolAction(ILogger logger, bool useConsole, ProcessManager? processManager, string actionName,
-        int procLineId = 0) : base(logger, useConsole, actionName)
+    protected ProcessesToolAction(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
+        ProcessManager? processManager, string actionName, int procLineId = 0) : base(logger, actionName,
+        messagesDataManager, userName)
     {
         ProcessManager = processManager;
         ProcLineId = procLineId;

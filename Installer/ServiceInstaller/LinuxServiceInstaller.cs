@@ -86,6 +86,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var checkedDotnetRunner = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunner == null)
         {
+            MessagesDataManager?.SendMessage(UserName, "dotnet location can not found").Wait();
             Logger.LogError("dotnet location can not found");
             return null;
         }
@@ -122,14 +123,18 @@ WantedBy=multi-user.target
         var serviceFileText =
             GenerateServiceFileText(serviceName, installFolderPath, serviceUserName, _dotnetRunner);
 
-        Logger.LogInformation($"Create service file {serviceConfigFileName}");
+        MessagesDataManager?.SendMessage(UserName, $"Create service file {serviceConfigFileName}").Wait();
+        Logger.LogInformation("Create service file {serviceConfigFileName}", serviceConfigFileName);
         File.WriteAllText(serviceConfigFileName, serviceFileText);
 
-        Logger.LogInformation($"Enable service {serviceName}");
+        MessagesDataManager?.SendMessage(UserName, $"Enable service {serviceName}").Wait();
+        Logger.LogInformation("Enable service {serviceName}", serviceName);
         if (StShared.RunProcess(UseConsole, Logger, "systemctl",
                 $"--no-ask-password --no-block --quiet enable {serviceName}"))
             return IsServiceExists(serviceName);
-        Logger.LogError($"Service {serviceName} can not enabled");
+
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not enabled").Wait();
+        Logger.LogError("Service {serviceName} can not enabled", serviceName);
         return false;
     }
 
@@ -147,12 +152,14 @@ WantedBy=multi-user.target
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
+            MessagesDataManager?.SendMessage(UserName, "File name is empty").Wait();
             Logger.LogError("File name is empty");
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
+            MessagesDataManager?.SendMessage(UserName, "user name is empty. owner not changed").Wait();
             Logger.LogWarning("user name is empty. owner not changed");
             return true;
         }
@@ -161,7 +168,8 @@ WantedBy=multi-user.target
             return StShared.RunProcess(UseConsole, Logger, "chown",
                 $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {filePath}");
 
-        Logger.LogError($"Error changing owner to file {filePath}");
+        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to file {filePath}").Wait();
+        Logger.LogError("Error changing owner to file {filePath}", filePath);
         return false;
     }
 
@@ -169,12 +177,14 @@ WantedBy=multi-user.target
     {
         if (string.IsNullOrWhiteSpace(folderPath))
         {
+            MessagesDataManager?.SendMessage(UserName, "Folder name is empty").Wait();
             Logger.LogError("Folder name is empty");
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
+            MessagesDataManager?.SendMessage(UserName, "user name is empty. owner not changed").Wait();
             Logger.LogWarning("user name is empty. owner not changed");
             return true;
         }
@@ -183,7 +193,8 @@ WantedBy=multi-user.target
             return StShared.RunProcess(UseConsole, Logger, "chown",
                 $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {folderPath}");
 
-        Logger.LogError($"Error changing owner to folder {folderPath}");
+        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to folder {folderPath}").Wait();
+        Logger.LogError("Error changing owner to folder {folderPath}", folderPath);
         return false;
     }
 }

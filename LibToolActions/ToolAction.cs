@@ -1,21 +1,24 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+using WebAgentMessagesContracts;
 
 namespace LibToolActions;
 
 public /*open*/ class ToolAction
 {
     private readonly string _actionName;
+    protected readonly IMessagesDataManager? MessagesDataManager;
+    protected readonly string? UserName;
     protected readonly ILogger Logger;
-    protected readonly bool UseConsole;
 
 
-    protected ToolAction(ILogger logger, bool useConsole, string actionName)
+    protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName)
     {
-        UseConsole = useConsole;
         Logger = logger;
         _actionName = actionName;
+        MessagesDataManager = messagesDataManager;
+        UserName = userName;
     }
 
     public bool Run()
@@ -25,14 +28,7 @@ public /*open*/ class ToolAction
             if (!CheckValidate())
                 return false;
 
-            //if (UseConsole && _askRunAction)
-            //{
-            //    Console.WriteLine(GetActionDescription());
-
-            //    if (!Inputer.InputBool("Are you sure, you want to run this action", true, false))
-            //        return false;
-            //}
-
+            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Started...").Wait();
             Logger.LogInformation("{_actionName} Started...", _actionName);
 
             //დავინიშნოთ დრო პროცესისათვის
@@ -41,6 +37,8 @@ public /*open*/ class ToolAction
             var success = RunAction();
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
+
+            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}").Wait();
             Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", _actionName, timeTakenMessage);
 
             return success;

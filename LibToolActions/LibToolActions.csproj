@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentMessagesContracts\WebAgentMessagesContracts.csproj" />
     </ItemGroup>
 
 </Project>

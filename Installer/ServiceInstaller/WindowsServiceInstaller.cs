@@ -68,6 +68,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             sc.Status.Equals(ServiceControllerStatus.StopPending))
             return true;
 
+        MessagesDataManager?.SendMessage(UserName, $"Stopping the {serviceName} service...").Wait();
         Logger.LogInformation("Stopping the {serviceName} service...", serviceName);
         sc.Stop();
         sc.WaitForStatus(ServiceControllerStatus.Stopped);
@@ -76,6 +77,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
 
         var status = sc.Status;
+
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceName} service status is now set to {status}.").Wait();
         Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
@@ -92,6 +95,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
             return true;
 
+        MessagesDataManager?.SendMessage(UserName, $"Starting the {serviceName} service...").Wait();
         Logger.LogInformation("Starting the {serviceName} service...", serviceName);
         sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running);
@@ -99,6 +103,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
 
         var status = sc.Status;
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceName} service status is now set to {status}.").Wait();
         Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
@@ -109,6 +114,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
+            MessagesDataManager?.SendMessage(UserName, "Folder name is empty").Wait();
             Logger.LogError("Folder name is empty");
             return false;
         }
@@ -136,6 +142,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
+        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to file {filePath}").Wait();
         Logger.LogError("Error changing owner to file {filePath}", filePath);
         return false;
     }
@@ -144,6 +151,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
         if (string.IsNullOrWhiteSpace(folderPath))
         {
+            MessagesDataManager?.SendMessage(UserName, "Folder name is empty").Wait();
             Logger.LogError("Folder name is empty");
             return false;
         }
@@ -171,6 +179,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
+        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to folder {folderPath}").Wait();
         Logger.LogError("Error changing owner to folder {folderPath}", folderPath);
         return false;
     }
