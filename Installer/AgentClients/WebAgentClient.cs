@@ -2,12 +2,14 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 
 public sealed class WebAgentClient : ApiClient, IAgentClient
 {
-    public WebAgentClient(ILogger logger, string server, string? apiKey) : base(logger, server, apiKey)
+    public WebAgentClient(ILogger logger, string server, string? apiKey, IMessagesDataManager? messagesDataManager,
+        string? userName) : base(logger, server, apiKey, messagesDataManager, userName)
     {
     }
 
