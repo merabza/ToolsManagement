@@ -142,9 +142,10 @@ public sealed class RemoteFileManager : FileManager
 
     private bool UploadFileReal(string fileFullName, string? afterRootPath, string tempFileName, string fileName)
     {
+        var rootPathName = afterRootPath ?? "Root Path";
         Logger.LogInformation(
-            "Uploading file from {fileFullName} to {afterRootPath} with temp name {tempFileName} and FinishName {fileName}",
-            fileFullName, afterRootPath, tempFileName, fileName);
+            "Uploading file from {fileFullName} to {rootPathName} with temp name {tempFileName} and FinishName {fileName}",
+            fileFullName, rootPathName, tempFileName, fileName);
         if (_cTools.UploadFile(fileFullName, afterRootPath, tempFileName) &&
             _cTools.Rename(afterRootPath, tempFileName, fileName))
             return true;
