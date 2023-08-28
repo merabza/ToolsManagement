@@ -9,6 +9,7 @@ using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
+using WebAgentMessagesContracts;
 using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabaseManagementClients;
@@ -16,38 +17,52 @@ namespace DatabaseManagementClients;
 public sealed class SqlServerManagementClient : DatabaseManagementClient
 {
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
+    private readonly IMessagesDataManager? _messagesDataManager;
+    private readonly string? _userName;
     private readonly ILogger _logger;
 
     private SqlServerManagementClient(ILogger logger, bool useConsole,
-        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain) : base(useConsole, logger)
+        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
+        IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger)
     {
         _logger = logger;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
+        _messagesDataManager = messagesDataManager;
+        _userName = userName;
     }
 
     public static SqlServerManagementClient? Create(ILogger logger, bool useConsole,
-        DatabaseServerConnectionData databaseServerConnectionData)
+        DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
+        string? userName)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
         {
+            messagesDataManager
+                ?.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient").Wait();
             logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
         {
+            messagesDataManager
+                ?.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient").Wait();
             logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
         {
+            messagesDataManager
+                ?.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient").Wait();
             logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
         {
+            messagesDataManager
+                ?.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient").Wait();
             logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -65,7 +80,8 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
             databaseServerConnectionData.BackupFolderName, databaseServerConnectionData.DataFolderName,
             databaseServerConnectionData.DataLogFolderName);
 
-        return new SqlServerManagementClient(logger, useConsole, databaseServerConnectionDataDomain);
+        return new SqlServerManagementClient(logger, useConsole, databaseServerConnectionDataDomain,
+            messagesDataManager, userName);
     }
 
     private DbClient GetDatabaseClient(string? databaseName = null)
@@ -77,7 +93,8 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
         if (dc is not null)
             return dc;
 
-        _logger.LogError($"Cannot create DbClient for database {databaseName}");
+        _messagesDataManager?.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}").Wait();
+        _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
         throw new Exception($"Cannot create DbClient for database {databaseName}");
     }
 
@@ -116,7 +133,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
 
         var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
 
-        //ბეკაპის ლოგიკური ფაილის სახელის მომზადება
+        //ბექაპის ლოგიკური ფაილის სახელის მომზადება
         var backupName = databaseName;
         if (dbBackupParameters.BackupType == EBackupType.Full)
             backupName += "-full";
@@ -194,6 +211,8 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
 
         if (hostPlatformName is null)
         {
+            if (_messagesDataManager is not null)
+                await _messagesDataManager.SendMessage(_userName, "Host platform does not detected");
             _logger.LogError("Host platform does not detected");
             return false;
         }

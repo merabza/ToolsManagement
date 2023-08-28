@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts.V1.Requests;
+using WebAgentMessagesContracts;
 using WebAgentProjectsApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Responses;
 
@@ -32,11 +33,12 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         _client = new HttpClient();
     }
 
-    public static DatabaseApiClient? Create(ILogger logger, bool useConsole, ApiClientSettings? apiClientSettings)
+    public static DatabaseApiClient? Create(ILogger logger, bool useConsole, ApiClientSettings? apiClientSettings,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
-        if (apiClientSettings is null ||
-            string.IsNullOrWhiteSpace(apiClientSettings.Server))
+        if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
         {
+            messagesDataManager?.SendMessage(userName, "cannot create DatabaseApiClient").Wait();
             logger.LogError("cannot create DatabaseApiClient");
             return null;
         }
@@ -178,7 +180,7 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         if (response.IsSuccessStatusCode)
             return;
         var errorMessage = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        Logger.LogError($"Returned error message from Database ApiClient: {errorMessage}");
+        Logger.LogError("Returned error message from Database ApiClient: {errorMessage}", errorMessage);
     }
 
     private async Task<bool> DoServerSide(string? databaseName, string methodName, string content)

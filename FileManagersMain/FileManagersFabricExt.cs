@@ -1,5 +1,6 @@
 ﻿using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using WebAgentMessagesContracts;
 
 namespace FileManagersMain;
 
@@ -12,17 +13,24 @@ public static class FileManagersFabricExt
     }
 
     public static (FileStorageData?, FileManager?) CreateFileStorageAndFileManager(bool useConsole, ILogger logger,
-        string localPatch, string? fileStorageName, FileStorages fileStorages)
+        string localPatch, string? fileStorageName, FileStorages fileStorages,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         FileStorageData? fileStorageData = null;
         if (string.IsNullOrWhiteSpace(fileStorageName))
         {
+            messagesDataManager?.SendMessage(userName, "File storage name not specified").Wait();
             logger.LogError("File storage name not specified");
         }
         else
         {
             fileStorageData = fileStorages.GetFileStorageDataByKey(fileStorageName);
-            if (fileStorageData == null) logger.LogError($"File storage with name {fileStorageName} not found");
+            if (fileStorageData == null)
+            {
+                messagesDataManager?.SendMessage(userName, $"File storage with name {fileStorageName} not found")
+                    .Wait();
+                logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
+            }
         }
 
         if (fileStorageData == null)
