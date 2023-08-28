@@ -261,7 +261,7 @@ public /*open*/ class FileManager
             return false;
         }
 
-        Console.WriteLine("Directory {newFolderName} does not exists", newFolderName);
+        Console.WriteLine($"Directory {newFolderName} does not exists");
         //თუ არ არსებობს, ვქმნით
         if (!CreateDirectory(newFolderName))
         {
@@ -270,7 +270,7 @@ public /*open*/ class FileManager
             return false;
         }
 
-        Console.WriteLine("Directory {newFolderName} Created", newFolderName);
+        Console.WriteLine($"Directory {newFolderName} Created");
 
         return true;
     }
@@ -296,7 +296,7 @@ public /*open*/ class FileManager
             return false;
         }
 
-        Console.WriteLine("Directory {newFolderName} Created", newFolderName);
+        Console.WriteLine($"Directory {newFolderName} Created");
         return true;
     }
 
