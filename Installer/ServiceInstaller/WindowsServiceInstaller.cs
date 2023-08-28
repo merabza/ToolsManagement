@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using SystemToolsShared;
 using WebAgentMessagesContracts;
 
 namespace Installer.ServiceInstaller;

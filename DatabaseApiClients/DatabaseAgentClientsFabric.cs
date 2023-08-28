@@ -4,6 +4,7 @@ using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
+using SystemToolsShared;
 using WebAgentMessagesContracts;
 
 namespace DatabaseApiClients;

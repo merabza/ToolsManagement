@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Installer.ServiceInstaller;
 using Microsoft.Extensions.Logging;
+using SystemToolsShared;
 using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;

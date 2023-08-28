@@ -4,6 +4,7 @@ using LibFileParameters.Models;
 using LibToolActions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using SystemToolsShared;
 using WebAgentMessagesContracts;
 
 namespace Installer.Actions;
