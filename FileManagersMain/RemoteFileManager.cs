@@ -28,12 +28,13 @@ public sealed class RemoteFileManager : FileManager
     public static RemoteFileManager? Create(FileStorageData fileStorageData, bool useConsole, ILogger logger,
         string? localPatch)
     {
+        var fileStoragePath = fileStorageData.FileStoragePath;
         var connectToolParameters = ConnectToolParameters.Create(fileStorageData.FileStoragePath,
             fileStorageData.UserName, fileStorageData.Password);
 
         if (connectToolParameters == null)
         {
-            logger.LogError($"Can not create connection parameters to server {fileStorageData.FileStoragePath}");
+            logger.LogError("Can not create connection parameters to server {fileStoragePath}", fileStoragePath);
             return null;
         }
 
@@ -42,14 +43,14 @@ public sealed class RemoteFileManager : FileManager
 
         if (connectionTools == null)
         {
-            logger.LogError($"Can not create connection to server {fileStorageData.FileStoragePath}");
+            logger.LogError("Can not create connection to server {fileStoragePath}", fileStoragePath);
             return null;
         }
 
         if (connectionTools.CheckConnection())
             return new RemoteFileManager(connectionTools, connectToolParameters.SiteRootAddress, useConsole, logger,
                 localPatch);
-        logger.LogError($"Can not connect to server {fileStorageData.FileStoragePath}");
+        logger.LogError("Can not connect to server {fileStoragePath}", fileStoragePath);
         return null;
 
         //CTools cTools = ConnectToolsFabric.CreateConnectToolsByAddress(connectToolParameters, logger);
@@ -111,12 +112,12 @@ public sealed class RemoteFileManager : FileManager
         var path = localAfterRootPath == null ? LocalPatch : Path.Combine(LocalPatch, localAfterRootPath);
         var fileFullName = Path.Combine(path, fileName);
         var tempFileName = downFileName + useTempExtension.AddNeedLeadPart(".");
-        //Logger.LogInformation($"Downloading file from {remoteAfterRootPath} to {fileFullName}");
+
         if (_cTools.DownloadFile(remoteAfterRootPath, fileName, path, tempFileName) &&
             RenameFile(Path.Combine(path, tempFileName), fileFullName, UseConsole, Logger))
             return true;
 
-        Logger.LogError($"DownloadFile file finished with errors: {fileFullName}");
+        Logger.LogError("DownloadFile file finished with errors: {fileFullName}", fileFullName);
         return false;
     }
 
@@ -134,7 +135,7 @@ public sealed class RemoteFileManager : FileManager
             RenameFile(Path.Combine(path, tempFileName), fileFullName, UseConsole, Logger))
             return true;
 
-        Logger.LogError($"DownloadFile file finished with errors: {fileFullName}");
+        Logger.LogError("DownloadFile file finished with errors: {fileFullName}", fileFullName);
         return false;
     }
 
@@ -142,28 +143,32 @@ public sealed class RemoteFileManager : FileManager
     private bool UploadFileReal(string fileFullName, string? afterRootPath, string tempFileName, string fileName)
     {
         Logger.LogInformation(
-            $"Uploading file from {fileFullName} to {afterRootPath} with temp name {tempFileName} and FinishName {fileName}");
+            "Uploading file from {fileFullName} to {afterRootPath} with temp name {tempFileName} and FinishName {fileName}",
+            fileFullName, afterRootPath, tempFileName, fileName);
         if (_cTools.UploadFile(fileFullName, afterRootPath, tempFileName) &&
             _cTools.Rename(afterRootPath, tempFileName, fileName))
             return true;
 
-        Logger.LogError($"Upload file finished with errors: form {fileFullName}");
+        Logger.LogError("Upload file finished with errors: form {fileFullName}", fileFullName);
         return false;
     }
 
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
-        Logger.LogInformation($"Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}");
+        Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
+            _serverRootPaths, serverSideFileName);
         if (_cTools.UploadContentToTextFile(content, null, serverSideFileName))
             return true;
 
-        Logger.LogError($"Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}");
+        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}",
+            serverSideFileName, _serverRootPaths);
         return false;
     }
 
     public override string? GetTextFileContent(string fileName)
     {
-        Logger.LogInformation($"Downloading text file {fileName} content from {_serverRootPaths}");
+        Logger.LogInformation("Downloading text file {fileName} content from {_serverRootPaths}", fileName,
+            _serverRootPaths);
         return _cTools.GetTextFileContent(null, fileName);
     }
 

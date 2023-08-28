@@ -44,7 +44,7 @@ public static class ArchiverFabric
         //დადგინდეს გვაქვს თუ არა ინფორმაცია არქივატორის გამშვები ფაილის შესახებ
         if (string.IsNullOrWhiteSpace(compressProgramPatch))
         {
-            logger.LogError($"Archiver program path is not specified for {archiveType}");
+            logger.LogError("Archiver program path is not specified for {archiveType}", archiveType);
             return null;
         }
 
@@ -52,7 +52,7 @@ public static class ArchiverFabric
         FileInfo compressProgram = new(compressProgramPatch);
         if (!compressProgram.Exists)
         {
-            logger.LogError($"Archiver program path is invalid for {archiveType}");
+            logger.LogError("Archiver program path is invalid for {archiveType}", archiveType);
             return null;
         }
 
@@ -66,7 +66,7 @@ public static class ArchiverFabric
 
         if (string.IsNullOrWhiteSpace(decompressProgramPatch))
         {
-            logger.LogError($"Archiver decompress program path is invalid for {archiveType}");
+            logger.LogError("Archiver decompress program path is invalid for {archiveType}", archiveType);
             return null;
         }
 
@@ -74,7 +74,7 @@ public static class ArchiverFabric
 
         if (decompressProgram.Exists)
             return new ZipArchiver(logger, compressProgramPatch, decompressProgramPatch, useConsole, fileExtension);
-        logger.LogError($"Archiver decompress program path is invalid for {archiveType}");
+        logger.LogError("Archiver decompress program path is invalid for {archiveType}", archiveType);
         return null;
     }
 }

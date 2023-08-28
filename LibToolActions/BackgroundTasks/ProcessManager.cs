@@ -69,7 +69,7 @@ public sealed class ProcessManager : IDisposable
         {
             if (!_processLines.TryAdd(procLineId, new ProcessLine(_logger, _signal)))
             {
-                _logger.LogError($"Cannot add New Process Line with Id {procLineId}");
+                _logger.LogError("Cannot add New Process Line with Id {procLineId}", procLineId);
                 return;
             }
 

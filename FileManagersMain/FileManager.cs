@@ -121,8 +121,9 @@ public /*open*/ class FileManager
 
         foreach (var buFileInfo in filesForDelete)
         {
+            var fileName = buFileInfo.FileName;
             DeleteFile(buFileInfo.FileName);
-            Logger.LogInformation($"Deleted old file {buFileInfo.FileName}.");
+            Logger.LogInformation("Deleted old file {fileName}.", fileName);
         }
     }
 
@@ -256,20 +257,20 @@ public /*open*/ class FileManager
         if (DirectoryExists(newFolderName))
         {
             //თუ არსებობს, ვჩერდებით
-            Logger.LogWarning($"Folder with name {newFolderName} already exists. Process Stopped");
+            Logger.LogWarning("Folder with name {newFolderName} already exists. Process Stopped", newFolderName);
             return false;
         }
 
-        Console.WriteLine($"Directory {newFolderName} does not exists");
+        Console.WriteLine("Directory {newFolderName} does not exists", newFolderName);
         //თუ არ არსებობს, ვქმნით
         if (!CreateDirectory(newFolderName))
         {
             //თუ ფოლდერი ვერ შეიქმნა, ვჩერდებით
-            Logger.LogWarning($"Folder with name {newFolderName} cannot created. Process Stopped");
+            Logger.LogWarning("Folder with name {newFolderName} cannot created. Process Stopped", newFolderName);
             return false;
         }
 
-        Console.WriteLine($"Directory {newFolderName} Created");
+        Console.WriteLine("Directory {newFolderName} Created", newFolderName);
 
         return true;
     }
@@ -283,7 +284,7 @@ public /*open*/ class FileManager
             if (allowExist)
                 return true;
             //თუ არსებობს, ვჩერდებით
-            Logger.LogWarning($"Folder with name {newFolderName} already exists. Process Stopped");
+            Logger.LogWarning("Folder with name {newFolderName} already exists. Process Stopped", newFolderName);
             return false;
         }
 
@@ -291,11 +292,11 @@ public /*open*/ class FileManager
         if (!CreateDirectory(afterRootPath, newFolderName))
         {
             //თუ ფოლდერი ვერ შეიქმნა, ვჩერდებით
-            Logger.LogWarning($"Folder with name {newFolderName} cannot created. Process Stopped");
+            Logger.LogWarning("Folder with name {newFolderName} cannot created. Process Stopped", newFolderName);
             return false;
         }
 
-        Console.WriteLine($"Directory {newFolderName} Created");
+        Console.WriteLine("Directory {newFolderName} Created", newFolderName);
         return true;
     }
 

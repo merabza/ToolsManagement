@@ -45,7 +45,7 @@ public sealed class ToolActionsQueuedRunner : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occurred executing {nameof(toolAction)}.");
+                _logger.LogError(ex, $"Error occurred executing toolAction.");
             }
 
             IsBusy = false;

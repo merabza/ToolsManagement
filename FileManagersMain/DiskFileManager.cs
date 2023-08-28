@@ -90,24 +90,26 @@ public sealed class DiskFileManager : FileManager
         if (FileStat.NormalizePath(LocalPatch) == FileStat.NormalizePath(copyToFolder))
             return File.Exists(fileFullName);
 
-        Logger.LogInformation($"Upload file from {fileFullName} to {copyToFolder}");
+        Logger.LogInformation("Upload file from {fileFullName} to {copyToFolder}", fileFullName, copyToFolder);
         var tempFileFullName = Path.Combine(copyToFolder, tempFileName);
         var targetFileFullName = Path.Combine(copyToFolder, fileName);
         if (CopyFile(fileFullName, tempFileFullName, UseConsole, Logger) &&
             RenameFile(tempFileFullName, targetFileFullName, UseConsole, Logger))
             return true;
 
-        Logger.LogError($"Upload file finished with errors: form {fileFullName} to {targetFileFullName}");
+        Logger.LogError("Upload file finished with errors: form {fileFullName} to {targetFileFullName}", fileFullName,
+            targetFileFullName);
         return false;
     }
 
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
-        Logger.LogInformation($"Uploading Parameters content to {_storageFolderName} in {serverSideFileName}");
+        Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
+            _storageFolderName, serverSideFileName);
         var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
         File.WriteAllText(targetFileFullName, content);
-        Logger.LogError(
-            $"Upload file content finished with errors: in {serverSideFileName} to {_storageFolderName}");
+        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_storageFolderName}",
+            serverSideFileName, _storageFolderName);
         return false;
     }
 
@@ -122,20 +124,22 @@ public sealed class DiskFileManager : FileManager
 
         var tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
         var sourceFileFullName = Path.Combine(_storageFolderName, fileName);
-        Logger.LogInformation($"Downloading File from {sourceFileFullName} to {fileFullName}");
+        Logger.LogInformation("Downloading File from {sourceFileFullName} to {fileFullName}", sourceFileFullName,
+            fileFullName);
         var tempFileFullName = Path.Combine(_storageFolderName, tempFileName);
 
         if (CopyFile(sourceFileFullName, tempFileFullName, UseConsole, Logger) &&
             RenameFile(tempFileFullName, fileFullName, UseConsole, Logger))
             return true;
 
-        Logger.LogError($"Downloading file was finished with errors: from {sourceFileFullName} to {fileFullName}");
+        Logger.LogError("Downloading file was finished with errors: from {sourceFileFullName} to {fileFullName}",
+            sourceFileFullName, fileFullName);
         return false;
     }
 
     public override string GetTextFileContent(string fileName)
     {
-        Logger.LogInformation($"Get content from text file {fileName}");
+        Logger.LogInformation("Get content from text file {fileName}", fileName);
         StreamReader reader = new(fileName);
         return reader.ReadToEnd();
     }
