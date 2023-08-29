@@ -2,7 +2,6 @@
 using Installer.ServiceInstaller;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 
@@ -53,20 +52,20 @@ public sealed class LocalAgent : IAgentClient
         return await Task.FromResult(false);
     }
 
-    public bool StopService(string serviceName)
+    public async Task<bool> StopService(string serviceName)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
 
-        return serviceInstaller.Stop(serviceName);
+        return await Task.FromResult(serviceInstaller.Stop(serviceName));
     }
 
-    public bool StartService(string serviceName)
+    public async Task<bool> StartService(string serviceName)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
 
-        return serviceInstaller.Start(serviceName);
+        return await Task.FromResult(serviceInstaller.Start(serviceName));
     }
 
     public async Task<bool> CheckValidation()

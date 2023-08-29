@@ -3,7 +3,6 @@ using Installer.Domain;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 
@@ -28,18 +27,19 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
         _useConsole = useConsole;
     }
 
-    public bool UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
+    public async Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension)
     {
         var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
-        return applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
-               false;
+        return await Task.FromResult(
+            applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
+            false);
     }
 
-    public string? InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+    public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
@@ -48,10 +48,10 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
-        return applicationUpdater?.UpdateProgram(projectName, environmentName);
+        return await Task.FromResult(applicationUpdater?.UpdateProgram(projectName, environmentName));
     }
 
-    public string? InstallService(string projectName, string environmentName, string? serviceName,
+    public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName,
         string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
         string parametersFileDateMask, string parametersFileExtension)
@@ -62,8 +62,8 @@ public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
-        return applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
-            serviceName, appSettingsFileName);
+        return await Task.FromResult(applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName,
+            serviceUserName, serviceName, appSettingsFileName));
     }
 
     public async Task<bool> CheckValidation()

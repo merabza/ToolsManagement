@@ -14,7 +14,6 @@ using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts.V1.Requests;
-using WebAgentMessagesContracts;
 using WebAgentProjectsApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Responses;
 

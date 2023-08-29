@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net.Http;
-using System.Text;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 using WebAgentProjectsApiContracts.V1.Requests;
 
 namespace Installer.AgentClients;
@@ -17,12 +14,9 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
     {
     }
 
-    public bool UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
+    public async Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension)
     {
-        var uri = new Uri(
-            $"{Server}projects/updatesettings{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
-
         var body = new UpdateSettingsRequest
         {
             ProjectName = projectName,
@@ -32,23 +26,15 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
             ParametersFileDateMask = parametersFileDateMask,
             ParametersFileExtension = parametersFileExtension
         };
+        var bodyJsonData = JsonConvert.SerializeObject(body);
 
-        var bodyApiKeyJsonData = JsonConvert.SerializeObject(body);
-
-        var response = Client
-            .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
-
-        if (response.IsSuccessStatusCode)
-            return true;
-
-        LogResponseErrorMessage(response);
-        return false;
+        return await PostAsync(
+            $"projects/updatesettings{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}", bodyJsonData);
     }
 
-    public string? InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+    public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
-        var uri = new Uri($"{Server}projects/update");
         var body = new ProjectUpdateRequest
         {
             ProjectName = projectName,
@@ -59,24 +45,15 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
             ParametersFileExtension = parametersFileExtension
         };
 
-        var bodyApiKeyJsonData = JsonConvert.SerializeObject(body);
+        var bodyJsonData = JsonConvert.SerializeObject(body);
 
-        var response = Client
-            .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
-
-        if (response.IsSuccessStatusCode)
-            return response.Content.ReadAsStringAsync().Result;
-
-        LogResponseErrorMessage(response);
-        return null;
+        return await PostAsyncReturnString("projects/update", bodyJsonData);
     }
 
-    public string? InstallService(string projectName, string environmentName, string? serviceName,
+    public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
     {
-        var uri = new Uri(
-            $"{Server}projects/updateservice{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
         var body = new UpdateServiceRequest
         {
             ProjectName = projectName,
@@ -90,15 +67,9 @@ public sealed class WebAgentClientWithFileStorage : ApiClient, IAgentClientWithF
             ParametersFileExtension = parametersFileExtension
         };
 
-        var bodyApiKeyJsonData = JsonConvert.SerializeObject(body);
+        var bodyJsonData = JsonConvert.SerializeObject(body);
 
-        var response = Client
-            .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
-
-        if (response.IsSuccessStatusCode)
-            return response.Content.ReadAsStringAsync().Result;
-
-        LogResponseErrorMessage(response);
-        return null;
+        return await PostAsyncReturnString(
+            $"projects/updateservice{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}", bodyJsonData);
     }
 }

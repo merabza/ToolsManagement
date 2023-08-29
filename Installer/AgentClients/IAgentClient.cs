@@ -6,6 +6,6 @@ public interface IAgentClient : IApiClient
 {
     Task<bool> RemoveProject(string projectName);
     Task<bool> RemoveProjectAndService(string projectName, string serviceName);
-    bool StopService(string serviceName);
-    bool StartService(string serviceName);
+    Task<bool> StopService(string serviceName);
+    Task<bool> StartService(string serviceName);
 }
