@@ -4,9 +4,10 @@ namespace Installer.AgentClients;
 
 public interface IProjectsApiClient
 {
-    Task<bool> RemoveProject(string projectName);
+    //არასერვისი პროგრამებისათვის მოშორებული წაშლა არ მოხდება, რადგან ასეთი პროგრამებისათვის სერვერზე დაინსტალირება გათვალისწინებული არ გვაქვს
+    //თუ მომავალში გადავაკეთებთ, ისე, რომ არასერვისული პროგრამებისათვის სერვერის მითითება შესაძლებელი იქნება და მოშორებულ სერვერზე ასეთი პროგრამის დაყენება შესაძლებელი იქნება, მაშინ RemoveProject უნდა აღდგეს
+    //Task<bool> RemoveProject(string projectName);
     Task<bool> RemoveProjectAndService(string projectName, string serviceName);
     Task<bool> StopService(string serviceName);
     Task<bool> StartService(string serviceName);
-
 }

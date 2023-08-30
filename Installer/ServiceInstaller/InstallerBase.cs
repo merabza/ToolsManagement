@@ -7,7 +7,6 @@ using Installer.Domain;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer.ServiceInstaller;
 
