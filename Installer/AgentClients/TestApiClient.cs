@@ -14,7 +14,7 @@ public class TestApiClient : ApiClient
     public async Task<string?> GetAppSettingsVersion()
     {
         return await GetAsyncAsString(
-            $"test/getappsettingsversion{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey ={ApiKey}")}", false);
+            $"test/getappsettingsversion", false);
     }
 
     public async Task<string?> GetVersion(bool useConsole = false)
@@ -28,19 +28,5 @@ public class TestApiClient : ApiClient
             StShared.WriteErrorLine(e.Message, useConsole);
             return null;
         }
-    }
-
-    public async Task<bool> CheckValidation()
-    {
-        Console.WriteLine("Try connect to Web Agent...");
-
-        var version = await GetVersion();
-
-        if (string.IsNullOrWhiteSpace(version))
-            return false;
-
-        Console.WriteLine($"Connected successfully, Web Agent version is {version}");
-
-        return true;
     }
 }
