@@ -4,9 +4,9 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public sealed class WebAgentClient : ApiClient, IAgentClient
+public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
 {
-    public WebAgentClient(ILogger logger, string server, string? apiKey, IMessagesDataManager? messagesDataManager,
+    public ProjectsApiClient(ILogger logger, string server, string? apiKey, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, server, apiKey, messagesDataManager, userName)
     {
     }
@@ -53,15 +53,4 @@ public sealed class WebAgentClient : ApiClient, IAgentClient
             $"test/getappsettingsversion{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey ={ApiKey}")}", false);
     }
 
-    public async Task<string?> GetVersionByProxy(int serverSidePort, string apiVersionId)
-    {
-        //+
-        return await GetAsyncAsString(
-            $"projects/getversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
-    }
-
-    //public bool CheckValidation()
-    //{
-    //    throw new NotImplementedException();
-    //}
 }

@@ -3,7 +3,6 @@ using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer;
 

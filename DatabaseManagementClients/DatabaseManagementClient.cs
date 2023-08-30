@@ -52,12 +52,6 @@ public /*open*/ class DatabaseManagementClient
         return Task.FromResult(new List<DatabaseInfoModel>());
     }
 
-    ////ხელმისაწვდომი სერვერების სახელების მიღება
-    //public virtual List<string>? GetDatabaseServerNames()
-    //{
-    //    return new List<string>();
-    //}
-
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.

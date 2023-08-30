@@ -2,7 +2,7 @@
 
 namespace Installer.AgentClients;
 
-public interface IAgentClientWithFileStorage : IApiClient
+public interface IIProjectsApiClientWithFileStorage
 {
     Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension);

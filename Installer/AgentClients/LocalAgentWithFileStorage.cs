@@ -6,7 +6,7 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public sealed class LocalAgentWithFileStorage : IAgentClientWithFileStorage
+public sealed class LocalAgentWithFileStorage : IIProjectsApiClientWithFileStorage
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;

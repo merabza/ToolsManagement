@@ -3,13 +3,12 @@ using Installer.Models;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer.AgentClients;
 
 public static class AgentClientsFabric
 {
-    public static IAgentClientWithFileStorage? CreateAgentClientWithFileStorage(ILogger logger,
+    public static IIProjectsApiClientWithFileStorage? CreateAgentClientWithFileStorage(ILogger logger,
         InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
@@ -29,13 +28,13 @@ public static class AgentClientsFabric
     }
 
 
-    public static IAgentClient? CreateAgentClient(ILogger logger, bool useConsole, string? installFolder,
+    public static IProjectsApiClient? CreateAgentClient(ILogger logger, bool useConsole, string? installFolder,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
         messagesDataManager?.SendMessage(userName, "Creating local Agent").Wait();
 
         if (!string.IsNullOrWhiteSpace(installFolder))
-            return new LocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
+            return new ProjectsLocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
 
         messagesDataManager?.SendMessage(userName, "installFolder name in parameters is empty").Wait();
         logger.LogError("installFolder name in parameters is empty");

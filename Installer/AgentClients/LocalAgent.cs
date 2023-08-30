@@ -5,7 +5,7 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public sealed class LocalAgent : IAgentClient
+public sealed class ProjectsLocalAgent : IProjectsApiClient
 {
     private readonly string _installFolder;
     private readonly IMessagesDataManager? _messagesDataManager;
@@ -13,7 +13,7 @@ public sealed class LocalAgent : IAgentClient
     private readonly ILogger _logger;
     private readonly bool _useConsole;
 
-    public LocalAgent(ILogger logger, bool useConsole, string installFolder, IMessagesDataManager? messagesDataManager,
+    public ProjectsLocalAgent(ILogger logger, bool useConsole, string installFolder, IMessagesDataManager? messagesDataManager,
         string? userName)
     {
         _logger = logger;

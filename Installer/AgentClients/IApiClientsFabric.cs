@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿//using Microsoft.Extensions.Logging;
 
-namespace Installer.AgentClients;
+//namespace Installer.AgentClients;
 
-public interface IApiClientsFabric
-{
-    IApiClient CreateApiClient(ILogger logger, string server, string? apiKey);
-}
+//public interface IApiClientsFabric
+//{
+//    ITestApiClient CreateApiClient(ILogger logger, string server, string? apiKey);
+//}
