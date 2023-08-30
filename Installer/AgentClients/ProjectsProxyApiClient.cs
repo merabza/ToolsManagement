@@ -4,9 +4,10 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public sealed class ProjectsVersionApiClient : ApiClient
+public sealed class ProjectsProxyApiClient : ApiClient
 {
-    public ProjectsVersionApiClient(ILogger logger, string server, string? apiKey, IMessagesDataManager? messagesDataManager,
+    public ProjectsProxyApiClient(ILogger logger, string server, string? apiKey,
+        IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, server, apiKey, messagesDataManager, userName)
     {
     }
@@ -18,4 +19,10 @@ public sealed class ProjectsVersionApiClient : ApiClient
             $"projects/getversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
     }
 
+    public async Task<string?> GetAppSettingsVersionByProxy(int serverSidePort, string apiVersionId)
+    {
+        //+
+        return await GetAsyncAsString(
+            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+    }
 }

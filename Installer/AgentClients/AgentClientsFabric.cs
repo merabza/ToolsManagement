@@ -19,7 +19,8 @@ public static class AgentClientsFabric
                 userName);
 
         if (localInstallerSettingsDomain is not null)
-            return new LocalAgentWithFileStorage(logger, useConsole, fileStorageForUpload, localInstallerSettingsDomain,
+            return new ProjectsLocalAgentWithFileStorage(logger, useConsole, fileStorageForUpload,
+                localInstallerSettingsDomain,
                 messagesDataManager, userName);
 
         messagesDataManager?.SendMessage(userName, "localInstallerSettingsDomain does not created").Wait();

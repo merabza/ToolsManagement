@@ -6,9 +6,9 @@ using WebAgentProjectsApiContracts.V1.Requests;
 
 namespace Installer.AgentClients;
 
-public sealed class WebAgentClientWithFileStorage : ApiClient, IIProjectsApiClientWithFileStorage
+public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiClientWithFileStorage
 {
-    public WebAgentClientWithFileStorage(ILogger logger, string server, string? apiKey,
+    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey,
         IMessagesDataManager? messagesDataManager, string? userName) : base(logger, server, apiKey, messagesDataManager,
         userName)
     {

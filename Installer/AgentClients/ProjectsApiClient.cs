@@ -11,12 +11,12 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     {
     }
 
-    public async Task<bool> RemoveProject(string projectName)
-    {
-        //+
-        return await DeleteAsync(
-            $"projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
-    }
+    //public async Task<bool> RemoveProject(string projectName)
+    //{
+    //    //+
+    //    return await DeleteAsync(
+    //        $"projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+    //}
 
     public async Task<bool> RemoveProjectAndService(string projectName, string serviceName)
     {
@@ -38,19 +38,4 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
         return await PostAsync(
             $"projects/start/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
     }
-
-    public async Task<string?> GetAppSettingsVersionByProxy(int serverSidePort, string apiVersionId)
-    {
-        //+
-        return await GetAsyncAsString(
-            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
-    }
-
-    public async Task<string?> GetAppSettingsVersion()
-    {
-        //+
-        return await GetAsyncAsString(
-            $"test/getappsettingsversion{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey ={ApiKey}")}", false);
-    }
-
 }

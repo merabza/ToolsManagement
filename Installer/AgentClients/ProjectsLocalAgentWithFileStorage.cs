@@ -6,7 +6,7 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public sealed class LocalAgentWithFileStorage : IIProjectsApiClientWithFileStorage
+public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithFileStorage
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
@@ -15,7 +15,7 @@ public sealed class LocalAgentWithFileStorage : IIProjectsApiClientWithFileStora
     private readonly ILogger _logger;
     private readonly bool _useConsole;
 
-    public LocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
+    public ProjectsLocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
         LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager? messagesDataManager,
         string? userName)
     {

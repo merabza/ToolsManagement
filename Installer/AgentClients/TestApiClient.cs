@@ -7,9 +7,14 @@ namespace Installer.AgentClients;
 
 public class TestApiClient : ApiClient
 {
-
     public TestApiClient(ILogger logger, string server) : base(logger, server, null, null, null)
     {
+    }
+
+    public async Task<string?> GetAppSettingsVersion()
+    {
+        return await GetAsyncAsString(
+            $"test/getappsettingsversion{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey ={ApiKey}")}", false);
     }
 
     public async Task<string?> GetVersion(bool useConsole = false)
@@ -38,5 +43,4 @@ public class TestApiClient : ApiClient
 
         return true;
     }
-
 }
