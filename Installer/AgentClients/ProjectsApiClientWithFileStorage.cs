@@ -8,9 +8,8 @@ namespace Installer.AgentClients;
 
 public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiClientWithFileStorage
 {
-    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey,
-        IMessagesDataManager? messagesDataManager, string? userName) : base(logger, server, apiKey, messagesDataManager,
-        userName)
+    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey) : base(logger, server,
+        apiKey)
     {
     }
 

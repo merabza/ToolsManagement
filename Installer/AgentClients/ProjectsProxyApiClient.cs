@@ -6,9 +6,7 @@ namespace Installer.AgentClients;
 
 public sealed class ProjectsProxyApiClient : ApiClient
 {
-    public ProjectsProxyApiClient(ILogger logger, string server, string? apiKey,
-        IMessagesDataManager? messagesDataManager,
-        string? userName) : base(logger, server, apiKey, messagesDataManager, userName)
+    public ProjectsProxyApiClient(ILogger logger, string server, string? apiKey) : base(logger, server, apiKey)
     {
     }
 

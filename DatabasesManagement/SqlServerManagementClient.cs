@@ -13,18 +13,20 @@ using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public sealed class SqlServerManagementClient : DatabaseManagementClient
+public sealed class SqlServerManagementClient : IDatabaseApiClient
 {
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly IMessagesDataManager? _messagesDataManager;
     private readonly string? _userName;
     private readonly ILogger _logger;
+    private readonly bool _useConsole;
 
     private SqlServerManagementClient(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger)
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         _logger = logger;
+        _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
         _messagesDataManager = messagesDataManager;
         _userName = userName;
@@ -85,7 +87,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
 
     private DbClient GetDatabaseClient(string? databaseName = null)
     {
-        var dc = DbClientFabric.GetDbClient(_logger, UseConsole, _databaseServerConnectionDataDomain.DataProvider,
+        var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
             ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName);
 
@@ -98,7 +100,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public override async Task<bool> CheckRepairDatabase(string databaseName)
+    public async Task<bool> CheckRepairDatabase(string databaseName)
     {
         var dc = GetDatabaseClient();
         return await dc.CheckRepairDatabase(databaseName);
@@ -106,7 +108,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public override async Task<BackupFileParameters?> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
+    public async Task<BackupFileParameters?> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
         string backupBaseName)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -153,21 +155,21 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public override async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
+    public async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
     {
         var dc = GetDatabaseClient(databaseName);
         return await dc.ExecuteCommandAsync(executeQueryCommand, true, true);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public override async Task<List<DatabaseInfoModel>> GetDatabaseNames()
+    public async Task<List<DatabaseInfoModel>> GetDatabaseNames()
     {
         var dc = GetDatabaseClient();
         return await dc.GetDatabaseInfos();
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public override async Task<DbServerInfo?> GetDatabaseServerInfo()
+    public async Task<DbServerInfo?> GetDatabaseServerInfo()
     {
         var dc = GetDatabaseClient();
         return await dc.GetDbServerInfo();
@@ -176,7 +178,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public override async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
+    public async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
@@ -184,7 +186,7 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
     }
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    public override bool IsServerLocal()
+    public bool IsServerLocal()
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
@@ -193,14 +195,14 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
 
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public override async Task<bool> RecompileProcedures(string databaseName)
+    public async Task<bool> RecompileProcedures(string databaseName)
     {
         var dc = GetDatabaseClient();
         return await dc.RecompileProcedures(databaseName);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public override async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+    public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, string? restoreFromFolderPath = null)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -233,14 +235,14 @@ public sealed class SqlServerManagementClient : DatabaseManagementClient
             dirSeparator);
     }
 
-    public override async Task<bool> TestConnection(string? databaseName)
+    public async Task<bool> TestConnection(string? databaseName)
     {
         var dc = GetDatabaseClient(databaseName);
         return await Task.FromResult(dc.TestConnection(databaseName != null));
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public override async Task<bool> UpdateStatistics(string databaseName)
+    public async Task<bool> UpdateStatistics(string databaseName)
     {
         var dc = GetDatabaseClient();
         return await dc.UpdateStatistics(databaseName);

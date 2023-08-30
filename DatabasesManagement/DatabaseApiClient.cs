@@ -18,20 +18,22 @@ using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public sealed class DatabaseApiClient : DatabaseManagementClient
+public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 {
+    private readonly ILogger _logger;
     private readonly ApiClientSettingsDomain _apiClientSettingsDomain;
 
     private readonly HttpClient _client;
 
-    private DatabaseApiClient(ILogger logger, bool useConsole, ApiClientSettingsDomain apiClientSettingsDomain) : base(
-        useConsole, logger)
+    private DatabaseApiClient(ILogger logger, ApiClientSettingsDomain apiClientSettingsDomain) : base(logger,
+        apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey)
     {
+        _logger = logger;
         _apiClientSettingsDomain = apiClientSettingsDomain;
         _client = new HttpClient();
     }
 
-    public static DatabaseApiClient? Create(ILogger logger, bool useConsole, ApiClientSettings? apiClientSettings,
+    public static DatabaseApiClient? Create(ILogger logger, ApiClientSettings? apiClientSettings,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
         if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
@@ -42,23 +44,23 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         }
 
         ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
-        return new DatabaseApiClient(logger, useConsole, apiClientSettingsDomain);
+        return new DatabaseApiClient(logger, apiClientSettingsDomain);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public override async Task<bool> CheckRepairDatabase(string databaseName)
+    public async Task<bool> CheckRepairDatabase(string databaseName)
     {
         return await DoServerSide(databaseName, "checkrepairdatabase", "");
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public override async Task<BackupFileParameters?> CreateBackup(
+    public async Task<BackupFileParameters?> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName)
     {
         if (string.IsNullOrWhiteSpace(backupBaseName))
         {
-            Logger.LogError("Database Name does Not Specified For Backup");
+            _logger.LogError("Database Name does Not Specified For Backup");
             return null;
         }
 
@@ -92,13 +94,18 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public override async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
+    public async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
     {
         return await DoServerSide(databaseName, "executecommand", executeQueryCommand);
     }
 
+    public Task<DbServerInfo?> GetDatabaseServerInfo()
+    {
+        throw new NotImplementedException();
+    }
+
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public override async Task<List<DatabaseInfoModel>> GetDatabaseNames()
+    public async Task<List<DatabaseInfoModel>> GetDatabaseNames()
     {
         Uri uri = new(
             $"{_apiClientSettingsDomain.Server}database/getdatabasenames{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
@@ -111,7 +118,7 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public override async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
+    public async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
     {
         Uri uri = new(
             $"{_apiClientSettingsDomain.Server}database/isdatabaseexists/{databaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
@@ -127,8 +134,13 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
             : errors.ToArray();
     }
 
+    public bool IsServerLocal()
+    {
+        throw new NotImplementedException();
+    }
+
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public override async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+    public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, string? restoreFromFolderPath = null)
     {
         var bodyApiKeyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
@@ -147,12 +159,12 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
     }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public override async Task<bool> RecompileProcedures(string databaseName)
+    public async Task<bool> RecompileProcedures(string databaseName)
     {
         return await DoServerSide(databaseName, "recompileprocedures", "");
     }
 
-    public override async Task<bool> TestConnection(string? databaseName)
+    public async Task<bool> TestConnection(string? databaseName)
     {
         Uri uri = new(
             $"{_apiClientSettingsDomain.Server}database/testconnection{(databaseName == null ? "" : $"/{databaseName}")}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
@@ -168,7 +180,7 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
 
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public override async Task<bool> UpdateStatistics(string databaseName)
+    public async Task<bool> UpdateStatistics(string databaseName)
     {
         return await DoServerSide(databaseName, "updatestatistics", "");
     }
@@ -178,7 +190,7 @@ public sealed class DatabaseApiClient : DatabaseManagementClient
         if (response.IsSuccessStatusCode)
             return;
         var errorMessage = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        Logger.LogError("Returned error message from Database ApiClient: {errorMessage}", errorMessage);
+        _logger.LogError("Returned error message from Database ApiClient: {errorMessage}", errorMessage);
     }
 
     private async Task<bool> DoServerSide(string? databaseName, string methodName, string content)

@@ -9,7 +9,7 @@ namespace DatabasesManagement;
 
 public static class DatabaseAgentClientsFabric
 {
-    public static DatabaseManagementClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         string? apiClientName, ApiClients apiClients, string? databaseConnectionName,
         DatabaseServerConnections databaseServerConnections, IMessagesDataManager? messagesDataManager,
         string? userName)
@@ -34,7 +34,7 @@ public static class DatabaseAgentClientsFabric
         }
 
         if (!string.IsNullOrWhiteSpace(apiClientName))
-            return CreateDatabaseManagementClient(useConsole, logger, apiClientName, apiClients, messagesDataManager,
+            return CreateDatabaseManagementClient(logger, apiClientName, apiClients, messagesDataManager,
                 userName);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
             return CreateDatabaseManagementClient(useConsole, logger, databaseConnectionName, databaseServerConnections,
@@ -43,14 +43,14 @@ public static class DatabaseAgentClientsFabric
     }
 
 
-    private static DatabaseManagementClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    private static IDatabaseApiClient? CreateDatabaseManagementClient(ILogger logger,
         string apiClientName, ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName)
     {
         var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
-        return DatabaseApiClient.Create(logger, useConsole, apiClientSettings, messagesDataManager, userName);
+        return DatabaseApiClient.Create(logger, apiClientSettings, messagesDataManager, userName);
     }
 
-    public static DatabaseManagementClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
@@ -61,7 +61,7 @@ public static class DatabaseAgentClientsFabric
             userName);
     }
 
-    public static DatabaseManagementClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
         string? userName)
     {

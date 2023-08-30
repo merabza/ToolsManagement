@@ -7,7 +7,7 @@ namespace Installer.AgentClients;
 
 public class TestApiClient : ApiClient
 {
-    public TestApiClient(ILogger logger, string server) : base(logger, server, null, null, null)
+    public TestApiClient(ILogger logger, string server) : base(logger, server, null)
     {
     }
 
