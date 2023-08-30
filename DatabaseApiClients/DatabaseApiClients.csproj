@@ -13,7 +13,6 @@
         <ProjectReference Include="..\..\ParametersManagement\LibApiClientParameters\LibApiClientParameters.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
-        <ProjectReference Include="..\DatabaseManagementClients\DatabaseManagementClients.csproj" />
         <ProjectReference Include="..\Installer\Installer.csproj" />
     </ItemGroup>
 

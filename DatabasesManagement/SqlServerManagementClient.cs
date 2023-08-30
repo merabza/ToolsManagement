@@ -11,7 +11,7 @@ using OneOf;
 using SystemToolsShared;
 using WebAgentProjectsApiContracts.V1.Responses;
 
-namespace DatabaseManagementClients;
+namespace DatabasesManagement;
 
 public sealed class SqlServerManagementClient : DatabaseManagementClient
 {

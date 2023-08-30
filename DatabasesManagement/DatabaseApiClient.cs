@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using DatabaseManagementClients;
 using DbTools.Models;
 using Installer.Domain;
 using LibApiClientParameters;
@@ -17,7 +16,7 @@ using WebAgentDatabasesApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Responses;
 
-namespace DatabaseApiClients;
+namespace DatabasesManagement;
 
 public sealed class DatabaseApiClient : DatabaseManagementClient
 {

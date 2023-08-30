@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace LibToolActions.BackgroundTasks;
 

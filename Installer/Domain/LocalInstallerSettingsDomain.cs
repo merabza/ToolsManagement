@@ -1,7 +1,6 @@
 ﻿using Installer.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
-using WebAgentMessagesContracts;
 
 namespace Installer.Domain;
 
