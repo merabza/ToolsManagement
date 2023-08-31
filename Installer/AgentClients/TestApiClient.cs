@@ -21,7 +21,7 @@ public class TestApiClient : ApiClient
     {
         try
         {
-            return await GetAsyncAsString("test/getversion");
+            return await GetAsyncAsString("test/getversion", false);
         }
         catch (Exception e)
         {

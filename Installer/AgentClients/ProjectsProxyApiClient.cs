@@ -14,13 +14,13 @@ public sealed class ProjectsProxyApiClient : ApiClient
     {
         //+
         return await GetAsyncAsString(
-            $"projects/getversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+            $"projects/getversion/{serverSidePort}/{apiVersionId}");
     }
 
     public async Task<string?> GetAppSettingsVersionByProxy(int serverSidePort, string apiVersionId)
     {
         //+
         return await GetAsyncAsString(
-            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}");
     }
 }

@@ -27,8 +27,7 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
         };
         var bodyJsonData = JsonConvert.SerializeObject(body);
 
-        return await PostAsync(
-            $"projects/updatesettings{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}", bodyJsonData);
+        return await PostAsync("projects/updatesettings", bodyJsonData);
     }
 
     public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
@@ -68,7 +67,6 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
 
         var bodyJsonData = JsonConvert.SerializeObject(body);
 
-        return await PostAsyncReturnString(
-            $"projects/updateservice{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}", bodyJsonData);
+        return await PostAsyncReturnString("projects/updateservice", bodyJsonData);
     }
 }

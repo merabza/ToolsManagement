@@ -14,27 +14,27 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     //{
     //    //+
     //    return await DeleteAsync(
-    //        $"projects/remove/{projectName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+    //        $"projects/remove/{projectName}");
     //}
 
     public async Task<bool> RemoveProjectAndService(string projectName, string serviceName)
     {
         //+
         return await DeleteAsync(
-            $"projects/removeservice/{projectName}/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+            $"projects/removeservice/{projectName}/{serviceName}");
     }
 
     public async Task<bool> StopService(string serviceName)
     {
         //+
         return await PostAsync(
-            $"projects/stop/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+            $"projects/stop/{serviceName}");
     }
 
     public async Task<bool> StartService(string serviceName)
     {
         //+
         return await PostAsync(
-            $"projects/start/{serviceName}{(string.IsNullOrWhiteSpace(ApiKey) ? "" : $"?apikey={ApiKey}")}");
+            $"projects/start/{serviceName}");
     }
 }
