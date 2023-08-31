@@ -31,7 +31,7 @@ public interface IDatabaseApiClient
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
     // ReSharper disable once UnusedMember.Global
-    Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName);
+    Task<bool> IsDatabaseExists(string databaseName);
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
     //DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,

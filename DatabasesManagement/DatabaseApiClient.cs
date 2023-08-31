@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using OneOf;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Requests;
@@ -64,7 +62,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             return null;
         }
 
-        var bodyApiKeyJsonData = JsonConvert.SerializeObject(new CreateBackupRequest
+        var bodyJsonData = JsonConvert.SerializeObject(new CreateBackupRequest
         {
             BackupNamePrefix = databaseBackupParametersModel.BackupNamePrefix,
             DateMask = databaseBackupParametersModel.DateMask,
@@ -76,21 +74,25 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             DbServerSideBackupPath = databaseBackupParametersModel.DbServerSideBackupPath
         });
 
-        Uri uri = new(
-            $"{_apiClientSettingsDomain.Server}database/createbackup/{backupBaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
+        return await PostAsyncReturn<BackupFileParameters>(
+            $"database/createbackup/{backupBaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}",
+            bodyJsonData);
 
-        var response = _client
-            .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
+        //Uri uri = new(
+        //    $"{_apiClientSettingsDomain.Server}database/createbackup/{backupBaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
 
-        if (!response.IsSuccessStatusCode)
-        {
-            LogResponseErrorMessage(response);
-            return null;
-        }
+        //var response = _client
+        //    .PostAsync(uri, new StringContent(bodyApiKeyJsonData, Encoding.UTF8, "application/json")).Result;
 
-        var result = await response.Content.ReadAsStringAsync();
-        var backupFileParameters = JsonConvert.DeserializeObject<BackupFileParameters>(result);
-        return backupFileParameters;
+        //if (!response.IsSuccessStatusCode)
+        //{
+        //    LogResponseErrorMessage(response);
+        //    return null;
+        //}
+
+        //var result = await response.Content.ReadAsStringAsync();
+        //var backupFileParameters = JsonConvert.DeserializeObject<BackupFileParameters>(result);
+        //return backupFileParameters;
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
@@ -107,18 +109,15 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     public async Task<List<DatabaseInfoModel>> GetDatabaseNames()
     {
-        Uri uri = new(
-            $"{_apiClientSettingsDomain.Server}database/getdatabasenames{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
-        var response = await _client.GetAsync(uri);
-        response.EnsureSuccessStatusCode();
-        var responseBody = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<List<DatabaseInfoModel>>(responseBody) ?? new List<DatabaseInfoModel>();
+        return await PostAsyncReturn<List<DatabaseInfoModel>>(
+                   $"database/getdatabasenames{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}") ??
+               new List<DatabaseInfoModel>();
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
+    public async Task<bool> IsDatabaseExists(string databaseName)
     {
         Uri uri = new(
             $"{_apiClientSettingsDomain.Server}database/isdatabaseexists/{databaseName}{(string.IsNullOrWhiteSpace(_apiClientSettingsDomain.ApiKey) ? "" : $"?apikey={_apiClientSettingsDomain.ApiKey}")}");
@@ -129,9 +128,13 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 
         var errors = JsonConvert.DeserializeObject<IEnumerable<Err>>(responseBody);
 
-        return errors is null
-            ? new[] { new Err { ErrorCode = "EmptyError", ErrorMessage = "Empty Error" } }
-            : errors.ToArray();
+        if (errors is null)
+            return false;
+
+        foreach (var err in errors)
+            StShared.WriteErrorLine($"Error from server: {err.ErrorMessage}", true);
+
+        return false;
     }
 
     public bool IsServerLocal()

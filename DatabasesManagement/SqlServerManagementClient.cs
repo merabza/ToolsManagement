@@ -7,7 +7,6 @@ using DbTools.Models;
 using DbToolsFabric;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using SystemToolsShared;
 using WebAgentProjectsApiContracts.V1.Responses;
 
@@ -178,7 +177,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName)
+    public async Task<bool> IsDatabaseExists(string databaseName)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
