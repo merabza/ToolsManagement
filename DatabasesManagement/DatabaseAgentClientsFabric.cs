@@ -42,7 +42,6 @@ public static class DatabaseAgentClientsFabric
         return null;
     }
 
-
     private static IDatabaseApiClient? CreateDatabaseManagementClient(ILogger logger,
         string apiClientName, ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName)
     {
@@ -61,7 +60,8 @@ public static class DatabaseAgentClientsFabric
             userName);
     }
 
-    private static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    //public იყენებს supportTools
+    public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
         string? userName)
     {
