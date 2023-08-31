@@ -21,9 +21,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
         _dotnetRunner = "";
     }
 
-    protected override bool IsServiceExists(string serviceName)
+    protected override bool IsServiceExists(string serviceEnvName)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceName);
+        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
         return File.Exists(serviceConfigFileName);
     }
 
@@ -35,18 +35,18 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return serviceConfigFileName;
     }
 
-    protected override bool IsServiceRunning(string serviceName)
+    protected override bool IsServiceRunning(string serviceEnvName)
     {
         return StShared.RunProcess(UseConsole, Logger, "systemctl",
-            $"--no-ask-password --no-block --quiet is-active {serviceName}");
+            $"--no-ask-password --no-block --quiet is-active {serviceEnvName}");
     }
 
-    protected override bool RemoveService(string serviceName)
+    protected override bool RemoveService(string serviceEnvName)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceName);
+        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
         if (!StShared.RunProcess(UseConsole, Logger, "systemctl",
-                $"--no-ask-password --no-block --quiet disable {serviceName}"))
+                $"--no-ask-password --no-block --quiet disable {serviceEnvName}"))
             return false;
 
         File.Delete(serviceConfigFileName);
@@ -54,25 +54,26 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return true;
     }
 
-    protected override bool StopService(string serviceName)
+    protected override bool StopService(string serviceEnvName)
     {
         return StShared.RunProcess(UseConsole, Logger, "systemctl",
-            $"--no-ask-password --no-block --quiet stop {serviceName}");
+            $"--no-ask-password --no-block --quiet stop {serviceEnvName}");
     }
 
-    protected override bool StartService(string serviceName)
+    protected override bool StartService(string serviceEnvName)
     {
         return StShared.RunProcess(UseConsole, Logger, "systemctl",
-            $"--no-ask-password --no-block --quiet start {serviceName}");
+            $"--no-ask-password --no-block --quiet start {serviceEnvName}");
     }
 
-    protected override bool IsServiceRegisteredProperly(string projectName, string serviceName, string serviceUserName,
+    protected override bool IsServiceRegisteredProperly(string projectName, string serviceEnvName,
+        string serviceUserName,
         string installFolderPath)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceName);
+        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
         var serviceFileText =
-            GenerateServiceFileText(serviceName, installFolderPath, serviceUserName, _dotnetRunner);
+            GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner);
 
         var existingServiceFileText = File.ReadAllText(serviceConfigFileName);
 
@@ -114,26 +115,26 @@ WantedBy=multi-user.target
     }
 
 
-    protected override bool RegisterService(string projectName, string serviceName, string serviceUserName,
+    protected override bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
         string installFolderPath)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceName);
+        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
         var serviceFileText =
-            GenerateServiceFileText(serviceName, installFolderPath, serviceUserName, _dotnetRunner);
+            GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner);
 
         MessagesDataManager?.SendMessage(UserName, $"Create service file {serviceConfigFileName}").Wait();
         Logger.LogInformation("Create service file {serviceConfigFileName}", serviceConfigFileName);
         File.WriteAllText(serviceConfigFileName, serviceFileText);
 
-        MessagesDataManager?.SendMessage(UserName, $"Enable service {serviceName}").Wait();
-        Logger.LogInformation("Enable service {serviceName}", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Enable service {serviceEnvName}").Wait();
+        Logger.LogInformation("Enable service {serviceName}", serviceEnvName);
         if (StShared.RunProcess(UseConsole, Logger, "systemctl",
-                $"--no-ask-password --no-block --quiet enable {serviceName}"))
-            return IsServiceExists(serviceName);
+                $"--no-ask-password --no-block --quiet enable {serviceEnvName}"))
+            return IsServiceExists(serviceEnvName);
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not enabled").Wait();
-        Logger.LogError("Service {serviceName} can not enabled", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not enabled").Wait();
+        Logger.LogError("Service {serviceName} can not enabled", serviceEnvName);
         return false;
     }
 

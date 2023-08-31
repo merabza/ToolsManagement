@@ -28,8 +28,15 @@ public /*open*/ class InstallerBase
         UseConsole = useConsole;
     }
 
-    public bool RunUpdateSettings(string projectName, string? serviceName, string appSettingsFileName,
-        string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName, string installFolder)
+    private string GetServiceEnvName(string? serviceName, string environmentName)
+    {
+        return $"{serviceName}_{environmentName}";
+    }
+
+
+    public bool RunUpdateSettings(string projectName, string? serviceName, string environmentName,
+        string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
+        string installFolder)
     {
         var projectInstallFullPath = CheckBeforeStartUpdate(projectName, installFolder);
         if (projectInstallFullPath == null)
@@ -61,20 +68,21 @@ public /*open*/ class InstallerBase
         //კიდევ აქ მოსვლის მიზეზი შეიძლება იყოს, ის რომ ფაილებში არასწორად არის, ან საერთოდ არ არის გაწერილი ვერსიები
         //ამ ბოლო შემთხვევაზე ყურადღებას არ ვამახვილებთ, იმისათვის, რომ შესაძლებელი იყოს ასეთი "არასწორი" პროგრამების პარამეტრები განახლდეს.
 
+        var serviceEnvName = GetServiceEnvName(serviceName, environmentName);
 
         if (!string.IsNullOrWhiteSpace(serviceName))
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
-            var serviceExists = IsServiceExists(serviceName);
+            var serviceExists = IsServiceExists(serviceEnvName);
             if (serviceExists)
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is exists").Wait();
-                Logger.LogInformation("Service {serviceName} is exists", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is exists").Wait();
+                Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
             }
             else
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not exists").Wait();
-                Logger.LogInformation("Service {serviceName} does not exists", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not exists").Wait();
+                Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
             }
 
             if (!serviceExists)
@@ -82,18 +90,19 @@ public /*open*/ class InstallerBase
                 //ეს არის პარამეტრების განახლების პროცესი, ამიტომ თუ პროგრამა სერვისია და ეს სერვისი არ არსებობს განახლება ვერ მოხდება
                 //ასეთ შემთხვევაში უნდა გაეშვას უკვე მთლიანი პროგრამის განახლების პროცესი
                 MessagesDataManager?.SendMessage(UserName,
-                    $"Service {serviceName} does not exists, cannot update settings file").Wait();
-                Logger.LogError("Service {serviceName} does not exists, cannot update settings file", serviceName);
+                    $"Service {serviceEnvName} does not exists, cannot update settings file").Wait();
+                Logger.LogError("Service {serviceEnvName} does not exists, cannot update settings file",
+                    serviceEnvName);
                 return false;
             }
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            MessagesDataManager?.SendMessage(UserName, $"Try to stop Service {serviceName}").Wait();
-            Logger.LogInformation("Try to stop Service {serviceName}", serviceName);
-            if (!Stop(serviceName))
+            MessagesDataManager?.SendMessage(UserName, $"Try to stop Service {serviceEnvName}").Wait();
+            Logger.LogInformation("Try to stop Service {serviceEnvName}", serviceEnvName);
+            if (!Stop(serviceEnvName))
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not stopped").Wait();
-                Logger.LogError("Service {serviceName} does not stopped", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not stopped").Wait();
+                Logger.LogError("Service {serviceEnvName} does not stopped", serviceEnvName);
                 return false;
             }
         }
@@ -176,7 +185,7 @@ public /*open*/ class InstallerBase
             return true;
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        if (Start(projectName))
+        if (Start(serviceEnvName))
             return true;
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
@@ -221,7 +230,7 @@ public /*open*/ class InstallerBase
     }
 
     public string? RunUpdateService(string archiveFileName, string projectName, string? serviceName,
-        FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
+        string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
         string filesUsersGroupName, string installWorkFolder, string installFolder)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
@@ -282,63 +291,65 @@ public /*open*/ class InstallerBase
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
-        var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{serviceName}.dll");
+        var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
         var version = Assembly.LoadFile(projectMainExeFileName).GetName().Version;
         var assemblyVersion = version?.ToString();
 
+
+        var serviceEnvName = GetServiceEnvName(serviceName, environmentName);
         var serviceExists = false;
         if (!string.IsNullOrWhiteSpace(serviceName))
         {
-            //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceName}
-            serviceExists = IsServiceExists(serviceName);
+            //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
+            serviceExists = IsServiceExists(serviceEnvName);
             if (serviceExists)
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is exists").Wait();
-                Logger.LogInformation("Service {serviceName} is exists", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is exists").Wait();
+                Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
             }
             else
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not exists").Wait();
-                Logger.LogInformation("Service {serviceName} does not exists", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not exists").Wait();
+                Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
             }
-
 
             //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
-            var serviceIsRunning = IsServiceRunning(serviceName);
+            var serviceIsRunning = IsServiceRunning(serviceEnvName);
             if (serviceIsRunning)
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is running").Wait();
-                Logger.LogInformation("Service {serviceName} is running", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is running").Wait();
+                Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
             }
             else
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not running").Wait();
-                Logger.LogInformation("Service {serviceName} does not running", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not running").Wait();
+                Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
             }
 
             if (!serviceExists && serviceIsRunning)
             {
                 MessagesDataManager
-                    ?.SendMessage(UserName, $"Service {serviceName} does not exists, but process is running").Wait();
-                Logger.LogError("Service {serviceName} does not exists, but process is running", serviceName);
+                    ?.SendMessage(UserName, $"Service {serviceEnvName} does not exists, but process is running").Wait();
+                Logger.LogError("Service {serviceEnvName} does not exists, but process is running", serviceEnvName);
                 return null;
             }
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            MessagesDataManager?.SendMessage(UserName, $"Try to stop Service {serviceName}").Wait();
-            Logger.LogInformation("Try to stop Service {serviceName}", serviceName);
-            if (!Stop(serviceName))
+            MessagesDataManager?.SendMessage(UserName, $"Try to stop Service {serviceEnvName}").Wait();
+            Logger.LogInformation("Try to stop Service {serviceEnvName}", serviceEnvName);
+            if (!Stop(serviceEnvName))
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not stopped").Wait();
-                Logger.LogError("Service {serviceName} does not stopped", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not stopped").Wait();
+                Logger.LogError("Service {serviceEnvName} does not stopped", serviceEnvName);
                 return null;
             }
 
-            if (IsProcessRunning(serviceName))
+            if (IsProcessRunning(serviceEnvName))
             {
-                MessagesDataManager?.SendMessage(UserName, $"Process {serviceName} is running and cannot be updated.")
+                MessagesDataManager
+                    ?.SendMessage(UserName, $"Process {serviceEnvName} is running and cannot be updated.")
                     .Wait();
-                Logger.LogError("Process {serviceName} is running and cannot be updated.", serviceName);
+                Logger.LogError("Process {serviceEnvName} is running and cannot be updated.", serviceEnvName);
                 return null;
             }
         }
@@ -417,29 +428,29 @@ public /*open*/ class InstallerBase
 
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
-            if (!IsServiceRegisteredProperly(projectName, serviceName, serviceUserName, projectInstallFullPath))
-                if (RemoveService(serviceName))
+            if (!IsServiceRegisteredProperly(projectName, serviceEnvName, serviceUserName, projectInstallFullPath))
+                if (RemoveService(serviceEnvName))
                     serviceExists = false;
 
         //თუ სერვისი არ არის დარეგისტრირებული და პლატფორმა მოითხოვს დარეგისტრირებას, დავარეგისტრიროთ
         if (!serviceExists)
         {
-            MessagesDataManager?.SendMessage(UserName, $"registering service {serviceName}...").Wait();
-            Logger.LogInformation("registering service {serviceName}...", serviceName);
-            if (!RegisterService(projectName, serviceName, serviceUserName, projectInstallFullPath))
+            MessagesDataManager?.SendMessage(UserName, $"registering service {serviceEnvName}...").Wait();
+            Logger.LogInformation("registering service {serviceEnvName}...", serviceEnvName);
+            if (!RegisterService(projectName, serviceEnvName, serviceUserName, projectInstallFullPath))
             {
-                MessagesDataManager?.SendMessage(UserName, $"cannot register Service {serviceName}").Wait();
-                Logger.LogError("cannot register Service {serviceName}", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"cannot register Service {serviceEnvName}").Wait();
+                Logger.LogError("cannot register Service {serviceEnvName}", serviceEnvName);
                 return null;
             }
         }
 
         //გავუშვათ სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        if (Start(serviceName))
+        if (Start(serviceEnvName))
             return assemblyVersion;
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not started").Wait();
-        Logger.LogError("Service {serviceName} can not started", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not started").Wait();
+        Logger.LogError("Service {serviceEnvName} can not started", serviceEnvName);
         return null;
     }
 
@@ -576,7 +587,7 @@ public /*open*/ class InstallerBase
         return null;
     }
 
-    protected virtual bool IsServiceRegisteredProperly(string projectName, string serviceName, string userName,
+    protected virtual bool IsServiceRegisteredProperly(string projectName, string serviceEnvName, string userName,
         string installFolderPath)
     {
         MessagesDataManager?.SendMessage(UserName, "IsServiceRegisteredProperly not implemented").Wait();
@@ -598,117 +609,129 @@ public /*open*/ class InstallerBase
         return false;
     }
 
-
-    public bool Stop(string serviceName)
+    public bool Stop(string? serviceName, string environmentName)
     {
-        //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceName}
-        var serviceExists = IsServiceExists(serviceName);
+        return Stop(GetServiceEnvName(serviceName, environmentName));
+    }
+
+    public bool Stop(string serviceEnvName)
+    {
+        //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
+        var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is exists").Wait();
-            Logger.LogInformation("Service {serviceName} is exists", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is exists").Wait();
+            Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
         }
         else
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not exists").Wait();
-            Logger.LogInformation("Service {serviceName} does not exists", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not exists").Wait();
+            Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
             return true;
         }
 
-        var serviceIsRunning = IsServiceRunning(serviceName);
+        var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is running").Wait();
-            Logger.LogInformation("Service {serviceName} is running", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is running").Wait();
+            Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
         }
         else
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not running").Wait();
-            Logger.LogInformation("Service {serviceName} does not running", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not running").Wait();
+            Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
             return true;
         }
 
-        if (StopService(serviceName))
+        if (StopService(serviceEnvName))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not stopped").Wait();
-        Logger.LogError("Service {serviceName} can not stopped", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not stopped").Wait();
+        Logger.LogError("Service {serviceEnvName} can not stopped", serviceEnvName);
         return false;
     }
 
-    public bool Start(string serviceName)
+    public bool Start(string? serviceName, string environmentName)
     {
-        var serviceIsRunning = IsServiceRunning(serviceName);
+        return Start(GetServiceEnvName(serviceName, environmentName));
+    }
+
+    private bool Start(string serviceEnvName)
+    {
+        var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is running").Wait();
-            Logger.LogInformation("Service {serviceName} is running", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is running").Wait();
+            Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
             return true;
         }
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not running").Wait();
-        Logger.LogInformation("Service {serviceName} does not running", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not running").Wait();
+        Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
 
-        if (StartService(serviceName))
+        if (StartService(serviceEnvName))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not started").Wait();
-        Logger.LogError("Service {serviceName} can not started", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not started").Wait();
+        Logger.LogError("Service {serviceEnvName} can not started", serviceEnvName);
         return false;
     }
 
-    public bool RemoveProjectAndService(string projectName, string serviceName, string installFolder)
+    public bool RemoveProjectAndService(string projectName, string serviceName, string environmentName,
+        string installFolder)
     {
-        MessagesDataManager?.SendMessage(UserName, $"Remove service {serviceName} started...").Wait();
-        Logger.LogInformation("Remove service {serviceName} started...", serviceName);
+        var serviceEnvName = GetServiceEnvName(serviceName, environmentName);
 
-        var serviceExists = IsServiceExists(serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Remove service {serviceEnvName} started...").Wait();
+        Logger.LogInformation("Remove service {serviceEnvName} started...", serviceEnvName);
+
+        var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is exists").Wait();
-            Logger.LogInformation("Service {serviceName} is exists", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is exists").Wait();
+            Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
         }
         else
         {
-            MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not exists").Wait();
-            Logger.LogInformation("Service {serviceName} does not exists", serviceName);
+            MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not exists").Wait();
+            Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
         }
 
         var serviceIsRunning = false;
         if (serviceExists)
         {
-            serviceIsRunning = IsServiceRunning(serviceName);
+            serviceIsRunning = IsServiceRunning(serviceEnvName);
 
 
             if (serviceIsRunning)
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} is running").Wait();
-                Logger.LogInformation("Service {serviceName} is running", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} is running").Wait();
+                Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
             }
             else
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} does not running").Wait();
-                Logger.LogInformation("Service {serviceName} does not running", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} does not running").Wait();
+                Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
             }
         }
 
 
         if (serviceIsRunning)
-            if (!Stop(serviceName))
+            if (!Stop(serviceEnvName))
             {
-                MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not be stopped").Wait();
-                Logger.LogError("Service {serviceName} can not be stopped", serviceName);
+                MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not be stopped").Wait();
+                Logger.LogError("Service {serviceEnvName} can not be stopped", serviceEnvName);
                 return false;
             }
 
         if (!serviceExists)
             return RemoveProject(projectName, installFolder);
 
-        if (RemoveService(serviceName))
+        if (RemoveService(serviceEnvName))
             return RemoveProject(projectName, installFolder);
 
-        MessagesDataManager?.SendMessage(UserName, $"Service {serviceName} can not be Removed").Wait();
-        Logger.LogError("Service {serviceName} can not be Removed", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not be Removed").Wait();
+        Logger.LogError("Service {serviceEnvName} can not be Removed", serviceEnvName);
         return false;
     }
 
@@ -736,34 +759,34 @@ public /*open*/ class InstallerBase
         return true;
     }
 
-    protected virtual bool RemoveService(string serviceName)
+    protected virtual bool RemoveService(string serviceEnvName)
     {
         return false;
     }
 
-    protected virtual bool StopService(string serviceName)
+    protected virtual bool StopService(string serviceEnvName)
     {
         return false;
     }
 
-    protected virtual bool StartService(string serviceName)
+    protected virtual bool StartService(string serviceEnvName)
     {
         return false;
     }
 
-    protected virtual bool RegisterService(string projectName, string serviceName, string serviceUserName,
+    protected virtual bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
         string installFolderPath)
     {
         return false;
     }
 
 
-    protected virtual bool IsServiceExists(string serviceName)
+    protected virtual bool IsServiceExists(string serviceEnvName)
     {
         return false;
     }
 
-    protected virtual bool IsServiceRunning(string serviceName)
+    protected virtual bool IsServiceRunning(string serviceEnvName)
     {
         return false;
     }

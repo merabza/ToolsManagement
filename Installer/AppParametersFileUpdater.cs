@@ -86,8 +86,8 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         if (appSettingsFileBody == null)
             return false;
 
-        return _serviceInstaller.RunUpdateSettings(projectName, serviceName, appSettingsFileName, appSettingsFileBody,
-            _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
-            _applicationUpdaterParameters.InstallFolder);
+        return _serviceInstaller.RunUpdateSettings(projectName, serviceName, environmentName, appSettingsFileName,
+            appSettingsFileBody, _applicationUpdaterParameters.FilesUserName,
+            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallFolder);
     }
 }

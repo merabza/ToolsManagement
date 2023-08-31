@@ -10,31 +10,31 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     {
     }
 
-    //public async Task<bool> RemoveProject(string projectName)
+    //public async Task<bool> RemoveProject(string projectName, string environmentName)
     //{
     //    //+
     //    return await DeleteAsync(
-    //        $"projects/remove/{projectName}");
+    //        $"projects/remove/{projectName}/{environmentName}");
     //}
 
-    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName)
+    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName, string environmentName)
     {
         //+
         return await DeleteAsync(
-            $"projects/removeservice/{projectName}/{serviceName}");
+            $"projects/removeservice/{projectName}/{serviceName}/{environmentName}");
     }
 
-    public async Task<bool> StopService(string serviceName)
+    public async Task<bool> StopService(string serviceName, string environmentName)
     {
         //+
         return await PostAsync(
-            $"projects/stop/{serviceName}");
+            $"projects/stop/{serviceName}/{environmentName}");
     }
 
-    public async Task<bool> StartService(string serviceName)
+    public async Task<bool> StartService(string serviceName, string environmentName)
     {
         //+
         return await PostAsync(
-            $"projects/start/{serviceName}");
+            $"projects/start/{serviceName}/{environmentName}");
     }
 }

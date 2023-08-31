@@ -282,7 +282,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
         var assemblyVersion = _installer.RunUpdateService(lastFileInfo.FileName, projectName, serviceName,
-            appSettingsFile, resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
+            environmentName, appSettingsFile, resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.InstallFolder);
 

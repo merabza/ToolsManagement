@@ -17,18 +17,18 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
     }
 
-    protected override bool IsServiceExists(string serviceName)
+    protected override bool IsServiceExists(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceName);
+        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
         return sc != null;
 #pragma warning restore CA1416 // Validate platform compatibility
     }
 
-    protected override bool IsServiceRunning(string serviceName)
+    protected override bool IsServiceRunning(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceName);
+        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
         if (sc == null)
             return false;
         return !(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
@@ -36,10 +36,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning restore CA1416 // Validate platform compatibility
     }
 
-    protected override bool RemoveService(string serviceName)
+    protected override bool RemoveService(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = new ServiceController(serviceName);
+        var sc = new ServiceController(serviceEnvName);
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
@@ -50,7 +50,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         using var ps = PowerShell.Create();
 
         // add command
-        ps.AddCommand("Remove-Service").AddParameter("Name", serviceName);
+        ps.AddCommand("Remove-Service").AddParameter("Name", serviceEnvName);
 
         //Collection<PSObject> results = ps.Invoke();
         ps.Invoke();
@@ -58,18 +58,18 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return true;
     }
 
-    protected override bool StopService(string serviceName)
+    protected override bool StopService(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var sc = new ServiceController(serviceName);
+        var sc = new ServiceController(serviceEnvName);
 
         if (sc.Status.Equals(ServiceControllerStatus.Stopped) ||
             sc.Status.Equals(ServiceControllerStatus.StopPending))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Stopping the {serviceName} service...").Wait();
-        Logger.LogInformation("Stopping the {serviceName} service...", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Stopping the {serviceEnvName} service...").Wait();
+        Logger.LogInformation("Stopping the {serviceName} service...", serviceEnvName);
         sc.Stop();
         sc.WaitForStatus(ServiceControllerStatus.Stopped);
 
@@ -78,33 +78,35 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
         var status = sc.Status;
 
-        MessagesDataManager?.SendMessage(UserName, $"The {serviceName} service status is now set to {status}.").Wait();
-        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.")
+            .Wait();
+        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceEnvName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
         return true;
     }
 
-    protected override bool StartService(string serviceName)
+    protected override bool StartService(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var sc = new ServiceController(serviceName);
+        var sc = new ServiceController(serviceEnvName);
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Starting the {serviceName} service...").Wait();
-        Logger.LogInformation("Starting the {serviceName} service...", serviceName);
+        MessagesDataManager?.SendMessage(UserName, $"Starting the {serviceEnvName} service...").Wait();
+        Logger.LogInformation("Starting the {serviceName} service...", serviceEnvName);
         sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running);
         // Refresh and display the current service status.
         sc.Refresh();
 
         var status = sc.Status;
-        MessagesDataManager?.SendMessage(UserName, $"The {serviceName} service status is now set to {status}.").Wait();
-        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceName, status);
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.")
+            .Wait();
+        Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceEnvName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
 
         return true;
@@ -193,7 +195,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 //#pragma warning restore CA1416 // Validate platform compatibility
 //    }
 
-    protected override bool IsServiceRegisteredProperly(string projectName, string serviceName, string userName,
+    protected override bool IsServiceRegisteredProperly(string projectName, string serviceEnvName, string userName,
         string installFolderPath)
     {
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
@@ -203,14 +205,14 @@ public sealed class WindowsServiceInstaller : InstallerBase
         //   Find the service you want to redirect,
         //   locate the ImagePath subkey value.
 #pragma warning disable CA1416 // Validate platform compatibility
-        var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceName}");
+        var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
         var imagePath = regKey?.GetValue("ImagePath")?.ToString();
 #pragma warning restore CA1416 // Validate platform compatibility
 
         return imagePath != null && imagePath == exeFilePath;
     }
 
-    protected override bool RegisterService(string projectName, string serviceName, string serviceUserName,
+    protected override bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
         string installFolderPath)
     {
         // create empty pipeline
@@ -219,7 +221,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         // add command
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         ps.AddCommand("New-Service")
-            .AddParameter("Name", serviceName)
+            .AddParameter("Name", serviceEnvName)
             .AddParameter("BinaryPathName", exeFilePath)
             //.AddParameter("Credential", "NT AUTHORITY\\LOCAL SERVICE")
             .AddParameter("StartupType", "Automatic");
@@ -237,6 +239,6 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
 
         //Collection<PSObject> obj = GetPsResults(ps, CreateCredential());
-        return IsServiceExists(serviceName);
+        return IsServiceExists(serviceEnvName);
     }
 }
