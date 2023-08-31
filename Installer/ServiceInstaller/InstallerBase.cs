@@ -130,7 +130,7 @@ public /*open*/ class InstallerBase
             Logger.LogInformation("File {appSettingsFileFullPath} is exists", appSettingsFileFullPath);
 
             var tryCount = 0;
-            while (!appSettingsFileDeletedSuccess && tryCount < 3)
+            while (!appSettingsFileDeletedSuccess && tryCount < 10)
             {
                 tryCount++;
                 try
@@ -369,7 +369,7 @@ public /*open*/ class InstallerBase
             Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
 
             var tryCount = 0;
-            while (!deleteSuccess && tryCount < 3)
+            while (!deleteSuccess && tryCount < 10)
             {
                 tryCount++;
                 try
@@ -535,7 +535,7 @@ public /*open*/ class InstallerBase
             Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
 
             var tryCount = 0;
-            while (!deleteSuccess && tryCount < 3)
+            while (!deleteSuccess && tryCount < 10)
             {
                 tryCount++;
                 try
