@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.ServiceProcess;
 using FileManagersMain;
 using Installer.Domain;
 using Installer.ServiceInstaller;
@@ -170,7 +169,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 return null;
             }
 
-        var assemblyVersion = _installer.RunUpdateApplication(lastFileInfo.FileName, projectName,
+        var assemblyVersion = _installer.RunUpdateApplication(lastFileInfo.FileName, projectName, environmentName,
             _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
             _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder);
 

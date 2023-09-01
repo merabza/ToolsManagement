@@ -38,7 +38,7 @@ public /*open*/ class InstallerBase
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
         string installFolder)
     {
-        var projectInstallFullPath = CheckBeforeStartUpdate(projectName, installFolder);
+        var projectInstallFullPath = CheckBeforeStartUpdate(projectName, installFolder, environmentName);
         if (projectInstallFullPath == null)
             return false;
 
@@ -202,7 +202,7 @@ public /*open*/ class InstallerBase
         return latestAppSettingsVersion;
     }
 
-    private string? CheckBeforeStartUpdate(string projectName, string installFolder)
+    private string? CheckBeforeStartUpdate(string projectName, string installFolder, string environmentName)
     {
         if (!Directory.Exists(installFolder))
         {
@@ -215,7 +215,7 @@ public /*open*/ class InstallerBase
         MessagesDataManager?.SendMessage(UserName, $"Installer install folder is {installFolder}").Wait();
         Logger.LogInformation("Installer install folder is {installFolder}", installFolder);
 
-        var projectInstallFullPath = Path.Combine(installFolder, projectName);
+        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
         if (!Directory.Exists(projectInstallFullPath))
         {
             MessagesDataManager
@@ -360,7 +360,7 @@ public /*open*/ class InstallerBase
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName);
+        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
 
         if (Directory.Exists(projectInstallFullPath))
         {
@@ -454,8 +454,8 @@ public /*open*/ class InstallerBase
         return null;
     }
 
-    public string? RunUpdateApplication(string archiveFileName, string projectName, string filesUserName,
-        string filesUsersGroupName, string installWorkFolder, string installFolder)
+    public string? RunUpdateApplication(string archiveFileName, string projectName, string environmentName,
+        string filesUserName, string filesUsersGroupName, string installWorkFolder, string installFolder)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -526,7 +526,7 @@ public /*open*/ class InstallerBase
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName);
+        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
 
         if (Directory.Exists(projectInstallFullPath))
         {
@@ -725,17 +725,17 @@ public /*open*/ class InstallerBase
             }
 
         if (!serviceExists)
-            return RemoveProject(projectName, installFolder);
+            return RemoveProject(projectName, environmentName, installFolder);
 
         if (RemoveService(serviceEnvName))
-            return RemoveProject(projectName, installFolder);
+            return RemoveProject(projectName, environmentName, installFolder);
 
         MessagesDataManager?.SendMessage(UserName, $"Service {serviceEnvName} can not be Removed").Wait();
         Logger.LogError("Service {serviceEnvName} can not be Removed", serviceEnvName);
         return false;
     }
 
-    public bool RemoveProject(string projectName, string installFolder)
+    public bool RemoveProject(string projectName, string environmentName, string installFolder)
     {
         MessagesDataManager?.SendMessage(UserName, $"Remove project {projectName} started...").Wait();
         Logger.LogInformation("Remove project {projectName} started...", projectName);
@@ -748,7 +748,7 @@ public /*open*/ class InstallerBase
         }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName);
+        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
 
         MessagesDataManager?.SendMessage(UserName, $"Deleting files {projectName}...").Wait();
         Logger.LogInformation("Deleting files {projectName}...", projectName);

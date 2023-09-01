@@ -24,12 +24,12 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
         _userName = userName;
     }
 
-    public async Task<bool> RemoveProject(string projectName)
+    public async Task<bool> RemoveProject(string projectName, string environmentName)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
 
-        if (serviceInstaller.RemoveProject(projectName, _installFolder))
+        if (serviceInstaller.RemoveProject(projectName, environmentName, _installFolder))
             return await Task.FromResult(true);
 
         if (_messagesDataManager is not null)
