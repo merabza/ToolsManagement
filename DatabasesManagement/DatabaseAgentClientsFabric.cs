@@ -49,7 +49,8 @@ public static class DatabaseAgentClientsFabric
         return DatabaseApiClient.Create(logger, apiClientSettings, messagesDataManager, userName);
     }
 
-    private static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    //public იყენებს ApAgent
+    public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
@@ -61,12 +62,13 @@ public static class DatabaseAgentClientsFabric
     }
 
     //public იყენებს supportTools
+    // ReSharper disable once MemberCanBePrivate.Global
     public static IDatabaseApiClient? CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
         string? userName)
     {
         if (databaseServerConnection is null)
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(databaseServerConnection));
 
         return databaseServerConnection.DataProvider switch
         {
