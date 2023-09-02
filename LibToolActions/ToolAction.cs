@@ -44,11 +44,11 @@ public /*open*/ class ToolAction
         }
         catch (OperationCanceledException e)
         {
-            Logger.LogError(e, null);
+            Logger.LogError(e, "Operation Canceled");
         }
         catch (Exception e)
         {
-            Logger.LogError(e, null);
+            Logger.LogError(e, "Error when run Tool Action");
         }
 
         return false;
