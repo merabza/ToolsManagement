@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using FileManagersMain;
 using Installer.Domain;
 using Installer.ServiceInstaller;
@@ -35,56 +36,57 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         if (serviceInstaller == null)
         {
-            messagesDataManager?.SendMessage(userName, "Installer does Not Created").Wait();
+            messagesDataManager?.SendMessage(userName, "Installer does Not Created", CancellationToken.None).Wait();
             logger.LogError("Installer does Not Created");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(installerWorkFolder))
         {
-            messagesDataManager?.SendMessage(userName, "installerWorkFolder is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "installerWorkFolder is empty", CancellationToken.None).Wait();
             logger.LogError("installerWorkFolder is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUserName is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "filesUserName is empty", CancellationToken.None).Wait();
             logger.LogError("filesUserName is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUsersGroupName is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "filesUsersGroupName is empty", CancellationToken.None).Wait();
             logger.LogError("filesUsersGroupName is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(serviceUserName))
         {
-            messagesDataManager?.SendMessage(userName, "serviceUserName is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "serviceUserName is empty", CancellationToken.None).Wait();
             logger.LogError("serviceUserName is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
         {
-            messagesDataManager?.SendMessage(userName, "downloadTempExtension is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "downloadTempExtension is empty", CancellationToken.None).Wait();
             logger.LogError("downloadTempExtension is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(installFolder))
         {
-            messagesDataManager?.SendMessage(userName, "downloadTempExtension is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "downloadTempExtension is empty", CancellationToken.None).Wait();
             logger.LogError("downloadTempExtension is empty");
             return null;
         }
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrWhiteSpace(dotnetRunner))
         {
-            messagesDataManager?.SendMessage(userName, "dotnetRunner is empty. This parameter required for this OS")
+            messagesDataManager?.SendMessage(userName, "dotnetRunner is empty. This parameter required for this OS",
+                    CancellationToken.None)
                 .Wait();
             logger.LogError("dotnetRunner is empty. This parameter required for this OS");
             return null;
@@ -102,7 +104,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     public string? UpdateProgram(string projectName, string environmentName)
     {
         MessagesDataManager?.SendMessage(UserName,
-                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}")
+                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation(
             "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}",
@@ -111,7 +114,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
         {
-            MessagesDataManager?.SendMessage(UserName, "Cannot update self").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Cannot update self", CancellationToken.None).Wait();
             Logger.LogError("Cannot update self");
             return null;
         }
@@ -122,7 +125,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         if (exchangeFileManager is null)
         {
-            MessagesDataManager?.SendMessage(UserName, "exchangeFileManager is null when UpdateProgramWithParameters")
+            MessagesDataManager?.SendMessage(UserName, "exchangeFileManager is null when UpdateProgramWithParameters",
+                    CancellationToken.None)
                 .Wait();
             Logger.LogError("exchangeFileManager is null when UpdateProgramWithParameters");
             return null;
@@ -131,7 +135,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var runTime = _installer.Runtime;
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
         MessagesDataManager?.SendMessage(UserName,
-                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runTime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}")
+                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runTime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation(
             "GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runTime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
@@ -141,7 +146,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
         MessagesDataManager?.SendMessage(UserName,
-            $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}").Wait();
+            $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
+            CancellationToken.None).Wait();
         Logger.LogInformation("GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
             prefix, dateMask, suffix);
 
@@ -151,7 +157,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
         {
-            MessagesDataManager?.SendMessage(UserName, "Project archive files not found on exchange storage").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Project archive files not found on exchange storage",
+                CancellationToken.None).Wait();
             Logger.LogError("Project archive files not found on exchange storage");
             return null;
         }
@@ -164,7 +171,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (!exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                     _applicationUpdaterParameters.DownloadTempExtension))
             {
-                MessagesDataManager?.SendMessage(UserName, "Project archive file not downloaded").Wait();
+                MessagesDataManager
+                    ?.SendMessage(UserName, "Project archive file not downloaded", CancellationToken.None).Wait();
                 Logger.LogError("Project archive file not downloaded");
                 return null;
             }
@@ -176,7 +184,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        MessagesDataManager?.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}").Wait();
+        MessagesDataManager
+            ?.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}", CancellationToken.None).Wait();
         Logger.LogError("Cannot Update {projectName}/{environmentName}", projectName, environmentName);
         return null;
     }
@@ -185,7 +194,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         string? serviceName, string? appSettingsFileName)
     {
         MessagesDataManager?.SendMessage(UserName,
-                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}")
+                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation(
             "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}",
@@ -194,7 +204,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
         {
-            MessagesDataManager?.SendMessage(UserName, "Cannot update self").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Cannot update self", CancellationToken.None).Wait();
             Logger.LogError("Cannot update self");
             return null;
         }
@@ -205,7 +215,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         if (exchangeFileManager is null)
         {
-            MessagesDataManager?.SendMessage(UserName, "exchangeFileManager is null when UpdateProgramWithParameters")
+            MessagesDataManager?.SendMessage(UserName, "exchangeFileManager is null when UpdateProgramWithParameters",
+                    CancellationToken.None)
                 .Wait();
             Logger.LogError("exchangeFileManager is null when UpdateProgramWithParameters");
             return null;
@@ -215,7 +226,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
 
         MessagesDataManager?.SendMessage(UserName,
-                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}")
+                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation(
             "GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
@@ -225,7 +237,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
         MessagesDataManager?.SendMessage(UserName,
-            $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}").Wait();
+            $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
+            CancellationToken.None).Wait();
         Logger.LogInformation("GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
             prefix, dateMask, suffix);
 
@@ -236,7 +249,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
         {
-            MessagesDataManager?.SendMessage(UserName, "Project archive files not found on exchange storage").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Project archive files not found on exchange storage",
+                CancellationToken.None).Wait();
             Logger.LogError("Project archive files not found on exchange storage");
             return null;
         }
@@ -249,7 +263,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (!exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                     _applicationUpdaterParameters.DownloadTempExtension))
             {
-                MessagesDataManager?.SendMessage(UserName, "Project archive file not downloaded").Wait();
+                MessagesDataManager
+                    ?.SendMessage(UserName, "Project archive file not downloaded", CancellationToken.None).Wait();
                 Logger.LogError("Project archive file not downloaded");
                 return null;
             }
@@ -266,7 +281,9 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (appSettingsFileBody is null)
             {
                 MessagesDataManager?.SendMessage(UserName,
-                    $"Cannot Update {projectName}, because cannot get latest parameters file").Wait();
+                        $"Cannot Update {projectName}, because cannot get latest parameters file",
+                        CancellationToken.None)
+                    .Wait();
                 Logger.LogError("Cannot Update {projectName}, because cannot get latest parameters file", projectName);
                 if (string.IsNullOrWhiteSpace(serviceName))
                     return null;
@@ -288,7 +305,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        MessagesDataManager?.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}").Wait();
+        MessagesDataManager
+            ?.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}", CancellationToken.None).Wait();
         Logger.LogError("Cannot Update {projectName}/{environmentName}", projectName, environmentName);
         return null;
     }

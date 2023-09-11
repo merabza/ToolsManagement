@@ -1,4 +1,5 @@
-﻿using Installer.Domain;
+﻿using System.Threading;
+using Installer.Domain;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -25,25 +26,25 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
-        messagesDataManager?.SendMessage(userName, "creating AppParametersFileUpdater").Wait();
+        messagesDataManager?.SendMessage(userName, "creating AppParametersFileUpdater", CancellationToken.None).Wait();
 
         if (string.IsNullOrWhiteSpace(installFolder))
         {
-            messagesDataManager?.SendMessage(userName, "installFolder is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "installFolder is empty", CancellationToken.None).Wait();
             logger.LogError("installFolder is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUserName is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "filesUserName is empty", CancellationToken.None).Wait();
             logger.LogError("filesUserName is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUsersGroupName is empty").Wait();
+            messagesDataManager?.SendMessage(userName, "filesUsersGroupName is empty", CancellationToken.None).Wait();
             logger.LogError("filesUsersGroupName is empty");
             return null;
         }
@@ -53,7 +54,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
 
         if (serviceInstaller == null)
         {
-            messagesDataManager?.SendMessage(userName, "Installer does Not Created").Wait();
+            messagesDataManager?.SendMessage(userName, "Installer does Not Created", CancellationToken.None).Wait();
             logger.LogError("Installer does Not Created");
             return null;
         }
@@ -73,7 +74,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     {
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
         {
-            MessagesDataManager?.SendMessage(UserName, "Installer does Not Created").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Installer does Not Created", CancellationToken.None).Wait();
             Logger.LogError("Cannot update self");
             return false;
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using DbTools;
 using DbTools.Models;
@@ -38,7 +39,8 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
         {
             messagesDataManager
-                ?.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient").Wait();
+                ?.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient",
+                    CancellationToken.None).Wait();
             logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -46,7 +48,8 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
         {
             messagesDataManager
-                ?.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient").Wait();
+                ?.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient",
+                    CancellationToken.None).Wait();
             logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -54,7 +57,8 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
         {
             messagesDataManager
-                ?.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient").Wait();
+                ?.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient",
+                    CancellationToken.None).Wait();
             logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -62,7 +66,8 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
         {
             messagesDataManager
-                ?.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient").Wait();
+                ?.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
+                    CancellationToken.None).Wait();
             logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -93,13 +98,14 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (dc is not null)
             return dc;
 
-        _messagesDataManager?.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}").Wait();
+        _messagesDataManager?.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
+            CancellationToken.None).Wait();
         _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
         throw new Exception($"Cannot create DbClient for database {databaseName}");
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public async Task<bool> CheckRepairDatabase(string databaseName)
+    public async Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.CheckRepairDatabase(databaseName);
@@ -108,7 +114,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
     public async Task<BackupFileParameters?> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
-        string backupBaseName)
+        string backupBaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
@@ -154,21 +160,22 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
+    public async Task<bool> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
+        string? databaseName = null)
     {
         var dc = GetDatabaseClient(databaseName);
         return await dc.ExecuteCommandAsync(executeQueryCommand, true, true);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<List<DatabaseInfoModel>> GetDatabaseNames()
+    public async Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.GetDatabaseInfos();
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<DbServerInfo?> GetDatabaseServerInfo()
+    public async Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.GetDbServerInfo();
@@ -177,7 +184,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<bool> IsDatabaseExists(string databaseName)
+    public async Task<bool> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
@@ -194,7 +201,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async Task<bool> RecompileProcedures(string databaseName)
+    public async Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.RecompileProcedures(databaseName);
@@ -202,7 +209,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string databaseName, string? restoreFromFolderPath = null)
+        string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
@@ -212,7 +219,8 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         if (hostPlatformName is null)
         {
             if (_messagesDataManager is not null)
-                await _messagesDataManager.SendMessage(_userName, "Host platform does not detected");
+                await _messagesDataManager.SendMessage(_userName, "Host platform does not detected",
+                    CancellationToken.None);
             _logger.LogError("Host platform does not detected");
             return false;
         }
@@ -234,14 +242,14 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             dirSeparator);
     }
 
-    public async Task<bool> TestConnection(string? databaseName)
+    public async Task<bool> TestConnection(string? databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient(databaseName);
         return await Task.FromResult(dc.TestConnection(databaseName != null));
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async Task<bool> UpdateStatistics(string databaseName)
+    public async Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.UpdateStatistics(databaseName);

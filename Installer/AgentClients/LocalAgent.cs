@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Installer.ServiceInstaller;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -24,7 +25,8 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
         _userName = userName;
     }
 
-    public async Task<bool> RemoveProject(string projectName, string environmentName)
+    public async Task<bool> RemoveProject(string projectName, string environmentName,
+        CancellationToken cancellationToken)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
@@ -33,12 +35,14 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
             return await Task.FromResult(true);
 
         if (_messagesDataManager is not null)
-            await _messagesDataManager.SendMessage(_userName, $"Project {projectName} can not removed");
+            await _messagesDataManager.SendMessage(_userName, $"Project {projectName} can not removed",
+                cancellationToken);
         _logger.LogError("Project {projectName} can not removed", projectName);
         return await Task.FromResult(false);
     }
 
-    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName, string environmentName)
+    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName, string environmentName,
+        CancellationToken cancellationToken)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
@@ -48,13 +52,13 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
 
         if (_messagesDataManager is not null)
             await _messagesDataManager.SendMessage(_userName,
-                $"Project {projectName} => service {serviceName}/{environmentName} can not removed");
+                $"Project {projectName} => service {serviceName}/{environmentName} can not removed", cancellationToken);
         _logger.LogError("Project {projectName} => service {serviceName}/{environmentName} can not removed",
             projectName, serviceName, environmentName);
         return await Task.FromResult(false);
     }
 
-    public async Task<bool> StopService(string serviceName, string environmentName)
+    public async Task<bool> StopService(string serviceName, string environmentName, CancellationToken cancellationToken)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
@@ -62,7 +66,8 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
         return await Task.FromResult(serviceInstaller.Stop(serviceName, environmentName));
     }
 
-    public async Task<bool> StartService(string serviceName, string environmentName)
+    public async Task<bool> StartService(string serviceName, string environmentName,
+        CancellationToken cancellationToken)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager, _userName);
@@ -70,7 +75,7 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
         return await Task.FromResult(serviceInstaller.Start(serviceName, environmentName));
     }
 
-    public async Task<bool> CheckValidation()
+    public async Task<bool> CheckValidation(CancellationToken cancellationToken)
     {
         return await Task.FromResult(true);
     }

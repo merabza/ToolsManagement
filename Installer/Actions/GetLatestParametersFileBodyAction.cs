@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using FileManagersMain;
 using LibFileParameters.Models;
 using LibToolActions;
@@ -65,7 +66,8 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
         MessagesDataManager?.SendMessage(UserName,
-                $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}")
+                $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}",
+                CancellationToken.None)
             .Wait();
         Console.WriteLine(
             $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}");
@@ -74,7 +76,8 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         if (lastParametersFileInfo != null)
             //მოვქაჩოთ არჩეული პარამეტრების ფაილის შიგთავსი
             return exchangeFileManager?.GetTextFileContent(lastParametersFileInfo.FileName);
-        MessagesDataManager?.SendMessage(UserName, "Project Parameter files not found on exchange storage").Wait();
+        MessagesDataManager?.SendMessage(UserName, "Project Parameter files not found on exchange storage",
+            CancellationToken.None).Wait();
         Logger.LogWarning("Project Parameter files not found on exchange storage");
         return null;
     }

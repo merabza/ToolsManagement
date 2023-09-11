@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -10,17 +11,19 @@ public sealed class ProjectsProxyApiClient : ApiClient
     {
     }
 
-    public async Task<string?> GetVersionByProxy(int serverSidePort, string apiVersionId)
+    public async Task<string?> GetVersionByProxy(int serverSidePort, string apiVersionId,
+        CancellationToken cancellationToken)
     {
         //+
         return await GetAsyncAsString(
-            $"projects/getversion/{serverSidePort}/{apiVersionId}");
+            $"projects/getversion/{serverSidePort}/{apiVersionId}", cancellationToken);
     }
 
-    public async Task<string?> GetAppSettingsVersionByProxy(int serverSidePort, string apiVersionId)
+    public async Task<string?> GetAppSettingsVersionByProxy(int serverSidePort, string apiVersionId,
+        CancellationToken cancellationToken)
     {
         //+
         return await GetAsyncAsString(
-            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}");
+            $"projects/getappsettingsversion/{serverSidePort}/{apiVersionId}", cancellationToken);
     }
 }

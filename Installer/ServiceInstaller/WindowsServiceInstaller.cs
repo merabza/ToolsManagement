@@ -4,6 +4,7 @@ using System.Management.Automation;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.ServiceProcess;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using SystemToolsShared;
@@ -68,7 +69,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
             sc.Status.Equals(ServiceControllerStatus.StopPending))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Stopping the {serviceEnvName} service...").Wait();
+        MessagesDataManager?.SendMessage(UserName, $"Stopping the {serviceEnvName} service...", CancellationToken.None)
+            .Wait();
         Logger.LogInformation("Stopping the {serviceName} service...", serviceEnvName);
         sc.Stop();
         sc.WaitForStatus(ServiceControllerStatus.Stopped);
@@ -78,7 +80,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
         var status = sc.Status;
 
-        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.")
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceEnvName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -96,7 +99,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
             return true;
 
-        MessagesDataManager?.SendMessage(UserName, $"Starting the {serviceEnvName} service...").Wait();
+        MessagesDataManager?.SendMessage(UserName, $"Starting the {serviceEnvName} service...", CancellationToken.None)
+            .Wait();
         Logger.LogInformation("Starting the {serviceName} service...", serviceEnvName);
         sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running);
@@ -104,7 +108,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
 
         var status = sc.Status;
-        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.")
+        MessagesDataManager?.SendMessage(UserName, $"The {serviceEnvName} service status is now set to {status}.",
+                CancellationToken.None)
             .Wait();
         Logger.LogInformation("The {serviceName} service status is now set to {status}.", serviceEnvName, status);
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -116,7 +121,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            MessagesDataManager?.SendMessage(UserName, "Folder name is empty").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Folder name is empty", CancellationToken.None).Wait();
             Logger.LogError("Folder name is empty");
             return false;
         }
@@ -144,7 +149,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
-        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to file {filePath}").Wait();
+        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to file {filePath}", CancellationToken.None)
+            .Wait();
         Logger.LogError("Error changing owner to file {filePath}", filePath);
         return false;
     }
@@ -153,7 +159,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
         if (string.IsNullOrWhiteSpace(folderPath))
         {
-            MessagesDataManager?.SendMessage(UserName, "Folder name is empty").Wait();
+            MessagesDataManager?.SendMessage(UserName, "Folder name is empty", CancellationToken.None).Wait();
             Logger.LogError("Folder name is empty");
             return false;
         }
@@ -181,7 +187,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
             return true;
         }
 
-        MessagesDataManager?.SendMessage(UserName, $"Error changing owner to folder {folderPath}").Wait();
+        MessagesDataManager
+            ?.SendMessage(UserName, $"Error changing owner to folder {folderPath}", CancellationToken.None).Wait();
         Logger.LogError("Error changing owner to folder {folderPath}", folderPath);
         return false;
     }

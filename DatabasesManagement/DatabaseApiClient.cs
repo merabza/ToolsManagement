@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using Installer.Domain;
@@ -28,7 +29,8 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     {
         if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
         {
-            messagesDataManager?.SendMessage(userName, "cannot create DatabaseApiClient").Wait();
+            messagesDataManager?.SendMessage(userName, "cannot create DatabaseApiClient", CancellationToken.None)
+                .Wait();
             logger.LogError("cannot create DatabaseApiClient");
             return null;
         }
@@ -40,7 +42,8 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
     public async Task<BackupFileParameters?> CreateBackup(
-        DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName)
+        DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(backupBaseName))
         {
@@ -60,46 +63,50 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             DbServerSideBackupPath = databaseBackupParametersModel.DbServerSideBackupPath
         });
 
-        return await PostAsyncReturn<BackupFileParameters>($"databases/createbackup/{backupBaseName}", bodyJsonData);
+        return await PostAsyncReturn<BackupFileParameters>($"databases/createbackup/{backupBaseName}",
+            cancellationToken, bodyJsonData);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<List<DatabaseInfoModel>> GetDatabaseNames()
+    public async Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken)
     {
-        return await PostAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames") ??
+        return await PostAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames", cancellationToken) ??
                new List<DatabaseInfoModel>();
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<bool> IsDatabaseExists(string databaseName)
+    public async Task<bool> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
-        return await PostAsyncReturn<bool>($"databases/isdatabaseexists/{databaseName}");
+        return await PostAsyncReturn<bool>($"databases/isdatabaseexists/{databaseName}", cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string databaseName, string? restoreFromFolderPath = null)
+        string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
-        return await PostAsync($"databases/restorebackup/{databaseName}");
+        return await PostAsync($"databases/restorebackup/{databaseName}", cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public async Task<bool> CheckRepairDatabase(string databaseName)
+    public async Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
         return await PostAsync(
-            $"databases/checkrepairdatabase{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}");
+            $"databases/checkrepairdatabase{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}",
+            cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async Task<bool> ExecuteCommand(string executeQueryCommand, string? databaseName = null)
+    public async Task<bool> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
+        string? databaseName = null)
     {
         return await PostAsync(
-            $"databases/executecommand{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}");
+            $"databases/executecommand{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}",
+            cancellationToken);
     }
 
-    public Task<DbServerInfo?> GetDatabaseServerInfo()
+    public Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -110,21 +117,24 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async Task<bool> RecompileProcedures(string databaseName)
+    public async Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
     {
         return await PostAsync(
-            $"databases/recompileprocedures{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}");
+            $"databases/recompileprocedures{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}",
+            cancellationToken);
     }
 
-    public async Task<bool> TestConnection(string? databaseName)
+    public async Task<bool> TestConnection(string? databaseName, CancellationToken cancellationToken)
     {
-        return await GetAsync($"databases/testconnection{(databaseName == null ? "" : $"/{databaseName}")}");
+        return await GetAsync($"databases/testconnection{(databaseName == null ? "" : $"/{databaseName}")}",
+            cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async Task<bool> UpdateStatistics(string databaseName)
+    public async Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
         return await PostAsync(
-            $"databases/updatestatistics{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}");
+            $"databases/updatestatistics{(string.IsNullOrWhiteSpace(databaseName) ? "" : $"/{databaseName}")}",
+            cancellationToken);
     }
 }

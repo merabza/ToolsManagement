@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -11,17 +12,16 @@ public class TestApiClient : ApiClient
     {
     }
 
-    public async Task<string?> GetAppSettingsVersion()
+    public async Task<string?> GetAppSettingsVersion(CancellationToken cancellationToken)
     {
-        return await GetAsyncAsString(
-            $"test/getappsettingsversion", false);
+        return await GetAsyncAsString("test/getappsettingsversion", cancellationToken, false);
     }
 
-    public async Task<string?> GetVersion(bool useConsole = false)
+    public async Task<string?> GetVersion(CancellationToken cancellationToken, bool useConsole = false)
     {
         try
         {
-            return await GetAsyncAsString("test/getversion", false);
+            return await GetAsyncAsString("test/getversion", cancellationToken, false);
         }
         catch (Exception e)
         {

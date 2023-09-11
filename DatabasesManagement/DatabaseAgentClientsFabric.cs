@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
@@ -17,7 +18,8 @@ public static class DatabaseAgentClientsFabric
         if (string.IsNullOrWhiteSpace(apiClientName) && string.IsNullOrWhiteSpace(databaseConnectionName))
         {
             messagesDataManager?.SendMessage(userName,
-                "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient").Wait();
+                "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient",
+                CancellationToken.None).Wait();
             logger.LogError(
                 "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient");
             return null;
@@ -26,7 +28,8 @@ public static class DatabaseAgentClientsFabric
         if (!string.IsNullOrWhiteSpace(apiClientName) && !string.IsNullOrWhiteSpace(databaseConnectionName))
         {
             messagesDataManager?.SendMessage(userName,
-                    "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient")
+                    "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient",
+                    CancellationToken.None)
                 .Wait();
             logger.LogError(
                 "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient");

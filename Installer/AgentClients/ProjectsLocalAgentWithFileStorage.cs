@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Installer.Domain;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     }
 
     public async Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
-        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension)
+        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+        CancellationToken cancellationToken)
     {
         var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
@@ -40,7 +42,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     }
 
     public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
-        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension)
+        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
+        CancellationToken cancellationToken)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
@@ -54,7 +57,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName,
         string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
-        string parametersFileDateMask, string parametersFileExtension)
+        string parametersFileDateMask, string parametersFileExtension, CancellationToken cancellationToken)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
@@ -66,7 +69,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
             serviceUserName, serviceName, appSettingsFileName));
     }
 
-    public async Task<bool> CheckValidation()
+    public async Task<bool> CheckValidation(CancellationToken cancellationToken)
     {
         return await Task.FromResult(true);
     }

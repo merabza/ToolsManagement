@@ -1,5 +1,6 @@
 ﻿using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 using SystemToolsShared;
 
 namespace FileManagersMain;
@@ -19,7 +20,8 @@ public static class FileManagersFabricExt
         FileStorageData? fileStorageData = null;
         if (string.IsNullOrWhiteSpace(fileStorageName))
         {
-            messagesDataManager?.SendMessage(userName, "File storage name not specified").Wait();
+            messagesDataManager?.SendMessage(userName, "File storage name not specified", CancellationToken.None)
+                .Wait();
             logger.LogError("File storage name not specified");
         }
         else
@@ -27,7 +29,8 @@ public static class FileManagersFabricExt
             fileStorageData = fileStorages.GetFileStorageDataByKey(fileStorageName);
             if (fileStorageData == null)
             {
-                messagesDataManager?.SendMessage(userName, $"File storage with name {fileStorageName} not found")
+                messagesDataManager?.SendMessage(userName, $"File storage with name {fileStorageName} not found",
+                        CancellationToken.None)
                     .Wait();
                 logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
             }

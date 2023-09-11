@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -27,7 +28,7 @@ public /*open*/ class ToolAction
             if (!CheckValidate())
                 return false;
 
-            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Started...").Wait();
+            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Started...", CancellationToken.None).Wait();
             Logger.LogInformation("{_actionName} Started...", _actionName);
 
             //დავინიშნოთ დრო პროცესისათვის
@@ -37,7 +38,8 @@ public /*open*/ class ToolAction
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}").Wait();
+            MessagesDataManager
+                ?.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}", CancellationToken.None).Wait();
             Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", _actionName, timeTakenMessage);
 
             return success;
