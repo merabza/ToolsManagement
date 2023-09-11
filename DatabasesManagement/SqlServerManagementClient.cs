@@ -108,7 +108,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     public async Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
-        return await dc.CheckRepairDatabase(databaseName);
+        return await dc.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
@@ -119,7 +119,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
 
-        var hostPlatformName = await dc.HostPlatform();
+        var hostPlatformName = await dc.HostPlatform(cancellationToken);
         var dirSeparator = "\\";
         if (hostPlatformName == "Linux")
             dirSeparator = "/";
@@ -146,11 +146,11 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
         //ბექაპის პროცესის გაშვება
         if (!await dc.BackupDatabase(databaseName, backupFileFullName, backupName, EBackupType.Full,
-                dbBackupParameters.Compress))
+                dbBackupParameters.Compress, cancellationToken))
             return await Task.FromResult<BackupFileParameters?>(null);
 
         if (dbBackupParameters.Verify)
-            if (!await dc.VerifyBackup(databaseName, backupFileFullName))
+            if (!await dc.VerifyBackup(databaseName, backupFileFullName, cancellationToken))
                 return null;
 
         BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
@@ -164,21 +164,21 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         string? databaseName = null)
     {
         var dc = GetDatabaseClient(databaseName);
-        return await dc.ExecuteCommandAsync(executeQueryCommand, true, true);
+        return await dc.ExecuteCommandAsync(executeQueryCommand, cancellationToken, true, true);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     public async Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
-        return await dc.GetDatabaseInfos();
+        return await dc.GetDatabaseInfos(cancellationToken);
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     public async Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
-        return await dc.GetDbServerInfo();
+        return await dc.GetDbServerInfo(cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
@@ -188,7 +188,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
-        return await dc.CheckDatabase(databaseName);
+        return await dc.CheckDatabase(databaseName, cancellationToken);
     }
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
@@ -204,7 +204,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     public async Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
-        return await dc.RecompileProcedures(databaseName);
+        return await dc.RecompileProcedures(databaseName, cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
@@ -214,7 +214,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
 
-        var hostPlatformName = dc.HostPlatform().Result;
+        var hostPlatformName = dc.HostPlatform(cancellationToken).Result;
 
         if (hostPlatformName is null)
         {
@@ -239,7 +239,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
             _databaseServerConnectionDataDomain.DataFolderName, _databaseServerConnectionDataDomain.DataLogFolderName,
-            dirSeparator);
+            dirSeparator, cancellationToken);
     }
 
     public async Task<bool> TestConnection(string? databaseName, CancellationToken cancellationToken)
@@ -252,6 +252,6 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     public async Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
-        return await dc.UpdateStatistics(databaseName);
+        return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
 }
