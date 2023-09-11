@@ -28,7 +28,7 @@ public /*open*/ class InstallerBase
         UseConsole = useConsole;
     }
 
-    private string GetServiceEnvName(string? serviceName, string environmentName)
+    private static string GetServiceEnvName(string? serviceName, string environmentName)
     {
         return $"{serviceName}_{environmentName}";
     }

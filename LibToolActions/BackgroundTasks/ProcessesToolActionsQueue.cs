@@ -20,7 +20,7 @@ public sealed class ProcessesToolActionsQueue
 
     public bool IsBusy()
     {
-        return _workItems.Count > 0;
+        return !_workItems.IsEmpty;
     }
 
     public async Task<ProcessesToolAction?> DequeueAsync(CancellationToken cancellationToken)
