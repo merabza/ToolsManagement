@@ -66,7 +66,9 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
             ProgramArchiveDateMask = programArchiveDateMask,
             ProgramArchiveExtension = programArchiveExtension,
             ParametersFileDateMask = parametersFileDateMask,
-            ParametersFileExtension = parametersFileExtension
+            ParametersFileExtension = parametersFileExtension,
+            ServiceDescriptionSignature = serviceDescriptionSignature,
+            ProjectDescription = projectDescription
         };
 
         var bodyJsonData = JsonConvert.SerializeObject(body);
