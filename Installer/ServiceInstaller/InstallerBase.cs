@@ -30,7 +30,7 @@ public /*open*/ class InstallerBase
 
     private static string GetServiceEnvName(string? serviceName, string environmentName)
     {
-        return $"{serviceName}_{environmentName}";
+        return $"{serviceName}{environmentName}";
     }
 
 
