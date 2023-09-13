@@ -54,7 +54,7 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
     public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
         var body = new UpdateServiceRequest
         {

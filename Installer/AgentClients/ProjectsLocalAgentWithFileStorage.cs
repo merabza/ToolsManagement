@@ -35,7 +35,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
         var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
+            _localInstallerSettings.DotnetRunner,
+            _messagesDataManager, _userName);
         return await Task.FromResult(
             applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
             false);
@@ -50,23 +51,26 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
+            _localInstallerSettings.DotnetRunner,
+            _messagesDataManager, _userName);
         return await Task.FromResult(applicationUpdater?.UpdateProgram(projectName, environmentName));
     }
 
     public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName,
         string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
-        string parametersFileDateMask, string parametersFileExtension, CancellationToken cancellationToken)
+        string parametersFileDateMask, string parametersFileExtension, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken)
     {
         var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName);
+            _localInstallerSettings.DotnetRunner,
+            _messagesDataManager, _userName);
         return await Task.FromResult(applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName,
-            serviceUserName, serviceName, appSettingsFileName));
+            serviceUserName, serviceName, appSettingsFileName, serviceDescriptionSignature, projectDescription));
     }
 
     public async Task<bool> CheckValidation(CancellationToken cancellationToken)

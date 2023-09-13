@@ -29,10 +29,12 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         FileStorageData fileStorageForUpload, string? installerWorkFolder, string? filesUserName,
         string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension, string? installFolder,
-        string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName)
+        string? dotnetRunner,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         var serviceInstaller =
-            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner, messagesDataManager, userName);
+            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
+                messagesDataManager, userName);
 
         if (serviceInstaller == null)
         {
@@ -191,7 +193,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     }
 
     public string? UpdateServiceWithParameters(string projectName, string environmentName, string serviceUserName,
-        string? serviceName, string? appSettingsFileName)
+        string? serviceName, string? appSettingsFileName, string? serviceDescriptionSignature,
+        string? projectDescription)
     {
         MessagesDataManager?.SendMessage(UserName,
                 $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}",
@@ -300,7 +303,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         var assemblyVersion = _installer.RunUpdateService(lastFileInfo.FileName, projectName, serviceName,
             environmentName, appSettingsFile, resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
-            _applicationUpdaterParameters.InstallFolder);
+            _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription);
 
         if (assemblyVersion != null)
             return assemblyVersion;

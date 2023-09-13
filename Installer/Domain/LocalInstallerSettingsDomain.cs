@@ -17,6 +17,8 @@ public sealed class LocalInstallerSettingsDomain
         DownloadTempExtension = downloadTempExtension;
         InstallFolder = installFolder;
         DotnetRunner = dotnetRunner;
+        //ServiceDescriptionSignature = serviceDescriptionSignature;
+        //ProjectDescription = projectDescription;
     }
 
     public string InstallerWorkFolder { get; }
@@ -25,7 +27,10 @@ public sealed class LocalInstallerSettingsDomain
     public string ServiceUserName { get; }
     public string DownloadTempExtension { get; }
     public string InstallFolder { get; }
+
     public string? DotnetRunner { get; }
+    //public string? ServiceDescriptionSignature { get; }
+    //public string? ProjectDescription { get; }
 
 
     public static LocalInstallerSettingsDomain? Create(ILogger? logger, bool useConsole, InstallerSettings? lis,
@@ -34,6 +39,7 @@ public sealed class LocalInstallerSettingsDomain
         if (lis is not null)
             return Create(logger, useConsole, lis.InstallerWorkFolder, lis.FilesUserName, lis.FilesUsersGroupName,
                 lis.ServiceUserName, lis.DownloadTempExtension, lis.InstallFolder, lis.DotnetRunner,
+                //lis.ServiceDescriptionSignature, lis.ProjectDescription,
                 messagesDataManager, userName);
 
         messagesDataManager?.SendMessage(userName, "LocalInstallerSettings does not configured for support tools",
@@ -46,7 +52,8 @@ public sealed class LocalInstallerSettingsDomain
 
     public static LocalInstallerSettingsDomain? Create(ILogger? logger, bool useConsole, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
-        string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName)
+        string? installFolder, string? dotnetRunner,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         messagesDataManager?.SendMessage(userName, "Creating LocalInstallerSettingsDomain", CancellationToken.None)
             .Wait();

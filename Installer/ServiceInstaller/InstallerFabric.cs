@@ -8,20 +8,30 @@ namespace Installer.ServiceInstaller;
 public static class InstallerFabric
 {
     public static InstallerBase? CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName)
+        //string? serviceDescriptionSignature,
+        //string? projectDescription,
+        IMessagesDataManager? messagesDataManager,
+        string? userName)
     {
         messagesDataManager?.SendMessage(userName, "Creating installer", CancellationToken.None).Wait();
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             messagesDataManager?.SendMessage(userName, "Creating WindowsServiceInstaller", CancellationToken.None)
                 .Wait();
-            return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
+            return new WindowsServiceInstaller(useConsole, logger,
+                //serviceDescriptionSignature,
+                //projectDescription,
+                messagesDataManager,
+                userName);
         }
 
         if (!string.IsNullOrWhiteSpace(dotnetRunner))
         {
             messagesDataManager?.SendMessage(userName, "Creating LinuxServiceInstaller", CancellationToken.None).Wait();
-            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner, messagesDataManager, userName);
+            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner,
+                //serviceDescriptionSignature,
+                //projectDescription,
+                messagesDataManager, userName);
         }
 
         messagesDataManager?.SendMessage(userName, "Installer dotnetRunner does not specified", CancellationToken.None)

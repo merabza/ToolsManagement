@@ -24,6 +24,8 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     public static AppParametersFileUpdater? Create(ILogger logger, bool useConsole, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? filesUserName,
         string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
+        //string? serviceDescriptionSignature,
+        //string? projectDescription,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
         messagesDataManager?.SendMessage(userName, "creating AppParametersFileUpdater", CancellationToken.None).Wait();
@@ -50,7 +52,10 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         }
 
         var serviceInstaller =
-            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner, messagesDataManager, userName);
+            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
+                //serviceDescriptionSignature,
+                //projectDescription,
+                messagesDataManager, userName);
 
         if (serviceInstaller == null)
         {

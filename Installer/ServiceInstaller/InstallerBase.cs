@@ -251,7 +251,8 @@ public /*open*/ class InstallerBase
 
     public string? RunUpdateService(string archiveFileName, string projectName, string? serviceName,
         string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
-        string filesUsersGroupName, string installWorkFolder, string installFolder)
+        string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
+        string? projectDescription)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -471,7 +472,8 @@ public /*open*/ class InstallerBase
 
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
-            if (!IsServiceRegisteredProperly(projectName, serviceEnvName, serviceUserName, projectInstallFullPath))
+            if (!IsServiceRegisteredProperly(projectName, serviceEnvName, serviceUserName, projectInstallFullPath,
+                    serviceDescriptionSignature, projectDescription))
                 if (RemoveService(serviceEnvName))
                     serviceExists = false;
 
@@ -481,7 +483,8 @@ public /*open*/ class InstallerBase
             MessagesDataManager
                 ?.SendMessage(UserName, $"registering service {serviceEnvName}...", CancellationToken.None).Wait();
             Logger.LogInformation("registering service {serviceEnvName}...", serviceEnvName);
-            if (!RegisterService(projectName, serviceEnvName, serviceUserName, projectInstallFullPath))
+            if (!RegisterService(projectName, serviceEnvName, serviceUserName, projectInstallFullPath,
+                    serviceDescriptionSignature, projectDescription))
             {
                 MessagesDataManager
                     ?.SendMessage(UserName, $"cannot register Service {serviceEnvName}", CancellationToken.None).Wait();
@@ -649,7 +652,7 @@ public /*open*/ class InstallerBase
     }
 
     protected virtual bool IsServiceRegisteredProperly(string projectName, string serviceEnvName, string userName,
-        string installFolderPath)
+        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription)
     {
         MessagesDataManager
             ?.SendMessage(UserName, "IsServiceRegisteredProperly not implemented", CancellationToken.None).Wait();
@@ -854,7 +857,7 @@ public /*open*/ class InstallerBase
     }
 
     protected virtual bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
-        string installFolderPath)
+        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription)
     {
         return false;
     }

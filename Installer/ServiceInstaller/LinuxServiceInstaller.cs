@@ -8,18 +8,25 @@ namespace Installer.ServiceInstaller;
 public sealed class LinuxServiceInstaller : InstallerBase
 {
     private readonly string _dotnetRunner;
+    //private readonly string? _serviceDescriptionSignature;
+    //private readonly string? _projectDescription;
+
 
     public LinuxServiceInstaller(bool useConsole, ILogger logger, string dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger, "linux-x64",
-        messagesDataManager, userName)
+        //string? serviceDescriptionSignature, string? projectDescription, 
+        IMessagesDataManager? messagesDataManager,
+        string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
     {
         _dotnetRunner = dotnetRunner;
+        //_serviceDescriptionSignature = serviceDescriptionSignature;
+        //_projectDescription = projectDescription;
     }
 
     public LinuxServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
     {
         _dotnetRunner = "";
+        //_serviceDescriptionSignature = "";
     }
 
     protected override bool IsServiceExists(string serviceEnvName)
@@ -68,13 +75,13 @@ public sealed class LinuxServiceInstaller : InstallerBase
     }
 
     protected override bool IsServiceRegisteredProperly(string projectName, string serviceEnvName,
-        string serviceUserName,
-        string installFolderPath)
+        string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
+        string? projectDescription)
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var serviceFileText =
-            GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner);
+        var serviceFileText = GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner,
+            serviceDescriptionSignature, projectDescription);
 
         var existingServiceFileText = File.ReadAllText(serviceConfigFileName);
 
@@ -82,7 +89,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
     }
 
     private string? GenerateServiceFileText(string serviceName, string installFolderPath, string serviceUserName,
-        string dotnetRunner)
+        string dotnetRunner, string? serviceDescriptionSignature, string? projectDescription)
     {
         var checkedDotnetRunner = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunner == null)
@@ -96,7 +103,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var syslogIdentifier = serviceName.Replace(".", "");
 
         return $@"[Unit]
-Description={serviceName} service
+Description={serviceName} service {serviceDescriptionSignature ?? ""} {projectDescription ?? ""}
 
 [Service]
 WorkingDirectory={installFolderPath}
@@ -117,12 +124,12 @@ WantedBy=multi-user.target
 
 
     protected override bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
-        string installFolderPath)
+        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription)
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var serviceFileText =
-            GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner);
+        var serviceFileText = GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner,
+            serviceDescriptionSignature, projectDescription);
 
         MessagesDataManager
             ?.SendMessage(UserName, $"Create service file {serviceConfigFileName}", CancellationToken.None).Wait();

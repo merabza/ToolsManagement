@@ -13,9 +13,23 @@ namespace Installer.ServiceInstaller;
 
 public sealed class WindowsServiceInstaller : InstallerBase
 {
-    public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
-        string? userName) : base(useConsole, logger, "win10-x64", messagesDataManager, userName)
+    private readonly string? _serviceDescriptionSignature;
+    private readonly string? _projectDescription;
+
+    public WindowsServiceInstaller(bool useConsole, ILogger logger, string? serviceDescriptionSignature,
+        string? projectDescription, IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole,
+        logger, "win10-x64", messagesDataManager, userName)
     {
+        _serviceDescriptionSignature = serviceDescriptionSignature;
+        _projectDescription = projectDescription;
+    }
+
+    public WindowsServiceInstaller(bool useConsole, ILogger logger,
+        IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger, "win10-x64",
+        messagesDataManager, userName)
+    {
+        _serviceDescriptionSignature = null;
+        _projectDescription = null;
     }
 
     protected override bool IsServiceExists(string serviceEnvName)
@@ -202,10 +216,13 @@ public sealed class WindowsServiceInstaller : InstallerBase
 //#pragma warning restore CA1416 // Validate platform compatibility
 //    }
 
-    protected override bool IsServiceRegisteredProperly(string projectName, string serviceEnvName, string userName,
-        string installFolderPath)
+    protected override bool IsServiceRegisteredProperly(string projectName, string serviceEnvName,
+        string userName,
+        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription)
     {
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
+        var mustBeDescription =
+            $"{serviceEnvName} service {_serviceDescriptionSignature ?? ""} {_projectDescription ?? ""}";
         //თუ სერვისი უკვე დარეგისტრირებულია და გვინდა დავადგინოთ გამშვები ფაილი რომელია, გვაქვს 2 გზა
         //1. გამოვიყენოთ sc qc <service name> და გავარჩიოთ რას დააბრუნებს
         //2. HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services.
@@ -214,13 +231,16 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning disable CA1416 // Validate platform compatibility
         var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
         var imagePath = regKey?.GetValue("ImagePath")?.ToString();
+        var description = regKey?.GetValue("Description")?.ToString();
 #pragma warning restore CA1416 // Validate platform compatibility
 
-        return imagePath != null && imagePath == exeFilePath;
+        return imagePath is not null && imagePath == exeFilePath && description is not null &&
+               description == mustBeDescription;
     }
 
-    protected override bool RegisterService(string projectName, string serviceEnvName, string serviceUserName,
-        string installFolderPath)
+    protected override bool RegisterService(string projectName, string serviceEnvName,
+        string serviceUserName,
+        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription)
     {
         // create empty pipeline
         using var ps = PowerShell.Create();
@@ -229,6 +249,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         ps.AddCommand("New-Service")
             .AddParameter("Name", serviceEnvName)
+            .AddParameter("Description",
+                $"{serviceEnvName} service {_serviceDescriptionSignature ?? ""} {_projectDescription ?? ""}")
             .AddParameter("BinaryPathName", exeFilePath)
             //.AddParameter("Credential", "NT AUTHORITY\\LOCAL SERVICE")
             .AddParameter("StartupType", "Automatic");

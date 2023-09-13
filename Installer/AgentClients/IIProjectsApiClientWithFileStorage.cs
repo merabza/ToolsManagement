@@ -16,5 +16,6 @@ public interface IIProjectsApiClientWithFileStorage
     Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
+        string? serviceDescriptionSignature, string? projectDescription,
         CancellationToken cancellationToken);
 }
