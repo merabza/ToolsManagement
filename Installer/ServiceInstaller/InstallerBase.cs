@@ -452,8 +452,22 @@ public /*open*/ class InstallerBase
             .Wait();
         Logger.LogInformation("Install {projectName} files to {projectInstallFullPath}...", projectName,
             projectInstallFullPath);
+
+        MessagesDataManager?.SendMessage(UserName,
+                $"Move Files from {projectFilesFolderFullName} to {projectInstallFullPath}...",
+                CancellationToken.None)
+            .Wait();
+        Logger.LogInformation("Move Files from {projectFilesFolderFullName} to {projectInstallFullPath}...",
+            projectFilesFolderFullName,
+            projectInstallFullPath);
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
+
+
+        MessagesDataManager?.SendMessage(UserName, $"WriteAllTextToPath {projectInstallFullPath}...",
+                CancellationToken.None)
+            .Wait();
+        Logger.LogInformation("WriteAllTextToPath {projectInstallFullPath}...", projectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
         appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
 
