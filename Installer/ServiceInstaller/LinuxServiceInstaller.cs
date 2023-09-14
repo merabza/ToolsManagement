@@ -80,7 +80,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var serviceFileText = GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner,
+        var serviceFileText = GenerateServiceFileText(projectName, serviceEnvName, installFolderPath, serviceUserName,
+            _dotnetRunner,
             serviceDescriptionSignature, projectDescription);
 
         var existingServiceFileText = File.ReadAllText(serviceConfigFileName);
@@ -88,7 +89,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return serviceFileText == existingServiceFileText;
     }
 
-    private string? GenerateServiceFileText(string serviceName, string installFolderPath, string serviceUserName,
+    private string? GenerateServiceFileText(string projectName, string serviceName, string installFolderPath,
+        string serviceUserName,
         string dotnetRunner, string? serviceDescriptionSignature, string? projectDescription)
     {
         var checkedDotnetRunner = CheckDotnetRunner(dotnetRunner);
@@ -99,7 +101,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return null;
         }
 
-        var mainDllFileName = Path.Combine(installFolderPath, $"{serviceName}.dll");
+        var mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
         var syslogIdentifier = serviceName.Replace(".", "");
 
         return $@"[Unit]
@@ -128,8 +130,8 @@ WantedBy=multi-user.target
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var serviceFileText = GenerateServiceFileText(serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner,
-            serviceDescriptionSignature, projectDescription);
+        var serviceFileText = GenerateServiceFileText(projectName, serviceEnvName, installFolderPath, serviceUserName,
+            _dotnetRunner, serviceDescriptionSignature, projectDescription);
 
         MessagesDataManager
             ?.SendMessage(UserName, $"Create service file {serviceConfigFileName}", CancellationToken.None).Wait();
