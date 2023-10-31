@@ -70,7 +70,7 @@ public /*open*/ class InstallerBase
 
         var serviceEnvName = GetServiceEnvName(serviceName, environmentName);
 
-        if (!string.IsNullOrWhiteSpace(serviceName))
+        if (!string.IsNullOrWhiteSpace(serviceEnvName))
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
             var serviceExists = IsServiceExists(serviceEnvName);
