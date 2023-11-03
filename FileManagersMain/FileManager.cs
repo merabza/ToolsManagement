@@ -4,9 +4,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using ConnectTools;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 using SystemToolsShared;
 
 namespace FileManagersMain;
@@ -188,7 +191,23 @@ public /*open*/ class FileManager
     {
         try
         {
-            File.Copy(fromFileName, toFullName);
+            //File.Copy(fromFileName, toFullName);
+            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                BackoffType = DelayBackoffType.Linear,
+                Delay = TimeSpan.FromSeconds(1),
+                ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
+                OnRetry = retryArgs =>
+                {
+                    StShared.WriteErrorLine($"File copy Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
+                    return ValueTask.CompletedTask;
+                }
+            }).Build();
+
+            pipeline.Execute(() => File.Copy(fromFileName, toFullName));
+
             return true;
         }
         catch (Exception e)
@@ -202,7 +221,23 @@ public /*open*/ class FileManager
     {
         try
         {
-            File.Delete(fileFullName);
+            //File.Delete(fileFullName);
+            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                BackoffType = DelayBackoffType.Linear,
+                Delay = TimeSpan.FromSeconds(1),
+                ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
+                OnRetry = retryArgs =>
+                {
+                    StShared.WriteErrorLine($"File delete Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
+                    return ValueTask.CompletedTask;
+                }
+            }).Build();
+
+            pipeline.Execute(() => File.Delete(fileFullName));
+
             return true;
         }
         catch (Exception e)
@@ -216,7 +251,22 @@ public /*open*/ class FileManager
     {
         try
         {
-            File.Move(fromFileName, toFullName);
+            //File.Move(fromFileName, toFullName);
+            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                BackoffType = DelayBackoffType.Linear,
+                Delay = TimeSpan.FromSeconds(1),
+                ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
+                OnRetry = retryArgs =>
+                {
+                    StShared.WriteErrorLine($"File move Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
+                    return ValueTask.CompletedTask;
+                }
+            }).Build();
+
+            pipeline.Execute(() => File.Move(fromFileName, toFullName));
             return true;
         }
         catch (Exception e)
