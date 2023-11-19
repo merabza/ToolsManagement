@@ -200,7 +200,8 @@ public /*open*/ class FileManager
                 ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
                 OnRetry = retryArgs =>
                 {
-                    StShared.WriteErrorLine($"File copy Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteErrorLine($"File copy Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole,
+                        logger, false);
                     StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
                     return ValueTask.CompletedTask;
                 }
@@ -230,7 +231,8 @@ public /*open*/ class FileManager
                 ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
                 OnRetry = retryArgs =>
                 {
-                    StShared.WriteErrorLine($"File delete Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteErrorLine($"File delete Failed. currentAttempt: {retryArgs.AttemptNumber}",
+                        useConsole, logger, false);
                     StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
                     return ValueTask.CompletedTask;
                 }
@@ -260,7 +262,8 @@ public /*open*/ class FileManager
                 ShouldHandle = new PredicateBuilder().Handle<DirectoryNotFoundException>(),
                 OnRetry = retryArgs =>
                 {
-                    StShared.WriteErrorLine($"File move Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole, logger, false);
+                    StShared.WriteErrorLine($"File move Failed. currentAttempt: {retryArgs.AttemptNumber}", useConsole,
+                        logger, false);
                     StShared.WriteException(retryArgs.Outcome.Exception, useConsole, logger, false);
                     return ValueTask.CompletedTask;
                 }
