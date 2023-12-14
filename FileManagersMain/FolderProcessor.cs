@@ -63,7 +63,7 @@ public /*open*/ class FolderProcessor
                 reloadFolders = false;
                 foreach (var folderName in folderNames)
                 {
-                    var (success, folderNameChanged) =
+                    var (success, folderNameChanged, continueWithThisFolder) =
                         ProcessOneFolder(afterRootPath, folderName);
                     if (folderNameChanged)
                     {
@@ -73,6 +73,9 @@ public /*open*/ class FolderProcessor
 
                     if (!success)
                         return false;
+
+                    if (!continueWithThisFolder)
+                        continue;
 
                     var folderAfterRootFullName = FileManager.PathCombine(afterRootPath, folderName);
                     if (!ProcessFolder(folderAfterRootFullName))
@@ -100,9 +103,9 @@ public /*open*/ class FolderProcessor
     //    return null;
     //}
 
-    protected virtual (bool, bool) ProcessOneFolder(string? afterRootPath, string folderName)
+    protected virtual (bool, bool, bool) ProcessOneFolder(string? afterRootPath, string folderName)
     {
-        return (true, false);
+        return (true, false, true);
     }
 
     protected virtual bool ProcessOneFile(string? afterRootPath, MyFileInfo file)
