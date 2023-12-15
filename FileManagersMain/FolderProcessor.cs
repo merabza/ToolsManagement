@@ -15,11 +15,12 @@ public /*open*/ class FolderProcessor
 
     private readonly string _name;
     private readonly bool _useSubFolders;
+    private readonly bool _useProcessFiles;
     protected readonly ExcludeSet? ExcludeSet;
     protected readonly FileManager FileManager;
 
     protected FolderProcessor(string name, string description, FileManager fileManager, string? fileSearchPattern,
-        bool deleteEmptyFolders, ExcludeSet? excludeSet, bool useSubFolders = true)
+        bool deleteEmptyFolders, ExcludeSet? excludeSet, bool useSubFolders, bool useProcessFiles)
     {
         _name = name;
         _description = description;
@@ -28,6 +29,7 @@ public /*open*/ class FolderProcessor
         _deleteEmptyFolders = deleteEmptyFolders;
         ExcludeSet = excludeSet;
         _useSubFolders = useSubFolders;
+        _useProcessFiles = useProcessFiles;
     }
 
     protected virtual bool CheckParameters()
@@ -84,7 +86,7 @@ public /*open*/ class FolderProcessor
             }
         }
 
-        if (!ProcessFiles(afterRootPath))
+        if (_useProcessFiles && !ProcessFiles(afterRootPath))
             return false;
 
         if (!_deleteEmptyFolders)
