@@ -301,6 +301,14 @@ public /*open*/ class InstallerBase
 
         ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
 
+        if (!Directory.Exists(projectFilesFolderFullName))
+        {
+            MessagesDataManager?.SendMessage(UserName, $"Project files is not extracted to {projectFilesFolderFullName}",
+                CancellationToken.None).Wait();
+            Logger.LogInformation("Project files is not extracted to {projectFilesFolderFullName}", projectFilesFolderFullName);
+            return null;
+        }
+
         MessagesDataManager?.SendMessage(UserName, $"Project files is extracted to {projectFilesFolderFullName}",
                 CancellationToken.None)
             .Wait();
