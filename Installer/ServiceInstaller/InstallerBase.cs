@@ -266,8 +266,10 @@ public /*open*/ class InstallerBase
             return null;
         }
 
-        var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
-        if (checkedInstallFolder == null)
+        var projectInstallFolder = Path.Combine(installFolder, projectName);
+
+        var checkedProjectInstallFolder = FileStat.CreateFolderIfNotExists(projectInstallFolder, UseConsole);
+        if (checkedProjectInstallFolder == null)
         {
             MessagesDataManager?.SendMessage(UserName, $"Installer install folder {installFolder} does not created",
                     CancellationToken.None)
@@ -276,9 +278,9 @@ public /*open*/ class InstallerBase
             return null;
         }
 
-        MessagesDataManager?.SendMessage(UserName, $"Installer install folder is {checkedInstallFolder}",
+        MessagesDataManager?.SendMessage(UserName, $"Installer project install folder is {checkedProjectInstallFolder}",
             CancellationToken.None).Wait();
-        Logger.LogInformation("Installer install folder is {checkedInstallFolder}", checkedInstallFolder);
+        Logger.LogInformation("Installer project install folder is {checkedProjectInstallFolder}", checkedProjectInstallFolder);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
@@ -395,7 +397,7 @@ public /*open*/ class InstallerBase
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
+        var projectInstallFullPath = Path.Combine(checkedProjectInstallFolder, environmentName);
 
         if (Directory.Exists(projectInstallFullPath))
         {
