@@ -3,6 +3,7 @@ using LibDatabaseParameters;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
 using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
@@ -11,17 +12,17 @@ public interface IDatabaseApiClient
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    Task<BackupFileParameters?> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
+    Task<Option<BackupFileParameters>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
         string backupBaseName, CancellationToken cancellationToken);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken);
+    Task<Option<List<DatabaseInfoModel>>> GetDatabaseNames(CancellationToken cancellationToken);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
     // ReSharper disable once UnusedMember.Global
-    Task<bool> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
+    Task<Option<bool>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global

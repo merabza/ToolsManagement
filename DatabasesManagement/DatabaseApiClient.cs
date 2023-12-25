@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using Installer.Domain;
+using LanguageExt;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
@@ -41,7 +42,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async Task<BackupFileParameters?> CreateBackup(
+    public async Task<Option<BackupFileParameters>> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName,
         CancellationToken cancellationToken)
     {
@@ -68,16 +69,15 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken)
+    public async Task<Option<List<DatabaseInfoModel>>> GetDatabaseNames(CancellationToken cancellationToken)
     {
-        return await PostAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames", cancellationToken) ??
-               new List<DatabaseInfoModel>();
+        return await PostAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames", cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<bool> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
+    public async Task<Option<bool>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
         return await PostAsyncReturn<bool>($"databases/isdatabaseexists/{databaseName}", cancellationToken);
     }

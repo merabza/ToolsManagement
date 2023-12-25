@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DbTools;
 using DbTools.Models;
 using DbToolsFabric;
+using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -113,7 +114,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async Task<BackupFileParameters?> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
+    public async Task<Option<BackupFileParameters>> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
         string backupBaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -130,8 +131,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         var backupFileNamePrefix = dbBackupParameters.GetPrefix(databaseName);
         //string backupFileNameSuffix = databaseBackupParametersModel.BackupFileExtension.AddNeedLeadPart(".");
         var backupFileNameSuffix = dbBackupParameters.GetSuffix();
-        var backupFileName = backupFileNamePrefix +
-                             DateTime.Now.ToString(dbBackupParameters.DateMask) +
+        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(dbBackupParameters.DateMask) +
                              backupFileNameSuffix;
 
         var backupFolder = dbBackupParameters.DbServerSideBackupPath ??
@@ -168,7 +168,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<List<DatabaseInfoModel>> GetDatabaseNames(CancellationToken cancellationToken)
+    public async Task<Option<List<DatabaseInfoModel>>> GetDatabaseNames(CancellationToken cancellationToken)
     {
         var dc = GetDatabaseClient();
         return await dc.GetDatabaseInfos(cancellationToken);
@@ -184,7 +184,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<bool> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
+    public async Task<Option<bool>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var dc = GetDatabaseClient();
