@@ -9,6 +9,7 @@ using DbToolsFabric;
 using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using SystemToolsShared;
 using WebAgentProjectsApiContracts.V1.Responses;
 
@@ -33,42 +34,41 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         _userName = userName;
     }
 
-    public static SqlServerManagementClient? Create(ILogger logger, bool useConsole,
+    public static async Task<SqlServerManagementClient?> Create(ILogger logger, bool useConsole,
         DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
-        string? userName)
+        string? userName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
         {
-            messagesDataManager
-                ?.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient",
-                    CancellationToken.None).Wait();
+            if ( messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient", cancellationToken);
             logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
         {
-            messagesDataManager
-                ?.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient",
-                    CancellationToken.None).Wait();
+            if ( messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
             logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
         {
-            messagesDataManager
-                ?.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient",
-                    CancellationToken.None).Wait();
+            if ( messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
             logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
         {
-            messagesDataManager
-                ?.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
-                    CancellationToken.None).Wait();
+            if ( messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
             logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -90,37 +90,58 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             messagesDataManager, userName);
     }
 
-    private DbClient GetDatabaseClient(string? databaseName = null)
+    private async Task<OneOf<DbClient, Err[]>> GetDatabaseClient(CancellationToken cancellationToken, string? databaseName = null)
     {
         var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName);
+            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager);
 
         if (dc is not null)
             return dc;
 
-        _messagesDataManager?.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
-            CancellationToken.None).Wait();
+        if ( _messagesDataManager is not null)
+            await _messagesDataManager.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
+                cancellationToken);
         _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
-        throw new Exception($"Cannot create DbClient for database {databaseName}");
+        //throw new Exception($"Cannot create DbClient for database {databaseName}");
+        return new Err[]
+        {
+            new()
+            {
+                ErrorCode = "CannotCreateDbClient", ErrorMessage = $"Cannot create DbClient for database {databaseName}"
+            }
+        };
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public async Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.CheckRepairDatabase(databaseName, cancellationToken);
+
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async Task<Option<BackupFileParameters>> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
+    public async Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
         string backupBaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
 
-        var hostPlatformName = await dc.HostPlatform(cancellationToken);
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        var hostPlatformResult = await dc.HostPlatform(cancellationToken);
+        if (hostPlatformResult.IsT1)
+            return hostPlatformResult.AsT1;
+        var hostPlatformName = hostPlatformResult.AsT0;
         var dirSeparator = "\\";
         if (hostPlatformName == "Linux")
             dirSeparator = "/";
@@ -145,14 +166,19 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             backupName += "-full";
 
         //ბექაპის პროცესის გაშვება
-        if (!await dc.BackupDatabase(databaseName, backupFileFullName, backupName, EBackupType.Full,
-                dbBackupParameters.Compress, cancellationToken))
-            return await Task.FromResult<BackupFileParameters?>(null);
+        var backupDatabaseResult = await dc.BackupDatabase(databaseName, backupFileFullName, backupName,
+            EBackupType.Full, dbBackupParameters.Compress, cancellationToken);
+
+        if (backupDatabaseResult.IsSome)
+            //return await Task.FromResult<BackupFileParameters?>(null);
+            return (Err[])backupDatabaseResult;
 
         if (dbBackupParameters.Verify)
-            if (!await dc.VerifyBackup(databaseName, backupFileFullName, cancellationToken))
-                return null;
-
+        {
+            var verifyBackupResult = await dc.VerifyBackup(databaseName, backupFileFullName, cancellationToken);
+            if (verifyBackupResult.IsSome)
+                return (Err[])verifyBackupResult;
+        }
         BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
             dbBackupParameters.DateMask);
 
@@ -160,70 +186,109 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async Task<bool> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
+    public async Task<Option<Err[]>> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
         string? databaseName = null)
     {
-        var dc = GetDatabaseClient(databaseName);
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken, databaseName);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.ExecuteCommandAsync(executeQueryCommand, cancellationToken, true, true);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<Option<List<DatabaseInfoModel>>> GetDatabaseNames(CancellationToken cancellationToken)
+    public async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.GetDatabaseInfos(cancellationToken);
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken)
+    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.GetDbServerInfo(cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<Option<bool>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
+    public async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var dc = GetDatabaseClient();
-        return await dc.CheckDatabase(databaseName, cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.IsDatabaseExists(databaseName, cancellationToken);
     }
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    public bool IsServerLocal()
+    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var dc = GetDatabaseClient();
-        return dc.IsServerLocal();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.IsServerLocal(cancellationToken);
     }
 
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.RecompileProcedures(databaseName, cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+    public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
 
-        var hostPlatformName = dc.HostPlatform(cancellationToken).Result;
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
 
-        if (hostPlatformName is null)
+        var hostPlatformResult = await dc.HostPlatform(cancellationToken);
+
+        if (hostPlatformResult.IsT1)
         {
             if (_messagesDataManager is not null)
                 await _messagesDataManager.SendMessage(_userName, "Host platform does not detected",
-                    CancellationToken.None);
+                    cancellationToken);
             _logger.LogError("Host platform does not detected");
-            return false;
+            return Err.RecreateErrors(hostPlatformResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "HostPlatformDoesNotDetected", ErrorMessage = "Host platform does not detected"
+                });
         }
+        var hostPlatformName = hostPlatformResult.AsT0;
 
         var dirSeparator = "\\";
         if (hostPlatformName == "Linux")
@@ -235,23 +300,47 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
                 ? _databaseServerConnectionDataDomain.BackupFolderName
                 : restoreFromFolderPath).AddNeedLastPart(dirSeparator) + backupFileParameters.Name;
 
-        var files = dc.GetRestoreFiles(backupFileFullName);
+        var getRestoreFilesResult = dc.GetRestoreFiles(backupFileFullName);
+        if (getRestoreFilesResult.IsT1)
+        {
+            if (_messagesDataManager is not null)
+                await _messagesDataManager.SendMessage(_userName, "Restore Files does not detected",
+                    cancellationToken);
+            _logger.LogError("Restore Files does not detected");
+            return Err.RecreateErrors(getRestoreFilesResult.AsT1,
+                new Err
+                {
+                    ErrorCode = "RestoreFilesDoesNotDetected", ErrorMessage = "Restore Files does not detected"
+                });
+        }
+        var files = getRestoreFilesResult.AsT0;
 
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
             _databaseServerConnectionDataDomain.DataFolderName, _databaseServerConnectionDataDomain.DataLogFolderName,
             dirSeparator, cancellationToken);
     }
 
-    public async Task<bool> TestConnection(string? databaseName, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient(databaseName);
-        return await Task.FromResult(dc.TestConnection(databaseName != null));
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken, databaseName);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return dc.TestConnection(databaseName != null);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken)
     {
-        var dc = GetDatabaseClient();
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
         return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
+
 }

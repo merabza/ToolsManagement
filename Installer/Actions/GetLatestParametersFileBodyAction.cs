@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using FileManagersMain;
 using LibFileParameters.Models;
 using LibToolActions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SystemToolsShared;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace Installer.Actions;
 
@@ -45,9 +47,9 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         return true;
     }
 
-    protected override bool RunAction()
+    protected override async Task<bool> RunAction(CancellationToken cancellationToken)
     {
-        LatestParametersFileContent = GetParametersFileBody();
+        LatestParametersFileContent = await GetParametersFileBody(cancellationToken);
         if (string.IsNullOrWhiteSpace(LatestParametersFileContent))
             return true;
         var appSetJObject = JObject.Parse(LatestParametersFileContent);
@@ -56,7 +58,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     }
 
 
-    private string? GetParametersFileBody()
+    private async Task<string?> GetParametersFileBody(CancellationToken cancellationToken)
     {
         var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 
@@ -65,10 +67,10 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
-        MessagesDataManager?.SendMessage(UserName,
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName,
                 $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}",
-                CancellationToken.None)
-            .Wait();
+                cancellationToken);
         Console.WriteLine(
             $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}");
         var lastParametersFileInfo =
@@ -76,8 +78,9 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         if (lastParametersFileInfo != null)
             //მოვქაჩოთ არჩეული პარამეტრების ფაილის შიგთავსი
             return exchangeFileManager?.GetTextFileContent(lastParametersFileInfo.FileName);
-        MessagesDataManager?.SendMessage(UserName, "Project Parameter files not found on exchange storage",
-            CancellationToken.None).Wait();
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName, "Project Parameter files not found on exchange storage",
+                cancellationToken);
         Logger.LogWarning("Project Parameter files not found on exchange storage");
         return null;
     }

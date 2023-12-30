@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Installer.Actions;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -22,13 +24,14 @@ public /*open*/ class ApplicationUpdaterBase
         UserName = userName;
     }
 
-    protected string? GetParametersFileBody(string projectName, string environmentName,
-        FileStorageData fileStorageForDownload, string parametersFileDateMask, string parametersFileExtension)
+    protected async Task<string?> GetParametersFileBody(string projectName, string environmentName,
+        FileStorageData fileStorageForDownload, string parametersFileDateMask, string parametersFileExtension,
+        CancellationToken cancellationToken)
     {
         var getLatestParametersFileBodyAction = new GetLatestParametersFileBodyAction(Logger, UseConsole,
             fileStorageForDownload, projectName, Environment.MachineName, environmentName, parametersFileDateMask,
             parametersFileExtension, MessagesDataManager, UserName);
-        var result = getLatestParametersFileBodyAction.Run();
+        var result = await getLatestParametersFileBodyAction.Run(cancellationToken);
         var appSettingsFileBody = getLatestParametersFileBodyAction.LatestParametersFileContent;
         if (!result || string.IsNullOrWhiteSpace(appSettingsFileBody))
             return null;

@@ -1,21 +1,23 @@
-﻿using System.Threading;
+﻿using LanguageExt;
+using OneOf;
+using System.Threading;
 using System.Threading.Tasks;
+using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
 public interface IIProjectsApiClientWithFileStorage
 {
-    Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
+    Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken);
 
-    Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+    Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken);
 
-    Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
+    Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName, string? serviceName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        string? serviceDescriptionSignature, string? projectDescription,
-        CancellationToken cancellationToken);
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken);
 }

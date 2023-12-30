@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -11,7 +12,7 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     {
     }
 
-    public async Task<bool> RemoveProjectAndService(string projectName, string serviceName, string environmentName,
+    public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string serviceName, string environmentName,
         CancellationToken cancellationToken)
     {
         //+
@@ -19,13 +20,13 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
             cancellationToken);
     }
 
-    public async Task<bool> StopService(string serviceName, string environmentName, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> StopService(string serviceName, string environmentName, CancellationToken cancellationToken)
     {
         //+
         return await PostAsync($"projects/stop/{serviceName}/{environmentName}", cancellationToken);
     }
 
-    public async Task<bool> StartService(string serviceName, string environmentName,
+    public async Task<Option<Err[]>> StartService(string serviceName, string environmentName,
         CancellationToken cancellationToken)
     {
         //+

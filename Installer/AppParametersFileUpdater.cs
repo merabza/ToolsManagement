@@ -1,6 +1,8 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using Installer.Domain;
 using Installer.ServiceInstaller;
+using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -21,45 +23,45 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         _serviceInstaller = serviceInstaller;
     }
 
-    public static AppParametersFileUpdater? Create(ILogger logger, bool useConsole, string parametersFileDateMask,
-        string parametersFileExtension, FileStorageData fileStorageForUpload, string? filesUserName,
-        string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
-        //string? serviceDescriptionSignature,
-        //string? projectDescription,
-        IMessagesDataManager? messagesDataManager, string? userName)
+    public static async Task<AppParametersFileUpdater?> Create(ILogger logger, bool useConsole,
+        string parametersFileDateMask, string parametersFileExtension, FileStorageData fileStorageForUpload,
+        string? filesUserName, string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
-        messagesDataManager?.SendMessage(userName, "creating AppParametersFileUpdater", CancellationToken.None).Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "creating AppParametersFileUpdater", cancellationToken);
 
         if (string.IsNullOrWhiteSpace(installFolder))
         {
-            messagesDataManager?.SendMessage(userName, "installFolder is empty", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "installFolder is empty", cancellationToken);
             logger.LogError("installFolder is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUserName is empty", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "filesUserName is empty", cancellationToken);
             logger.LogError("filesUserName is empty");
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUsersGroupName is empty", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "filesUsersGroupName is empty", cancellationToken);
             logger.LogError("filesUsersGroupName is empty");
             return null;
         }
 
-        var serviceInstaller =
-            InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
-                //serviceDescriptionSignature,
-                //projectDescription,
-                messagesDataManager, userName);
+        var serviceInstaller = await InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
+            messagesDataManager, userName, cancellationToken);
 
         if (serviceInstaller == null)
         {
-            messagesDataManager?.SendMessage(userName, "Installer does Not Created", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "Installer does Not Created", cancellationToken);
             logger.LogError("Installer does Not Created");
             return null;
         }
@@ -74,26 +76,42 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     }
 
 
-    public bool UpdateParameters(string projectName, string environmentName, string? serviceName,
-        string appSettingsFileName)
+    public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName, string? serviceName,
+        string appSettingsFileName, CancellationToken cancellationToken)
     {
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
         {
-            MessagesDataManager?.SendMessage(UserName, "Installer does Not Created", CancellationToken.None).Wait();
+            if (MessagesDataManager is not null)
+                await MessagesDataManager.SendMessage(UserName, "Installer does Not Created", cancellationToken);
             Logger.LogError("Cannot update self");
-            return false;
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "CannotUpdateSelf",
+                    ErrorMessage = $"Cannot update self"
+                }
+            };
         }
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
-        var appSettingsFileBody = GetParametersFileBody(projectName, environmentName,
+        var appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
             _applicationUpdaterParameters.ProgramExchangeFileStorage,
-            _applicationUpdaterParameters.ParametersFileDateMask,
-            _applicationUpdaterParameters.ParametersFileExtension);
+            _applicationUpdaterParameters.ParametersFileDateMask, _applicationUpdaterParameters.ParametersFileExtension,
+            cancellationToken);
         if (appSettingsFileBody == null)
-            return false;
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "CannotUpdateSelf",
+                    ErrorMessage = "Cannot update self"
+                }
+            };
 
-        return _serviceInstaller.RunUpdateSettings(projectName, serviceName, environmentName, appSettingsFileName,
+        return await _serviceInstaller.RunUpdateSettings(projectName, serviceName, environmentName, appSettingsFileName,
             appSettingsFileBody, _applicationUpdaterParameters.FilesUserName,
-            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallFolder);
+            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallFolder,
+            cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
@@ -7,17 +8,15 @@ namespace Installer.ServiceInstaller;
 
 public static class InstallerFabric
 {
-    public static InstallerBase? CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
-        //string? serviceDescriptionSignature,
-        //string? projectDescription,
-        IMessagesDataManager? messagesDataManager,
-        string? userName)
+    public static async Task<InstallerBase?> CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
-        messagesDataManager?.SendMessage(userName, "Creating installer", CancellationToken.None).Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "Creating installer", cancellationToken);
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            messagesDataManager?.SendMessage(userName, "Creating WindowsServiceInstaller", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "Creating WindowsServiceInstaller", cancellationToken);
             return new WindowsServiceInstaller(useConsole, logger,
                 //serviceDescriptionSignature,
                 //projectDescription,
@@ -27,33 +26,37 @@ public static class InstallerFabric
 
         if (!string.IsNullOrWhiteSpace(dotnetRunner))
         {
-            messagesDataManager?.SendMessage(userName, "Creating LinuxServiceInstaller", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "Creating LinuxServiceInstaller", cancellationToken);
             return new LinuxServiceInstaller(useConsole, logger, dotnetRunner,
                 //serviceDescriptionSignature,
                 //projectDescription,
                 messagesDataManager, userName);
         }
 
-        messagesDataManager?.SendMessage(userName, "Installer dotnetRunner does not specified", CancellationToken.None)
-            .Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "Installer dotnetRunner does not specified",
+                cancellationToken);
         logger.LogError("Installer dotnetRunner does not specified");
         return null;
     }
 
-    public static InstallerBase CreateInstaller(ILogger logger, bool useConsole,
-        IMessagesDataManager? messagesDataManager, string? userName)
+    public static async Task<InstallerBase> CreateInstaller(ILogger logger, bool useConsole,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
-        messagesDataManager?.SendMessage(userName, "Creating installer (without dotnetRunner)", CancellationToken.None)
-            .Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "Creating installer (without dotnetRunner)",
+                cancellationToken);
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            messagesDataManager?.SendMessage(userName, "Creating WindowsServiceInstaller", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "Creating WindowsServiceInstaller", cancellationToken);
             return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
         }
 
-        messagesDataManager?.SendMessage(userName, "Creating LinuxServiceInstaller (without dotnetRunner)",
-            CancellationToken.None).Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "Creating LinuxServiceInstaller (without dotnetRunner)",
+                cancellationToken);
         return new LinuxServiceInstaller(useConsole, logger, messagesDataManager, userName);
     }
 }

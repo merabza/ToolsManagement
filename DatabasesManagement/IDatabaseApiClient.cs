@@ -3,8 +3,10 @@ using LibDatabaseParameters;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using WebAgentProjectsApiContracts.V1.Responses;
+using OneOf;
+using SystemToolsShared;
+using LanguageExt;
 
 namespace DatabasesManagement;
 
@@ -12,43 +14,43 @@ public interface IDatabaseApiClient
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    Task<Option<BackupFileParameters>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
+    Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
         string backupBaseName, CancellationToken cancellationToken);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    Task<Option<List<DatabaseInfoModel>>> GetDatabaseNames(CancellationToken cancellationToken);
+    Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
     // ReSharper disable once UnusedMember.Global
-    Task<Option<bool>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
+    Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
-    Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
+    Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
         CancellationToken cancellationToken, string? restoreFromFolderPath = null);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    Task<bool> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);
+    Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    Task<bool> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
+    Task<Option<Err[]>> ExecuteCommand(string executeQueryCommand, CancellationToken cancellationToken,
         string? databaseName = null);
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken);
+    //Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken);
 
-    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    //DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
-    //რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
-    bool IsServerLocal();
+    ////გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
+    ////DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
+    ////რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
+    //OneOf<bool, Err[]> IsServerLocal();
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    Task<bool> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
+    Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
 
-    Task<bool> TestConnection(string? databaseName, CancellationToken cancellationToken);
+    Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken);
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    Task<bool> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
+    Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
 }

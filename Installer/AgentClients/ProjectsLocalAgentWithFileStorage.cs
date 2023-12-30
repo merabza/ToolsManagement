@@ -1,9 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
+using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using SystemToolsShared;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace Installer.AgentClients;
 
@@ -28,49 +31,70 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
         _useConsole = useConsole;
     }
 
-    public async Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
-        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+    public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
+        string? serviceName, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
-        var applicationUpdater = AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
+        var applicationUpdater = await AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner,
-            _messagesDataManager, _userName);
-        return await Task.FromResult(
-            applicationUpdater?.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName) ??
-            false);
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+
+        if ( applicationUpdater is null)
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "AppParametersFileUpdaterCreateError",
+                    ErrorMessage = "AppParametersFileUpdater does not created"
+                }
+            };
+        return await applicationUpdater.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName, cancellationToken);
     }
 
-    public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
+    public async Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
+        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
+        string parametersFileExtension, CancellationToken cancellationToken)
+    {
+        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
+            programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
+            _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
+            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
+            _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+        if (applicationUpdaterCreateResult.IsT1)
+            return applicationUpdaterCreateResult.AsT1;
+        var applicationUpdater = applicationUpdaterCreateResult.AsT0;
+        if (applicationUpdater is null)
+            return new Err[]
+            {
+                new()
+                {
+                    ErrorCode = "ApplicationUpdaterDoesNotCreated",
+                    ErrorMessage = $"ApplicationUpdater for {projectName}/{environmentName} does not created"
+                }
+            };
+        return await applicationUpdater.UpdateProgram(projectName, environmentName,cancellationToken);
+    }
+
+    public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
+        string? serviceName, string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
-        var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
+        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner,
-            _messagesDataManager, _userName);
-        return await Task.FromResult(applicationUpdater?.UpdateProgram(projectName, environmentName));
-    }
-
-    public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
-        string serviceUserName,
-        string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
-        string parametersFileDateMask, string parametersFileExtension, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken)
-    {
-        var applicationUpdater = ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
-            programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
-            _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
-            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
-            _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner,
-            _messagesDataManager, _userName);
-        return await Task.FromResult(applicationUpdater?.UpdateServiceWithParameters(projectName, environmentName,
-            serviceUserName, serviceName, appSettingsFileName, serviceDescriptionSignature, projectDescription));
+            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+        if (applicationUpdaterCreateResult.IsT1)
+            return applicationUpdaterCreateResult.AsT1;
+        var applicationUpdater = applicationUpdaterCreateResult.AsT0;
+        var updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(projectName,
+            environmentName, serviceUserName, serviceName, appSettingsFileName, serviceDescriptionSignature,
+            projectDescription, cancellationToken);
+        return updateServiceWithParametersResult;
     }
 
     public async Task<bool> CheckValidation(CancellationToken cancellationToken)

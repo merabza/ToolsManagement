@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace LibToolActions;
 
@@ -21,25 +23,26 @@ public /*open*/ class ToolAction
         UserName = userName;
     }
 
-    public bool Run()
+    public async Task<bool> Run(CancellationToken cancellationToken)
     {
         try
         {
             if (!CheckValidate())
                 return false;
 
-            MessagesDataManager?.SendMessage(UserName, $"{_actionName} Started...", CancellationToken.None).Wait();
+            if (MessagesDataManager is not null)
+                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Started...", cancellationToken);
             Logger.LogInformation("{_actionName} Started...", _actionName);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
 
-            var success = RunAction();
+            var success = await RunAction(cancellationToken);
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            MessagesDataManager
-                ?.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}", CancellationToken.None).Wait();
+            if (MessagesDataManager is not null)
+                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}", cancellationToken);
             Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", _actionName, timeTakenMessage);
 
             return success;
@@ -68,8 +71,8 @@ public /*open*/ class ToolAction
         return true;
     }
 
-    protected virtual bool RunAction()
+    protected virtual Task<bool> RunAction(CancellationToken cancellationToken)
     {
-        return false;
+        return Task.FromResult(true);
     }
 }

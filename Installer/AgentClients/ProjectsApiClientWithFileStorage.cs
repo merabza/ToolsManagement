@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using OneOf;
 using SystemToolsShared;
 using WebAgentProjectsApiContracts.V1.Requests;
 
@@ -14,8 +16,8 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
     {
     }
 
-    public async Task<bool> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
-        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+    public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
+        string? serviceName, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
         var body = new UpdateSettingsRequest
@@ -32,9 +34,9 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
         return await PostAsync("projects/updatesettings", cancellationToken, bodyJsonData);
     }
 
-    public async Task<string?> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
-        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+    public async Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
+        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
+        string parametersFileExtension, CancellationToken cancellationToken)
     {
         var body = new ProjectUpdateRequest
         {
@@ -51,8 +53,8 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
         return await PostAsyncReturnString("projects/update", cancellationToken, bodyJsonData);
     }
 
-    public async Task<string?> InstallService(string projectName, string environmentName, string? serviceName,
-        string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
+    public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
+        string? serviceName, string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {

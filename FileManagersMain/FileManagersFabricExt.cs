@@ -1,6 +1,7 @@
 ﻿using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace FileManagersMain;
@@ -13,15 +14,15 @@ public static class FileManagersFabricExt
         return FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
     }
 
-    public static (FileStorageData?, FileManager?) CreateFileStorageAndFileManager(bool useConsole, ILogger logger,
+    public static async Task<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole, ILogger logger,
         string localPatch, string? fileStorageName, FileStorages fileStorages,
-        IMessagesDataManager? messagesDataManager, string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         FileStorageData? fileStorageData = null;
         if (string.IsNullOrWhiteSpace(fileStorageName))
         {
-            messagesDataManager?.SendMessage(userName, "File storage name not specified", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "File storage name not specified", cancellationToken);
             logger.LogError("File storage name not specified");
         }
         else
@@ -29,9 +30,8 @@ public static class FileManagersFabricExt
             fileStorageData = fileStorages.GetFileStorageDataByKey(fileStorageName);
             if (fileStorageData == null)
             {
-                messagesDataManager?.SendMessage(userName, $"File storage with name {fileStorageName} not found",
-                        CancellationToken.None)
-                    .Wait();
+                if (messagesDataManager is not null)
+                    await messagesDataManager.SendMessage(userName, $"File storage with name {fileStorageName} not found", cancellationToken);
                 logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
             }
         }

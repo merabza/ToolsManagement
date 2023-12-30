@@ -7,13 +7,13 @@ namespace LibToolActions.BackgroundTasks;
 
 public /*open*/ class ProcessesToolAction : ToolAction
 {
-    protected readonly ProcessManager? ProcessManager;
+    private readonly ProcessManager? _processManager;
 
     protected ProcessesToolAction(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
         ProcessManager? processManager, string actionName, int procLineId = 0) : base(logger, actionName,
         messagesDataManager, userName)
     {
-        ProcessManager = processManager;
+        _processManager = processManager;
         ProcLineId = procLineId;
     }
 
@@ -21,36 +21,36 @@ public /*open*/ class ProcessesToolAction : ToolAction
 
     public Task RunAsync(CancellationToken cancellationToken)
     {
-        var task = Task.Run(() =>
+        var task = Task.Run(async () =>
         {
-            if (ProcessManager is not null && ProcessManager.CheckCancellation())
+            if (_processManager is not null && _processManager.CheckCancellation())
                 return;
-            if (!Run()) //თუ პროცესი ცუდად დასრულდა, ვჩერდებით
+            if (!await Run(cancellationToken)) //თუ პროცესი ცუდად დასრულდა, ვჩერდებით
                 return;
             //თუ პროცესი კარგად დასრულდა, გაეშვას შემდეგი პროცესი
             var nextAction = GetNextAction();
-            RunNextAction(nextAction);
+            await RunNextAction(nextAction,cancellationToken);
         }, cancellationToken);
         return task;
     }
 
-    public virtual ProcessesToolAction? GetNextAction()
+    protected virtual ProcessesToolAction? GetNextAction()
     {
         return null;
     }
 
 
-    protected void RunNextAction(ProcessesToolAction? nextToolAction)
+    private async Task RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken)
     {
         while (true)
         {
-            if (ProcessManager is not null && ProcessManager.CheckCancellation())
+            if (_processManager is not null && _processManager.CheckCancellation())
                 return;
             if (nextToolAction == null)
                 return;
             if (ProcLineId == nextToolAction.ProcLineId)
             {
-                if (nextToolAction.Run())
+                if (await nextToolAction.Run(cancellationToken))
                 {
                     nextToolAction = nextToolAction.GetNextAction();
                     continue;
@@ -58,7 +58,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
             }
             else
             {
-                ProcessManager?.Run(nextToolAction);
+                _processManager?.Run(nextToolAction);
             }
 
             break;

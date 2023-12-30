@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using Installer.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -33,67 +34,70 @@ public sealed class LocalInstallerSettingsDomain
     //public string? ProjectDescription { get; }
 
 
-    public static LocalInstallerSettingsDomain? Create(ILogger? logger, bool useConsole, InstallerSettings? lis,
-        IMessagesDataManager? messagesDataManager, string? userName)
+    public static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
+        InstallerSettings? lis,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         if (lis is not null)
-            return Create(logger, useConsole, lis.InstallerWorkFolder, lis.FilesUserName, lis.FilesUsersGroupName,
+            return await Create(logger, useConsole, lis.InstallerWorkFolder, lis.FilesUserName, lis.FilesUsersGroupName,
                 lis.ServiceUserName, lis.DownloadTempExtension, lis.InstallFolder, lis.DotnetRunner,
-                //lis.ServiceDescriptionSignature, lis.ProjectDescription,
-                messagesDataManager, userName);
+                messagesDataManager, userName, cancellationToken);
 
-        messagesDataManager?.SendMessage(userName, "LocalInstallerSettings does not configured for support tools",
-                CancellationToken.None)
-            .Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName,
+                "LocalInstallerSettings does not configured for support tools", cancellationToken);
         StShared.WriteErrorLine("LocalInstallerSettings does not configured for support tools", true);
         return null;
     }
 
 
-    public static LocalInstallerSettingsDomain? Create(ILogger? logger, bool useConsole, string? installerWorkFolder,
-        string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
-        string? installFolder, string? dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName)
+    public static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
+        string? installerWorkFolder, string? filesUserName, string? filesUsersGroupName, string? serviceUserName,
+        string? downloadTempExtension, string? installFolder, string? dotnetRunner,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
-        messagesDataManager?.SendMessage(userName, "Creating LocalInstallerSettingsDomain", CancellationToken.None)
-            .Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "Creating LocalInstallerSettingsDomain", cancellationToken);
 
         if (string.IsNullOrWhiteSpace(installerWorkFolder))
         {
-            messagesDataManager?.SendMessage(userName, "installerWorkFolder does not specified", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "installerWorkFolder does not specified",
+                    cancellationToken);
             StShared.WriteErrorLine("installerWorkFolder does not specified", useConsole, logger);
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUserName does not specified", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "filesUserName does not specified", cancellationToken);
             StShared.WriteErrorLine("filesUserName does not specified", useConsole, logger);
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
-            messagesDataManager?.SendMessage(userName, "filesUsersGroupName does not specified", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "filesUsersGroupName does not specified",
+                    cancellationToken);
             StShared.WriteErrorLine("filesUsersGroupName does not specified", useConsole, logger);
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(serviceUserName))
         {
-            messagesDataManager?.SendMessage(userName, "serviceUserName does not specified", CancellationToken.None)
-                .Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "serviceUserName does not specified",
+                    cancellationToken);
             StShared.WriteErrorLine("serviceUserName does not specified", useConsole, logger);
             return null;
         }
 
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
         {
-            messagesDataManager
-                ?.SendMessage(userName, "downloadTempExtension does not specified", CancellationToken.None).Wait();
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "downloadTempExtension does not specified", cancellationToken);
             StShared.WriteErrorLine("downloadTempExtension does not specified", useConsole, logger);
             return null;
         }
@@ -102,7 +106,8 @@ public sealed class LocalInstallerSettingsDomain
             return new LocalInstallerSettingsDomain(installerWorkFolder, filesUserName, filesUsersGroupName,
                 serviceUserName, downloadTempExtension, installFolder, dotnetRunner);
 
-        messagesDataManager?.SendMessage(userName, "installFolder does not specified", CancellationToken.None).Wait();
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName, "installFolder does not specified", cancellationToken);
         StShared.WriteErrorLine("installFolder does not specified", useConsole, logger);
         return null;
     }

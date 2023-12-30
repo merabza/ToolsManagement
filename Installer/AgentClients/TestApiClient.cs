@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using SystemToolsShared;
 
 namespace Installer.AgentClients;
@@ -12,21 +12,13 @@ public class TestApiClient : ApiClient
     {
     }
 
-    public async Task<string?> GetAppSettingsVersion(CancellationToken cancellationToken)
+    public async Task<OneOf<string, Err[]>> GetAppSettingsVersion(CancellationToken cancellationToken)
     {
         return await GetAsyncAsString("test/getappsettingsversion", cancellationToken, false);
     }
 
-    public async Task<string?> GetVersion(CancellationToken cancellationToken, bool useConsole = false)
+    public async Task<OneOf<string, Err[]>> GetVersion(CancellationToken cancellationToken, bool useConsole = false)
     {
-        try
-        {
-            return await GetAsyncAsString("test/getversion", cancellationToken, false);
-        }
-        catch (Exception e)
-        {
-            StShared.WriteErrorLine(e.Message, useConsole);
-            return null;
-        }
+        return await GetAsyncAsString("test/getversion", cancellationToken, false);
     }
 }
