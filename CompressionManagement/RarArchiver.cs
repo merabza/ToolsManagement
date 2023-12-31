@@ -2,6 +2,7 @@
 using LibToolActions.BackgroundTasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+// ReSharper disable ConvertToPrimaryConstructor
 
 namespace CompressionManagement;
 
@@ -49,7 +50,7 @@ public sealed class RarArchiver : Archiver
         programArguments =
             sources.Aggregate(programArguments, (current, source) => current + " \"" + source + "\"");
 
-        return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments);
+        return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments).IsNone;
 
 
         //ProgRunner runProg = new ProgRunner(progPath, programArguments);

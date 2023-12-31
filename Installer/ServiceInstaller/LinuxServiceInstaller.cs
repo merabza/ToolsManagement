@@ -176,8 +176,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"Enable service {serviceEnvName}", cancellationToken);
         Logger.LogInformation("Enable service {serviceName}", serviceEnvName);
-        if (StShared.RunProcess(UseConsole, Logger, "systemctl",
-                $"--no-ask-password --no-block --quiet enable {serviceEnvName}"))
+
+        var processResult = StShared.RunProcess(UseConsole, Logger, "systemctl",
+            $"--no-ask-password --no-block --quiet enable {serviceEnvName}");
+
+        if (processResult.IsNone)
         {
             if (IsServiceExists(serviceEnvName))
                 return null;
@@ -213,7 +216,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         if (runProcessWithOutputResult.IsT1)
             return Err.RecreateErrors(runProcessWithOutputResult.AsT1,
                 new Err { ErrorCode = "WhichDotnetError", ErrorMessage = "Which Dotnet finished with Errors" });
-        var newDotnetRunner = runProcessWithOutputResult.AsT0;
+        var newDotnetRunner = runProcessWithOutputResult.AsT0.Item1;
         if (!string.IsNullOrWhiteSpace(newDotnetRunner) && File.Exists(newDotnetRunner))
             return newDotnetRunner;
         return Err.RecreateErrors(runProcessWithOutputResult.AsT1,
