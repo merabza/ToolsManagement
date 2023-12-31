@@ -288,8 +288,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
         var description = regKey?.GetValue("Description")?.ToString();
 #pragma warning restore CA1416 // Validate platform compatibility
 
-        return imagePath is not null && imagePath == exeFilePath && description is not null &&
-               description == mustBeDescription;
+        var toReturn = imagePath is not null && imagePath == exeFilePath && description is not null &&
+                       description == mustBeDescription;
+        return await Task.FromResult(toReturn);
     }
 
     protected override async Task<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
