@@ -276,22 +276,20 @@ public /*open*/ abstract class InstallerBase
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
         var startResult = await Start(serviceEnvName, cancellationToken);
-        if (startResult.IsSome)
-            return (Err[])startResult;
+        if (startResult.IsNone)
+            return null;
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"Service {projectName} can not started",
                 cancellationToken);
         Logger.LogError("Service {projectName} can not started", projectName);
-        return new Err[]
-        {
+        return Err.RecreateErrors((Err[])startResult,
             new()
             {
-                ErrorCode = "ServiceProjectNameCanNotStarted",
-                ErrorMessage = $"Service {projectName} can not started"
-            }
-        };
+                ErrorCode = "ServiceProjectNameCanNotStarted", ErrorMessage = $"Service {projectName} can not started"
+            });
+        ;
     }
 
     private async Task<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
@@ -726,14 +724,11 @@ public /*open*/ abstract class InstallerBase
                     cancellationToken)
                 ;
         Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
-        return new Err[]
-        {
+        return Err.RecreateErrors((Err[])startResult,
             new()
             {
-                ErrorCode = "ServiceCanNotBeStarted",
-                ErrorMessage = $"Service {serviceEnvName} can not be started"
-            }
-        };
+                ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
+            });
     }
 
     public async Task<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
@@ -1033,22 +1028,20 @@ public /*open*/ abstract class InstallerBase
         Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
 
         var startServiceResult = await StartService(serviceEnvName, cancellationToken);
-        if (startServiceResult.IsSome)
-            return startServiceResult;
+        if (startServiceResult.IsNone)
+            return null;
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not started",
                 cancellationToken);
 
         Logger.LogError("Service {serviceEnvName} can not started", serviceEnvName);
-        return new Err[]
-        {
+
+        return Err.RecreateErrors((Err[])startServiceResult,
             new()
             {
-                ErrorCode = "ServiceCanNotBeStarted",
-                ErrorMessage = $"Service {serviceEnvName} can not be started"
-            }
-        };
+                ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
+            });
     }
 
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string serviceName,
