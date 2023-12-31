@@ -721,8 +721,7 @@ public /*open*/ abstract class InstallerBase
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not started",
-                    cancellationToken)
-                ;
+                    cancellationToken);
         Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
         return Err.RecreateErrors((Err[])startResult,
             new()
