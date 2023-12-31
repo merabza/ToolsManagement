@@ -941,56 +941,54 @@ public /*open*/ abstract class InstallerBase
         return await Stop(GetServiceEnvName(serviceName, environmentName), cancellationToken);
     }
 
+    private async Task LogInfoAndSendMessage(string message, CancellationToken cancellationToken)
+    {
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName, message,
+                cancellationToken);
+        Logger.LogInformation(message);
+
+    }
+
+    private async Task<Err[]> LogInfoAndSendMessageFromError(string errorCode, string message, CancellationToken cancellationToken)
+    {
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
+        Logger.LogInformation(message);
+        return new Err[]
+        {
+            new()
+            {
+                ErrorCode = errorCode,
+                ErrorMessage = message
+            }
+        };
+    }
+
+    private async Task<Err[]> LogInfoAndSendMessageFromError(Err error, CancellationToken cancellationToken)
+    {
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName, error.ErrorMessage, cancellationToken);
+        Logger.LogInformation(error.ErrorMessage);
+        return new[] {error};
+    }
+
     private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is exists",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
-        }
+            await LogInfoAndSendMessage($"Service {serviceEnvName} is exists", cancellationToken);
         else
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not exists",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ServiceDoesNotExists",
-                    ErrorMessage = $"Service {serviceEnvName} does not exists"
-                }
-            };
-        }
+            return await LogInfoAndSendMessageFromError("ServiceDoesNotExists", $"Service {serviceEnvName} does not exists", cancellationToken);
 
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
-        if (serviceIsRunning)
+        if (!serviceIsRunning)
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
+            await LogInfoAndSendMessage($"Service {serviceEnvName} is not running", cancellationToken);
+            return null;
         }
-        else
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not running",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ServiceDoesNotExists",
-                    ErrorMessage = $"Service {serviceEnvName} does not running"
-                }
-            };
-        }
+        await LogInfoAndSendMessage($"Service {serviceEnvName} is running", cancellationToken);
 
         var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
         if (stopServiceResult.IsNone)
@@ -1023,8 +1021,7 @@ public /*open*/ abstract class InstallerBase
         {
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                        cancellationToken)
-                    ;
+                        cancellationToken);
             Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
             return null;
         }
