@@ -941,27 +941,26 @@ public /*open*/ abstract class InstallerBase
         return await Stop(GetServiceEnvName(serviceName, environmentName), cancellationToken);
     }
 
-    private async Task LogInfoAndSendMessage(CancellationToken cancellationToken, string message, params object?[] args)
+    private async Task LogInfoAndSendMessage(CancellationToken cancellationToken, string message)
     {
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, string.Format(message, args),
+            await MessagesDataManager.SendMessage(UserName, message,
                 cancellationToken);
-        Logger.LogInformation(message, args);
+        Logger.LogInformation(message);
 
     }
 
-    private async Task<Err[]> LogInfoAndSendMessageFromError(CancellationToken cancellationToken, string errorCode, string message, params object?[] args)
+    private async Task<Err[]> LogInfoAndSendMessageFromError(CancellationToken cancellationToken, string errorCode, string message)
     {
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, string.Format(message, args),
-                cancellationToken);
-        Logger.LogInformation(message, args);
+            await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
+        Logger.LogInformation(message);
         return new Err[]
         {
             new()
             {
                 ErrorCode = errorCode,
-                ErrorMessage = string.Format(message, args)
+                ErrorMessage = message
             }
         };
     }
@@ -979,7 +978,7 @@ public /*open*/ abstract class InstallerBase
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
-            await LogInfoAndSendMessage(cancellationToken, "Service {serviceEnvName} is exists", serviceEnvName);
+            await LogInfoAndSendMessage(cancellationToken, "Service {0} is exists", serviceEnvName);
         else
             return await LogInfoAndSendMessageFromError(cancellationToken, "ServiceDoesNotExists",
                 "Service {serviceEnvName} does not exists", serviceEnvName);
@@ -987,10 +986,10 @@ public /*open*/ abstract class InstallerBase
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (!serviceIsRunning)
         {
-            await LogInfoAndSendMessage(cancellationToken, "Service {serviceEnvName} is not running", serviceEnvName);
+            await LogInfoAndSendMessage(cancellationToken, "Service {0} is not running", serviceEnvName);
             return null;
         }
-        await LogInfoAndSendMessage(cancellationToken, "Service {serviceEnvName} is running", serviceEnvName);
+        await LogInfoAndSendMessage(cancellationToken, "Service {0} is running", serviceEnvName);
 
         var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
         if (stopServiceResult.IsSome)
