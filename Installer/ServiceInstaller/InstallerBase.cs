@@ -993,7 +993,7 @@ public /*open*/ abstract class InstallerBase
         }
 
         var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
-        if (stopServiceResult.IsSome)
+        if (stopServiceResult.IsNone)
             return stopServiceResult;
 
         if (MessagesDataManager is not null)
