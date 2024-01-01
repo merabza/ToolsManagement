@@ -698,7 +698,7 @@ public /*open*/ abstract class InstallerBase
             if (!isServiceRegisteredProperlyResult.AsT0)
             {
                 await LogInfoAndSendMessage(
-                    $"Service {projectName}/{serviceEnvName} registration is not properly, so wil be removed",
+                    $"Service {projectName}/{serviceEnvName} registration is not properly, so will be removed",
                     cancellationToken);
                 var removeServiceError = RemoveService(serviceEnvName);
                 if (removeServiceError.IsSome)
@@ -706,6 +706,8 @@ public /*open*/ abstract class InstallerBase
                     Err.PrintErrorsOnConsole((Err[])removeServiceError);
                     return (Err[])removeServiceError;
                 }
+                //რადგან სერვისი წავშალეთ ის აღარ არსებობს და შემდგომში თავიდან უნდა შეიქმნას
+                serviceExists = false;
             }
         }
 
