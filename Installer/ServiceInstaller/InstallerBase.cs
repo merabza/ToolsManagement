@@ -281,13 +281,13 @@ public /*open*/ abstract class InstallerBase
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {projectName} can not started",
+            await MessagesDataManager.SendMessage(UserName, $"Service {projectName} can not be started",
                 cancellationToken);
-        Logger.LogError("Service {projectName} can not started", projectName);
+        Logger.LogError("Service {projectName} can not be started", projectName);
         return Err.RecreateErrors((Err[])startResult,
             new()
             {
-                ErrorCode = "ServiceProjectNameCanNotStarted", ErrorMessage = $"Service {projectName} can not started"
+                ErrorCode = "ServiceProjectNameCanNotStarted", ErrorMessage = $"Service {projectName} can not be started"
             });
     }
 
@@ -647,8 +647,7 @@ public /*open*/ abstract class InstallerBase
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {projectInstallFullPath}...",
-                    cancellationToken)
-                ;
+                    cancellationToken);
         Logger.LogInformation("WriteAllTextToPath {projectInstallFullPath}...", projectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
         appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
@@ -719,7 +718,7 @@ public /*open*/ abstract class InstallerBase
             return assemblyVersion;
 
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not started",
+            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be started",
                     cancellationToken);
         Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
         return Err.RecreateErrors((Err[])startResult,
@@ -1030,10 +1029,10 @@ public /*open*/ abstract class InstallerBase
             return null;
 
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not started",
+            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be started",
                 cancellationToken);
 
-        Logger.LogError("Service {serviceEnvName} can not started", serviceEnvName);
+        Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
 
         return Err.RecreateErrors((Err[])startServiceResult,
             new()
