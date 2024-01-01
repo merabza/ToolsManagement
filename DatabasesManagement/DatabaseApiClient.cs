@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts.V1.Requests;
+using WebAgentProjectsApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
@@ -93,7 +94,17 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
-        return await PutAsync($"databases/restorebackup/{databaseName}", cancellationToken);
+
+        var bodyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
+        {
+            Prefix = backupFileParameters.Prefix,
+            Suffix = backupFileParameters.Suffix,
+            Name = backupFileParameters.Name,
+            DateMask = backupFileParameters.DateMask
+        });
+
+
+        return await PutAsync($"databases/restorebackup/{databaseName}", cancellationToken, bodyJsonData);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
