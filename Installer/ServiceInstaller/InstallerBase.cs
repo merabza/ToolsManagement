@@ -289,7 +289,6 @@ public /*open*/ abstract class InstallerBase
             {
                 ErrorCode = "ServiceProjectNameCanNotStarted", ErrorMessage = $"Service {projectName} can not started"
             });
-        ;
     }
 
     private async Task<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
