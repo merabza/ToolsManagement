@@ -86,14 +86,14 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     //რომ არსებულის გადანახვა არ მოხდეს.
     public async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken)
     {
-        return await PostAsyncReturn<bool>($"databases/isdatabaseexists/{databaseName}", cancellationToken);
+        return await GetAsyncReturn<bool>($"databases/isdatabaseexists/{databaseName}", cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
-        return await PostAsync($"databases/restorebackup/{databaseName}", cancellationToken);
+        return await PutAsync($"databases/restorebackup/{databaseName}", cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
