@@ -644,13 +644,16 @@ public /*open*/ abstract class InstallerBase
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
 
-
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {projectInstallFullPath}...",
                     cancellationToken);
         Logger.LogInformation("WriteAllTextToPath {projectInstallFullPath}...", projectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
         appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
+
+        await LogInfoAndSendMessage(
+            $"Change Owner for Path {projectInstallFullPath} for user {filesUserName} and group {filesUsersGroupName}",
+            cancellationToken);
 
         var changeOwnerResult =
             await ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
@@ -676,20 +679,37 @@ public /*open*/ abstract class InstallerBase
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
         {
+
+            await LogInfoAndSendMessage(
+                $"Because service {projectName}/{serviceEnvName} is exists, Check if Service registered properly",
+                cancellationToken);
+
             var isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName, serviceEnvName,
                 serviceUserName, projectInstallFullPath, serviceDescriptionSignature, projectDescription,
                 cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
-                return isServiceRegisteredProperlyResult.AsT1;
+                return Err.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
+                    new Err
+                    {
+                        ErrorCode = "IsServiceRegisteredProperlyError",
+                        ErrorMessage = "Error when check IsServiceRegisteredProperly"
+                    });
 
             if (!isServiceRegisteredProperlyResult.AsT0)
-                if (RemoveService(serviceEnvName))
-                    serviceExists = false;
+            {
+                await LogInfoAndSendMessage(
+                    $"Service {projectName}/{serviceEnvName} registration is not properly, so wil be removed",
+                    cancellationToken);
+                var removeServiceError = RemoveService(serviceEnvName);
+                if (removeServiceError.IsSome)
+                    return (Err[])removeServiceError;
+            }
         }
 
         //თუ სერვისი არ არის დარეგისტრირებული და პლატფორმა მოითხოვს დარეგისტრირებას, დავარეგისტრიროთ
         if (!serviceExists)
         {
+
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName, $"registering service {serviceEnvName}...",
                     cancellationToken);
