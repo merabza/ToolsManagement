@@ -57,7 +57,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
         var disableProcessResult = StShared.RunProcess(UseConsole, Logger, "systemctl",
-            $"--no-ask-password --no-block --quiet disable {serviceEnvName}");
+            $"--no-ask-password --no-block --quiet disable {serviceEnvName}", new[] { 1 });
 
         if (disableProcessResult.IsSome)
             return Err.RecreateErrors((Err[])disableProcessResult,

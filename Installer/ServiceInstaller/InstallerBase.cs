@@ -702,7 +702,10 @@ public /*open*/ abstract class InstallerBase
                     cancellationToken);
                 var removeServiceError = RemoveService(serviceEnvName);
                 if (removeServiceError.IsSome)
+                {
+                    Err.PrintErrorsOnConsole((Err[])removeServiceError);
                     return (Err[])removeServiceError;
+                }
             }
         }
 
