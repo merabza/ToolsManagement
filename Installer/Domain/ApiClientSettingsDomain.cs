@@ -1,4 +1,5 @@
-﻿namespace Installer.Domain;
+﻿// ReSharper disable ConvertToPrimaryConstructor
+namespace Installer.Domain;
 
 public sealed class ApiClientSettingsDomain
 {
