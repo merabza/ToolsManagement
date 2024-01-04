@@ -29,7 +29,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
                 return;
             //თუ პროცესი კარგად დასრულდა, გაეშვას შემდეგი პროცესი
             var nextAction = GetNextAction();
-            await RunNextAction(nextAction,cancellationToken);
+            await RunNextAction(nextAction, cancellationToken);
         }, cancellationToken);
         return task;
     }

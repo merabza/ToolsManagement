@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace LibToolActions.BackgroundTasks;
@@ -46,7 +47,7 @@ public sealed class ToolActionsQueuedRunner : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occurred executing toolAction.");
+                _logger.LogError(ex, "Error occurred executing toolAction.");
             }
 
             IsBusy = false;

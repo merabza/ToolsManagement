@@ -18,10 +18,10 @@ namespace DatabasesManagement;
 public sealed class SqlServerManagementClient : IDatabaseApiClient
 {
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
-    private readonly IMessagesDataManager? _messagesDataManager;
-    private readonly string? _userName;
     private readonly ILogger _logger;
+    private readonly IMessagesDataManager? _messagesDataManager;
     private readonly bool _useConsole;
+    private readonly string? _userName;
 
     private SqlServerManagementClient(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
@@ -34,85 +34,6 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         _userName = userName;
     }
 
-    public static async Task<SqlServerManagementClient?> Create(ILogger logger, bool useConsole,
-        DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
-        {
-            if ( messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "ServerAddress is empty, Cannot create SqlServerManagementClient", cancellationToken);
-            logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
-        {
-            if ( messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "BackupFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
-            logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
-        {
-            if ( messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "DataFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
-            logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
-        {
-            if ( messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
-            logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-        var dbAuthSettings = DbAuthSettingsCreator.Create(
-            databaseServerConnectionData.WindowsNtIntegratedSecurity,
-            databaseServerConnectionData.ServerUser, databaseServerConnectionData.ServerPass);
-
-        if (dbAuthSettings is null)
-            return null;
-
-        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
-            databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress,
-            dbAuthSettings,
-            databaseServerConnectionData.BackupFolderName, databaseServerConnectionData.DataFolderName,
-            databaseServerConnectionData.DataLogFolderName);
-
-        return new SqlServerManagementClient(logger, useConsole, databaseServerConnectionDataDomain,
-            messagesDataManager, userName);
-    }
-
-    private async Task<OneOf<DbClient, Err[]>> GetDatabaseClient(CancellationToken cancellationToken, string? databaseName = null)
-    {
-        var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
-            _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager);
-
-        if (dc is not null)
-            return dc;
-
-        if ( _messagesDataManager is not null)
-            await _messagesDataManager.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
-                cancellationToken);
-        _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
-        //throw new Exception($"Cannot create DbClient for database {databaseName}");
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "CannotCreateDbClient", ErrorMessage = $"Cannot create DbClient for database {databaseName}"
-            }
-        };
-    }
-
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
     public async Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken)
     {
@@ -123,12 +44,12 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.CheckRepairDatabase(databaseName, cancellationToken);
-
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain dbBackupParameters,
+    public async Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(
+        DatabaseBackupParametersDomain dbBackupParameters,
         string backupBaseName, CancellationToken cancellationToken)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -179,6 +100,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             if (verifyBackupResult.IsSome)
                 return (Err[])verifyBackupResult;
         }
+
         BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
             dbBackupParameters.DateMask);
 
@@ -210,18 +132,6 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         return await dc.GetDatabaseInfos(cancellationToken);
     }
 
-    //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
-    {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
-
-        if (getDatabaseClientResult.IsT1)
-            return getDatabaseClientResult.AsT1;
-        var dc = getDatabaseClientResult.AsT0;
-
-        return await dc.GetDbServerInfo(cancellationToken);
-    }
-
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
@@ -235,19 +145,6 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.IsDatabaseExists(databaseName, cancellationToken);
-    }
-
-    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
-    {
-        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
-
-        if (getDatabaseClientResult.IsT1)
-            return getDatabaseClientResult.AsT1;
-        var dc = getDatabaseClientResult.AsT0;
-
-        return await dc.IsServerLocal(cancellationToken);
     }
 
 
@@ -288,6 +185,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
                     ErrorCode = "HostPlatformDoesNotDetected", ErrorMessage = "Host platform does not detected"
                 });
         }
+
         var hostPlatformName = hostPlatformResult.AsT0;
 
         var dirSeparator = "\\";
@@ -313,6 +211,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
                     ErrorCode = "RestoreFilesDoesNotDetected", ErrorMessage = "Restore Files does not detected"
                 });
         }
+
         var files = getRestoreFilesResult.AsT0;
 
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
@@ -343,4 +242,112 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
 
+    public static async Task<SqlServerManagementClient?> Create(ILogger logger, bool useConsole,
+        DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
+        string? userName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName,
+                    "ServerAddress is empty, Cannot create SqlServerManagementClient", cancellationToken);
+            logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName,
+                    "BackupFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
+            logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName,
+                    "DataFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
+            logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName,
+                    "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
+                    cancellationToken);
+            logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
+            return null;
+        }
+
+        var dbAuthSettings = DbAuthSettingsCreator.Create(
+            databaseServerConnectionData.WindowsNtIntegratedSecurity,
+            databaseServerConnectionData.ServerUser, databaseServerConnectionData.ServerPass);
+
+        if (dbAuthSettings is null)
+            return null;
+
+        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
+            databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress,
+            dbAuthSettings,
+            databaseServerConnectionData.BackupFolderName, databaseServerConnectionData.DataFolderName,
+            databaseServerConnectionData.DataLogFolderName);
+
+        return new SqlServerManagementClient(logger, useConsole, databaseServerConnectionDataDomain,
+            messagesDataManager, userName);
+    }
+
+    private async Task<OneOf<DbClient, Err[]>> GetDatabaseClient(CancellationToken cancellationToken,
+        string? databaseName = null)
+    {
+        var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
+            _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
+            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager);
+
+        if (dc is not null)
+            return dc;
+
+        if (_messagesDataManager is not null)
+            await _messagesDataManager.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
+                cancellationToken);
+        _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
+        //throw new Exception($"Cannot create DbClient for database {databaseName}");
+        return new Err[]
+        {
+            new()
+            {
+                ErrorCode = "CannotCreateDbClient", ErrorMessage = $"Cannot create DbClient for database {databaseName}"
+            }
+        };
+    }
+
+    //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
+    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
+    {
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.GetDbServerInfo(cancellationToken);
+    }
+
+    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
+    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
+    {
+        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.IsServerLocal(cancellationToken);
+    }
 }

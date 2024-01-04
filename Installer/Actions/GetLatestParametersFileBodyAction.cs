@@ -7,6 +7,7 @@ using LibToolActions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Installer.Actions;

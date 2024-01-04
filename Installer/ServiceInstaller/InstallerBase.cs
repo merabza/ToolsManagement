@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OneOf;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Installer.ServiceInstaller;
@@ -17,10 +18,10 @@ namespace Installer.ServiceInstaller;
 public /*open*/ abstract class InstallerBase
 {
     protected readonly ILogger Logger;
-    public readonly string Runtime;
     protected readonly IMessagesDataManager? MessagesDataManager;
-    protected readonly string? UserName;
+    public readonly string Runtime;
     protected readonly bool UseConsole;
+    protected readonly string? UserName;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName)
@@ -285,9 +286,10 @@ public /*open*/ abstract class InstallerBase
                 cancellationToken);
         Logger.LogError("Service {projectName} can not be started", projectName);
         return Err.RecreateErrors((Err[])startResult,
-            new()
+            new Err
             {
-                ErrorCode = "ServiceProjectNameCanNotStarted", ErrorMessage = $"Service {projectName} can not be started"
+                ErrorCode = "ServiceProjectNameCanNotStarted",
+                ErrorMessage = $"Service {projectName} can not be started"
             });
     }
 
@@ -646,7 +648,7 @@ public /*open*/ abstract class InstallerBase
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {projectInstallFullPath}...",
-                    cancellationToken);
+                cancellationToken);
         Logger.LogInformation("WriteAllTextToPath {projectInstallFullPath}...", projectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
         appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
@@ -679,7 +681,6 @@ public /*open*/ abstract class InstallerBase
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
         {
-
             await LogInfoAndSendMessage(
                 $"Because service {projectName}/{serviceEnvName} is exists, Check if Service registered properly",
                 cancellationToken);
@@ -706,6 +707,7 @@ public /*open*/ abstract class InstallerBase
                     Err.PrintErrorsOnConsole((Err[])removeServiceError);
                     return (Err[])removeServiceError;
                 }
+
                 //რადგან სერვისი წავშალეთ ის აღარ არსებობს და შემდგომში თავიდან უნდა შეიქმნას
                 serviceExists = false;
             }
@@ -714,7 +716,6 @@ public /*open*/ abstract class InstallerBase
         //თუ სერვისი არ არის დარეგისტრირებული და პლატფორმა მოითხოვს დარეგისტრირებას, დავარეგისტრიროთ
         if (!serviceExists)
         {
-
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName, $"registering service {serviceEnvName}...",
                     cancellationToken);
@@ -744,10 +745,10 @@ public /*open*/ abstract class InstallerBase
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be started",
-                    cancellationToken);
+                cancellationToken);
         Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
         return Err.RecreateErrors((Err[])startResult,
-            new()
+            new Err
             {
                 ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
             });
@@ -949,7 +950,6 @@ public /*open*/ abstract class InstallerBase
                 ErrorMessage = $"folder {projectInstallFullPath} owner can not be changed"
             }
         };
-
     }
 
     public async Task<Option<Err[]>> Stop(string? serviceName, string environmentName,
@@ -964,10 +964,10 @@ public /*open*/ abstract class InstallerBase
             await MessagesDataManager.SendMessage(UserName, message,
                 cancellationToken);
         Logger.LogInformation(message);
-
     }
 
-    private async Task<Err[]> LogInfoAndSendMessageFromError(string errorCode, string message, CancellationToken cancellationToken)
+    private async Task<Err[]> LogInfoAndSendMessageFromError(string errorCode, string message,
+        CancellationToken cancellationToken)
     {
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
@@ -987,7 +987,7 @@ public /*open*/ abstract class InstallerBase
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, error.ErrorMessage, cancellationToken);
         Logger.LogInformation(error.ErrorMessage);
-        return new[] {error};
+        return new[] { error };
     }
 
     private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken)
@@ -997,7 +997,8 @@ public /*open*/ abstract class InstallerBase
         if (serviceExists)
             await LogInfoAndSendMessage($"Service {serviceEnvName} is exists", cancellationToken);
         else
-            return await LogInfoAndSendMessageFromError("ServiceDoesNotExists", $"Service {serviceEnvName} does not exists", cancellationToken);
+            return await LogInfoAndSendMessageFromError("ServiceDoesNotExists",
+                $"Service {serviceEnvName} does not exists", cancellationToken);
 
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (!serviceIsRunning)
@@ -1005,6 +1006,7 @@ public /*open*/ abstract class InstallerBase
             await LogInfoAndSendMessage($"Service {serviceEnvName} is not running", cancellationToken);
             return null;
         }
+
         await LogInfoAndSendMessage($"Service {serviceEnvName} is running", cancellationToken);
 
         var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
@@ -1038,7 +1040,7 @@ public /*open*/ abstract class InstallerBase
         {
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                        cancellationToken);
+                    cancellationToken);
             Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
             return null;
         }
@@ -1060,7 +1062,7 @@ public /*open*/ abstract class InstallerBase
         Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
 
         return Err.RecreateErrors((Err[])startServiceResult,
-            new()
+            new Err
             {
                 ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
             });

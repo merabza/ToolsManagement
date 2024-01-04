@@ -16,8 +16,8 @@ namespace Installer.ServiceInstaller;
 
 public sealed class WindowsServiceInstaller : InstallerBase
 {
-    private readonly string? _serviceDescriptionSignature;
     private readonly string? _projectDescription;
+    private readonly string? _serviceDescriptionSignature;
 
     public WindowsServiceInstaller(bool useConsole, ILogger logger, string? serviceDescriptionSignature,
         string? projectDescription, IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole,

@@ -11,8 +11,8 @@ namespace Installer;
 public /*open*/ class ApplicationUpdaterBase
 {
     protected readonly ILogger Logger;
-    protected readonly bool UseConsole;
     protected readonly IMessagesDataManager? MessagesDataManager;
+    protected readonly bool UseConsole;
     protected readonly string? UserName;
 
     protected ApplicationUpdaterBase(ILogger logger, bool useConsole, IMessagesDataManager? messagesDataManager,

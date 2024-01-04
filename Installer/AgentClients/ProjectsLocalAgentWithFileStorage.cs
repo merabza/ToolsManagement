@@ -6,6 +6,7 @@ using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace Installer.AgentClients;
@@ -14,10 +15,10 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
-    private readonly IMessagesDataManager? _messagesDataManager;
-    private readonly string? _userName;
     private readonly ILogger _logger;
+    private readonly IMessagesDataManager? _messagesDataManager;
     private readonly bool _useConsole;
+    private readonly string? _userName;
 
     public ProjectsLocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
         LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager? messagesDataManager,
@@ -40,7 +41,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
 
-        if ( applicationUpdater is null)
+        if (applicationUpdater is null)
             return new Err[]
             {
                 new()
@@ -49,14 +50,16 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
                     ErrorMessage = "AppParametersFileUpdater does not created"
                 }
             };
-        return await applicationUpdater.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName, cancellationToken);
+        return await applicationUpdater.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName,
+            cancellationToken);
     }
 
     public async Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken)
     {
-        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
+        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
+            programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
@@ -74,7 +77,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
                     ErrorMessage = $"ApplicationUpdater for {projectName}/{environmentName} does not created"
                 }
             };
-        return await applicationUpdater.UpdateProgram(projectName, environmentName,cancellationToken);
+        return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 
     public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
@@ -82,7 +85,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
-        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole, programArchiveDateMask,
+        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
+            programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
             _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,

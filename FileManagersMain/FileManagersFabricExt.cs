@@ -1,7 +1,7 @@
-﻿using LibFileParameters.Models;
-using Microsoft.Extensions.Logging;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using LibFileParameters.Models;
+using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
 namespace FileManagersMain;
@@ -14,7 +14,8 @@ public static class FileManagersFabricExt
         return FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
     }
 
-    public static async Task<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole, ILogger logger,
+    public static async Task<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole,
+        ILogger logger,
         string localPatch, string? fileStorageName, FileStorages fileStorages,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
@@ -31,7 +32,8 @@ public static class FileManagersFabricExt
             if (fileStorageData == null)
             {
                 if (messagesDataManager is not null)
-                    await messagesDataManager.SendMessage(userName, $"File storage with name {fileStorageName} not found", cancellationToken);
+                    await messagesDataManager.SendMessage(userName,
+                        $"File storage with name {fileStorageName} not found", cancellationToken);
                 logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
             }
         }

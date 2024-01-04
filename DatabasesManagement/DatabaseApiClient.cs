@@ -26,21 +26,6 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
         _logger = logger;
     }
 
-    public static async Task< DatabaseApiClient?> Create(ILogger logger, ApiClientSettings? apiClientSettings,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
-    {
-        if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "cannot create DatabaseApiClient", cancellationToken);
-            logger.LogError("cannot create DatabaseApiClient");
-            return null;
-        }
-
-        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
-        return new DatabaseApiClient(logger, apiClientSettingsDomain);
-    }
-
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
     public async Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(
@@ -94,7 +79,6 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
-
         var bodyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
         {
             Prefix = backupFileParameters.Prefix,
@@ -156,4 +140,18 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             cancellationToken);
     }
 
+    public static async Task<DatabaseApiClient?> Create(ILogger logger, ApiClientSettings? apiClientSettings,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+    {
+        if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "cannot create DatabaseApiClient", cancellationToken);
+            logger.LogError("cannot create DatabaseApiClient");
+            return null;
+        }
+
+        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
+        return new DatabaseApiClient(logger, apiClientSettingsDomain);
+    }
 }

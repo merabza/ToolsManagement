@@ -27,7 +27,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async Task<OneOf<ApplicationUpdater,Err[]>> Create(ILogger logger, bool useConsole, string programArchiveDateMask,
+    public static async Task<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
+        string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         FileStorageData fileStorageForUpload, string? installerWorkFolder, string? filesUserName,
         string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension, string? installFolder,
@@ -167,7 +168,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName, CancellationToken cancellationToken)
+    public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
+        CancellationToken cancellationToken)
     {
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName,
@@ -275,7 +277,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 };
             }
 
-        var assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName, environmentName,
+        var assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName,
+            environmentName,
             _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
             _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder,
             cancellationToken);

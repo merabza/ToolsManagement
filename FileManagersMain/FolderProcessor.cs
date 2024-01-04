@@ -14,8 +14,8 @@ public /*open*/ class FolderProcessor
     private readonly string? _fileSearchPattern;
 
     private readonly string _name;
-    private readonly bool _useSubFolders;
     private readonly bool _useProcessFiles;
+    private readonly bool _useSubFolders;
     protected readonly ExcludeSet? ExcludeSet;
     protected readonly FileManager FileManager;
 

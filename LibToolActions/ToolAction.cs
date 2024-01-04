@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+
 // ReSharper disable ConvertToPrimaryConstructor
 
 namespace LibToolActions;
@@ -10,9 +11,9 @@ namespace LibToolActions;
 public /*open*/ class ToolAction
 {
     private readonly string _actionName;
+    protected readonly ILogger Logger;
     protected readonly IMessagesDataManager? MessagesDataManager;
     protected readonly string? UserName;
-    protected readonly ILogger Logger;
 
 
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName)
@@ -42,7 +43,8 @@ public /*open*/ class ToolAction
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
             if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}", cancellationToken);
+                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}",
+                    cancellationToken);
             Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", _actionName, timeTakenMessage);
 
             return success;

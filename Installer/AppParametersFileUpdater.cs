@@ -89,7 +89,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
                 new()
                 {
                     ErrorCode = "CannotUpdateSelf",
-                    ErrorMessage = $"Cannot update self"
+                    ErrorMessage = "Cannot update self"
                 }
             };
         }

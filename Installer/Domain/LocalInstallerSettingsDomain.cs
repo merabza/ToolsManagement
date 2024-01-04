@@ -97,7 +97,8 @@ public sealed class LocalInstallerSettingsDomain
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
         {
             if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "downloadTempExtension does not specified", cancellationToken);
+                await messagesDataManager.SendMessage(userName, "downloadTempExtension does not specified",
+                    cancellationToken);
             StShared.WriteErrorLine("downloadTempExtension does not specified", useConsole, logger);
             return null;
         }
