@@ -8,6 +8,7 @@ namespace Installer.AgentClients;
 
 public class TestApiClient : ApiClient
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public TestApiClient(ILogger logger, string server) : base(logger, server, null)
     {
     }
@@ -17,7 +18,7 @@ public class TestApiClient : ApiClient
         return await GetAsyncAsString("test/getappsettingsversion", cancellationToken, false);
     }
 
-    public async Task<OneOf<string, Err[]>> GetVersion(CancellationToken cancellationToken, bool useConsole = false)
+    public async Task<OneOf<string, Err[]>> GetVersion(CancellationToken cancellationToken)
     {
         return await GetAsyncAsString("test/getversion", cancellationToken, false);
     }
