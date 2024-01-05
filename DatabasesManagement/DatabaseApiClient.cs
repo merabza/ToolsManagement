@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
@@ -108,15 +109,15 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             cancellationToken);
     }
 
-    //public Task<DbServerInfo?> GetDatabaseServerInfo(CancellationToken cancellationToken)
-    //{
-    //    throw new NotImplementedException();
-    //}
+    public Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
-    //public bool IsServerLocal()
-    //{
-    //    throw new NotImplementedException();
-    //}
+    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
+    {
+        return await Task.FromResult(false);
+    }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
     public async Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken)

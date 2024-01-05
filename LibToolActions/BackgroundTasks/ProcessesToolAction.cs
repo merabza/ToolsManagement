@@ -7,13 +7,14 @@ namespace LibToolActions.BackgroundTasks;
 
 public /*open*/ class ProcessesToolAction : ToolAction
 {
-    private readonly ProcessManager? _processManager;
+    //საჭიროა ApAgent-ისთვის
+    protected readonly ProcessManager? ProcessManager;
 
     protected ProcessesToolAction(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
         ProcessManager? processManager, string actionName, int procLineId = 0) : base(logger, actionName,
         messagesDataManager, userName)
     {
-        _processManager = processManager;
+        ProcessManager = processManager;
         ProcLineId = procLineId;
     }
 
@@ -23,7 +24,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
     {
         var task = Task.Run(async () =>
         {
-            if (_processManager is not null && _processManager.CheckCancellation())
+            if (ProcessManager is not null && ProcessManager.CheckCancellation())
                 return;
             if (!await Run(cancellationToken)) //თუ პროცესი ცუდად დასრულდა, ვჩერდებით
                 return;
@@ -34,17 +35,18 @@ public /*open*/ class ProcessesToolAction : ToolAction
         return task;
     }
 
-    protected virtual ProcessesToolAction? GetNextAction()
+    //public საჭიროა ApAgent-ისათვის
+    public virtual ProcessesToolAction? GetNextAction()
     {
         return null;
     }
 
-
-    private async Task RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken)
+    //protected საჭიროა ApAgent-ისათვის
+    protected async Task RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken)
     {
         while (true)
         {
-            if (_processManager is not null && _processManager.CheckCancellation())
+            if (ProcessManager is not null && ProcessManager.CheckCancellation())
                 return;
             if (nextToolAction == null)
                 return;
@@ -58,7 +60,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
             }
             else
             {
-                _processManager?.Run(nextToolAction);
+                ProcessManager?.Run(nextToolAction);
             }
 
             break;

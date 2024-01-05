@@ -105,6 +105,7 @@ public /*open*/ class FolderProcessor
     //    return null;
     //}
 
+    //success, folderNameChanged, continueWithThisFolder
     protected virtual (bool, bool, bool) ProcessOneFolder(string? afterRootPath, string folderName)
     {
         return (true, false, true);

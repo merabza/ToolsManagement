@@ -39,12 +39,15 @@ public interface IDatabaseApiClient
         string? databaseName = null);
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    //Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken);
+    //გამოიყენება ApAgent-ში
+    Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken);
 
-    ////გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    ////DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
-    ////რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
-    //OneOf<bool, Err[]> IsServerLocal();
+    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
+    //DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
+    //რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
+    //გამოიყენება ApAgent-ში
+    Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken);
+
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
     Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken);

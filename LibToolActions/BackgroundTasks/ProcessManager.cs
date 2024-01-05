@@ -22,7 +22,7 @@ public sealed class ProcessManager : IDisposable
         CancellationToken = _source.Token;
     }
 
-    public CancellationToken CancellationToken { get; }
+    private CancellationToken CancellationToken { get; }
 
     public void Dispose()
     {
