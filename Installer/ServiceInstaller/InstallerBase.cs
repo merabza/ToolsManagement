@@ -972,14 +972,7 @@ public /*open*/ abstract class InstallerBase
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
         Logger.LogInformation(message);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = errorCode,
-                ErrorMessage = message
-            }
-        };
+        return [new Err { ErrorCode = errorCode, ErrorMessage = message }];
     }
 
     private async Task<Err[]> LogInfoAndSendMessageFromError(Err error, CancellationToken cancellationToken)
@@ -987,7 +980,7 @@ public /*open*/ abstract class InstallerBase
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName, error.ErrorMessage, cancellationToken);
         Logger.LogInformation(error.ErrorMessage);
-        return new[] { error };
+        return [error];
     }
 
     private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken)
