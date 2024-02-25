@@ -4,6 +4,7 @@ namespace Installer.Domain;
 
 public sealed class AppParametersFileUpdaterParameters
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public AppParametersFileUpdaterParameters(FileStorageData programExchangeFileStorage, string parametersFileDateMask,
         string parametersFileExtension, string filesUserName, string? filesUsersGroupName, string installFolder)
     {
