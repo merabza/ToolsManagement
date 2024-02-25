@@ -29,8 +29,8 @@ public sealed class RemoteFileManager : FileManager
         string? localPatch)
     {
         var fileStoragePath = fileStorageData.FileStoragePath;
-        var connectToolParameters = ConnectToolParameters.Create(fileStorageData.FileStoragePath,
-            fileStorageData.UserName, fileStorageData.Password);
+        var connectToolParameters =
+            ConnectToolParameters.Create(fileStoragePath, fileStorageData.UserName, fileStorageData.Password);
 
         if (connectToolParameters == null)
         {
@@ -53,12 +53,6 @@ public sealed class RemoteFileManager : FileManager
         logger.LogError("Can not connect to server {fileStoragePath}", fileStoragePath);
         return null;
 
-        //CTools cTools = ConnectToolsFabric.CreateConnectToolsByAddress(connectToolParameters, logger);
-
-        //if (cTools != null)
-
-        //logger.LogError("Wrong URI " + fileStorageData.FileStoragePath);
-        //return null;
     }
 
     public override List<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
