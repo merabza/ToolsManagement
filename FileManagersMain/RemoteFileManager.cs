@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ConnectTools;
 using CToolsFabric;
 using LibFileParameters.Models;
@@ -153,6 +155,18 @@ public sealed class RemoteFileManager : FileManager
         Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
             _serverRootPaths, serverSideFileName);
         if (_cTools.UploadContentToTextFile(content, null, serverSideFileName))
+            return true;
+
+        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}",
+            serverSideFileName, _serverRootPaths);
+        return false;
+    }
+
+    public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName, CancellationToken cancellationToken)
+    {
+        Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
+            _serverRootPaths, serverSideFileName);
+        if (await _cTools.UploadContentToTextFileAsync(content, null, serverSideFileName, cancellationToken))
             return true;
 
         Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}",

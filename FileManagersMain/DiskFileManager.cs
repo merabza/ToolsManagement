@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ConnectTools;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
@@ -101,15 +103,23 @@ public sealed class DiskFileManager : FileManager
             targetFileFullName);
         return false;
     }
-
+    
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
         Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
             _storageFolderName, serverSideFileName);
         var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
         File.WriteAllText(targetFileFullName, content);
-        //Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_storageFolderName}",
-        //    serverSideFileName, _storageFolderName);
+        return true;
+    }
+
+    public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
+        CancellationToken cancellationToken)
+    {
+        Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
+            _storageFolderName, serverSideFileName);
+        var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
+        await File.WriteAllTextAsync(targetFileFullName, content, cancellationToken);
         return true;
     }
 

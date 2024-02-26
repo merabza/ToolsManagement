@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ConnectTools;
 using LibFileParameters.Models;
@@ -75,6 +76,13 @@ public /*open*/ class FileManager
     public virtual bool UploadContentToTextFile(string content, string serverSideFileName)
     {
         return false;
+    }
+
+    //ტექსტის ატვირთვა ფაილის სახით ასინქრონულად
+    public virtual Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(false);
     }
 
     //სავარაუდოდ საჭირო იქნება ფაილის ჩამოტვირთვა
