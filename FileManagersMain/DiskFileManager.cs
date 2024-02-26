@@ -108,9 +108,9 @@ public sealed class DiskFileManager : FileManager
             _storageFolderName, serverSideFileName);
         var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
         File.WriteAllText(targetFileFullName, content);
-        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_storageFolderName}",
-            serverSideFileName, _storageFolderName);
-        return false;
+        //Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_storageFolderName}",
+        //    serverSideFileName, _storageFolderName);
+        return true;
     }
 
     public override bool DownloadFile(string fileName, string useTempExtension, string? afterRootPath = null)
