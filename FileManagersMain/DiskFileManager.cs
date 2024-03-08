@@ -149,8 +149,9 @@ public sealed class DiskFileManager : FileManager
 
     public override string GetTextFileContent(string fileName)
     {
-        Logger.LogInformation("Get content from text file {fileName}", fileName);
-        StreamReader reader = new(fileName);
+        var fullFileName = Path.Combine(GetDirectoryInfo(null).FullName, fileName);
+        Logger.LogInformation("Get content from text file {fullFileName}", fullFileName);
+        StreamReader reader = new(fullFileName);
         return reader.ReadToEnd();
     }
 
