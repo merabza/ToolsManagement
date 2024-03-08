@@ -8,6 +8,7 @@ namespace Installer.AgentClients;
 
 public sealed class ProjectsProxyApiClient : ApiClient
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public ProjectsProxyApiClient(ILogger logger, string server, string? apiKey) : base(logger, server, apiKey)
     {
     }
