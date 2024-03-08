@@ -57,7 +57,7 @@ public sealed class RemoteFileManager : FileManager
 
     }
 
-    public override List<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
+    public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
         return _cTools.GetFilesWithInfo(afterRootPath, searchPattern, false);
     }

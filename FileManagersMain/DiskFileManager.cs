@@ -21,7 +21,7 @@ public sealed class DiskFileManager : FileManager
         _storageFolderName = storageFolderName;
     }
 
-    public override List<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
+    public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
         var destDir = GetDirectoryInfo(afterRootPath);
         return GetFiles(searchPattern, destDir)

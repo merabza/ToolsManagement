@@ -31,21 +31,21 @@ public /*open*/ class FileManager
     //public for UsbCopyRunner
     public virtual char DirectorySeparatorChar => Path.DirectorySeparatorChar;
 
-    public virtual List<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
+    public virtual IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
-        return new List<MyFileInfo>();
+        return [];
     }
 
     //public for UsbCopyRunner
     public virtual List<string> GetFileNames(string? relativePath, string? searchPattern)
     {
-        return new List<string>();
+        return [];
     }
 
     //public for UsbCopyRunner
     public virtual List<string> GetFolderNames(string? afterRootPath, string? searchPattern)
     {
-        return new List<string>();
+        return [];
     }
 
     //ფაილის წაშლა სახელის მითითებით
