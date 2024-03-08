@@ -12,6 +12,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Polly.Core" Version="8.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\ConnectionTools\ConnectTools\ConnectTools.csproj" />
         <ProjectReference Include="..\..\ConnectionTools\CToolsFabric\CToolsFabric.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
