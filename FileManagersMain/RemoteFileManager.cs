@@ -54,7 +54,6 @@ public sealed class RemoteFileManager : FileManager
                 localPatch);
         logger.LogError("Can not connect to server {fileStoragePath}", fileStoragePath);
         return null;
-
     }
 
     public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
@@ -162,7 +161,8 @@ public sealed class RemoteFileManager : FileManager
         return false;
     }
 
-    public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName, CancellationToken cancellationToken)
+    public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
+        CancellationToken cancellationToken)
     {
         Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
             _serverRootPaths, serverSideFileName);

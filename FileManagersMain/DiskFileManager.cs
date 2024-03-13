@@ -104,7 +104,7 @@ public sealed class DiskFileManager : FileManager
             targetFileFullName);
         return false;
     }
-    
+
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
         Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",

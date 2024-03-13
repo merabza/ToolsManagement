@@ -242,6 +242,31 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
 
+    //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
+    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
+    {
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.GetDbServerInfo(cancellationToken);
+    }
+
+    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
+    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
+    {
+        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.IsServerLocal(cancellationToken);
+    }
+
     public static async Task<SqlServerManagementClient?> Create(ILogger logger, bool useConsole,
         DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken)
@@ -324,30 +349,5 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
                 ErrorCode = "CannotCreateDbClient", ErrorMessage = $"Cannot create DbClient for database {databaseName}"
             }
         };
-    }
-
-    //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
-    {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
-
-        if (getDatabaseClientResult.IsT1)
-            return getDatabaseClientResult.AsT1;
-        var dc = getDatabaseClientResult.AsT0;
-
-        return await dc.GetDbServerInfo(cancellationToken);
-    }
-
-    //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken)
-    {
-        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
-
-        if (getDatabaseClientResult.IsT1)
-            return getDatabaseClientResult.AsT1;
-        var dc = getDatabaseClientResult.AsT0;
-
-        return await dc.IsServerLocal(cancellationToken);
     }
 }
