@@ -1,6 +1,6 @@
 ﻿// ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.Domain;
+namespace ApiClientsManagement;
 
 public sealed class ApiClientSettingsDomain
 {
