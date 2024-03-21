@@ -1,18 +1,18 @@
-﻿// ReSharper disable ConvertToPrimaryConstructor
-
+﻿
 namespace ApiClientsManagement;
 
 public sealed class ApiClientSettingsDomain
 {
-    public ApiClientSettingsDomain(string server, string? apiKey) //, string? remoteServerName)
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public ApiClientSettingsDomain(string server, string? apiKey, bool withMessaging)
     {
         Server = server;
         ApiKey = apiKey;
-        //RemoteServerName = remoteServerName;
+        WithMessaging = withMessaging;
     }
 
     public string Server { get; set; }
 
     public string? ApiKey { get; set; }
-    //public string? RemoteServerName { get; }
+    public bool WithMessaging { get; set; }
 }

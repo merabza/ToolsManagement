@@ -9,17 +9,17 @@ namespace ApiClientsManagement;
 public class TestApiClient : ApiClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public TestApiClient(ILogger logger, string server) : base(logger, server, null)
+    public TestApiClient(ILogger logger, string server) : base(logger, server, null, false)
     {
     }
 
     public async Task<OneOf<string, Err[]>> GetAppSettingsVersion(CancellationToken cancellationToken)
     {
-        return await GetAsyncAsString("test/getappsettingsversion", cancellationToken, false);
+        return await GetAsyncAsString("test/getappsettingsversion", cancellationToken);
     }
 
     public async Task<OneOf<string, Err[]>> GetVersion(CancellationToken cancellationToken)
     {
-        return await GetAsyncAsString("test/getversion", cancellationToken, false);
+        return await GetAsyncAsString("test/getversion", cancellationToken);
     }
 }
