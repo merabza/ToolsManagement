@@ -22,7 +22,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     private readonly ILogger _logger;
 
     private DatabaseApiClient(ILogger logger, ApiClientSettingsDomain apiClientSettingsDomain) : base(logger,
-        apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey)
+        apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey, apiClientSettingsDomain.WithMessaging)
     {
         _logger = logger;
     }
@@ -152,7 +152,8 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             return null;
         }
 
-        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
+        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
+            apiClientSettings.WithMessaging);
         return new DatabaseApiClient(logger, apiClientSettingsDomain);
     }
 }

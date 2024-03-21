@@ -8,7 +8,9 @@ namespace Installer.AgentClients;
 
 public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
 {
-    public ProjectsApiClient(ILogger logger, string server, string? apiKey) : base(logger, server, apiKey)
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public ProjectsApiClient(ILogger logger, string server, string? apiKey, bool withMessaging) : base(logger, server,
+        apiKey, withMessaging)
     {
     }
 
@@ -16,7 +18,6 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
         string environmentName,
         CancellationToken cancellationToken)
     {
-        //+
         return await DeleteAsync($"projects/removeservice/{projectName}/{serviceName}/{environmentName}",
             cancellationToken);
     }
@@ -24,14 +25,12 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     public async Task<Option<Err[]>> StopService(string serviceName, string environmentName,
         CancellationToken cancellationToken)
     {
-        //+
         return await PostAsync($"projects/stop/{serviceName}/{environmentName}", cancellationToken);
     }
 
     public async Task<Option<Err[]>> StartService(string serviceName, string environmentName,
         CancellationToken cancellationToken)
     {
-        //+
         return await PostAsync($"projects/start/{serviceName}/{environmentName}", cancellationToken);
     }
 }

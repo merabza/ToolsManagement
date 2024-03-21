@@ -11,8 +11,9 @@ namespace Installer.AgentClients;
 
 public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiClientWithFileStorage
 {
-    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey) : base(logger, server,
-        apiKey)
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey, bool withMessaging) : base(
+        logger, server, apiKey, withMessaging)
     {
     }
 
