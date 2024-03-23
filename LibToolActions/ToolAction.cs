@@ -10,7 +10,7 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction
 {
-    private readonly string _actionName;
+    protected readonly string ToolActionName;
     protected readonly ILogger Logger;
     protected readonly IMessagesDataManager? MessagesDataManager;
     protected readonly string? UserName;
@@ -19,7 +19,7 @@ public /*open*/ class ToolAction
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName)
     {
         Logger = logger;
-        _actionName = actionName;
+        ToolActionName = actionName;
         MessagesDataManager = messagesDataManager;
         UserName = userName;
     }
@@ -32,8 +32,8 @@ public /*open*/ class ToolAction
                 return false;
 
             if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Started...", cancellationToken);
-            Logger.LogInformation("{_actionName} Started...", _actionName);
+                await MessagesDataManager.SendMessage(UserName, $"{ToolActionName} Started...", cancellationToken);
+            Logger.LogInformation("{_actionName} Started...", ToolActionName);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
@@ -43,9 +43,9 @@ public /*open*/ class ToolAction
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
             if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"{_actionName} Finished. {timeTakenMessage}",
+                await MessagesDataManager.SendMessage(UserName, $"{ToolActionName} Finished. {timeTakenMessage}",
                     cancellationToken);
-            Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", _actionName, timeTakenMessage);
+            Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", ToolActionName, timeTakenMessage);
 
             return success;
         }
