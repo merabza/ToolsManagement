@@ -22,7 +22,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     private readonly ILogger _logger;
 
     private DatabaseApiClient(ILogger logger, ApiClientSettingsDomain apiClientSettingsDomain) : base(logger,
-        apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey, apiClientSettingsDomain.WithMessaging)
+        apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey, null, apiClientSettingsDomain.WithMessaging)
     {
         _logger = logger;
     }

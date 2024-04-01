@@ -13,7 +13,7 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
 {
     // ReSharper disable once ConvertToPrimaryConstructor
     public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey, bool withMessaging) : base(
-        logger, server, apiKey, withMessaging)
+        logger, server, apiKey, null, withMessaging)
     {
     }
 

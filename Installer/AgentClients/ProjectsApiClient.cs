@@ -10,7 +10,7 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
     public ProjectsApiClient(ILogger logger, string server, string? apiKey, bool withMessaging) : base(logger, server,
-        apiKey, withMessaging)
+        apiKey, null, withMessaging)
     {
     }
 
