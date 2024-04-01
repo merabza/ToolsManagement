@@ -9,7 +9,7 @@ namespace ApiClientsManagement;
 public class TestApiClient : ApiClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public TestApiClient(ILogger logger, string server) : base(logger, server, null, false)
+    public TestApiClient(ILogger logger, string server) : base(logger, server, null, null, false)
     {
     }
 
