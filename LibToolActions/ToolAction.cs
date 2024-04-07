@@ -14,14 +14,17 @@ public /*open*/ class ToolAction
     protected readonly ILogger Logger;
     protected readonly IMessagesDataManager? MessagesDataManager;
     protected readonly string? UserName;
+    private readonly bool _useConsole;
 
 
-    protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName)
+    protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
+        bool useConsole = false)
     {
         Logger = logger;
         ToolActionName = actionName;
         MessagesDataManager = messagesDataManager;
         UserName = userName;
+        _useConsole = useConsole;
     }
 
     public async Task<bool> Run(CancellationToken cancellationToken)
@@ -31,9 +34,7 @@ public /*open*/ class ToolAction
             if (!CheckValidate())
                 return false;
 
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"{ToolActionName} Started...", cancellationToken);
-            Logger.LogInformation("{_actionName} Started...", ToolActionName);
+            await WriteMessage($"{ToolActionName} Started...", _useConsole, cancellationToken);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
@@ -42,10 +43,7 @@ public /*open*/ class ToolAction
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"{ToolActionName} Finished. {timeTakenMessage}",
-                    cancellationToken);
-            Logger.LogInformation("{_actionName} Finished. {timeTakenMessage}", ToolActionName, timeTakenMessage);
+            await WriteMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
 
             return success;
         }
@@ -59,6 +57,16 @@ public /*open*/ class ToolAction
         }
 
         return false;
+    }
+
+    private async Task WriteMessage(string message, bool useConsole, CancellationToken cancellationToken)
+    {
+        if (MessagesDataManager is not null)
+            await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
+        if (useConsole)
+            Console.WriteLine(message);
+        else
+            Logger.LogInformation(message);
     }
 
     //protected virtual string GetActionDescription()
