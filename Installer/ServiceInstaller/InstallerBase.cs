@@ -349,6 +349,9 @@ public /*open*/ abstract class InstallerBase
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
+
+
+
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
         {
@@ -368,10 +371,12 @@ public /*open*/ abstract class InstallerBase
             };
         }
 
-        var projectInstallFolder = Path.Combine(installFolder, projectName);
+        //var projectInstallFolder = Path.Combine(installFolder, projectName);
 
-        var checkedProjectInstallFolder = FileStat.CreateFolderIfNotExists(projectInstallFolder, UseConsole);
-        if (checkedProjectInstallFolder == null)
+        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
+
+        var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
+        if (checkedProjectInstallFullPath == null)
         {
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName,
@@ -391,10 +396,10 @@ public /*open*/ abstract class InstallerBase
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName,
-                $"Installer project install folder is {checkedProjectInstallFolder}",
+                $"Installer project install folder is {checkedProjectInstallFullPath}",
                 cancellationToken);
         Logger.LogInformation("Installer project install folder is {checkedProjectInstallFolder}",
-            checkedProjectInstallFolder);
+            checkedProjectInstallFullPath);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
@@ -562,15 +567,17 @@ public /*open*/ abstract class InstallerBase
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(checkedProjectInstallFolder, environmentName);
 
-        if (Directory.Exists(projectInstallFullPath))
+
+
+
+        if (Directory.Exists(checkedProjectInstallFullPath))
         {
             deleteSuccess = false;
             if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Folder {projectInstallFullPath} already exists",
+                await MessagesDataManager.SendMessage(UserName, $"Folder {checkedProjectInstallFullPath} already exists",
                     cancellationToken);
-            Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
+            Logger.LogInformation("Folder {checkedProjectInstallFullPath} already exists", checkedProjectInstallFullPath);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
@@ -580,28 +587,28 @@ public /*open*/ abstract class InstallerBase
                 {
                     if (MessagesDataManager is not null)
                         await MessagesDataManager.SendMessage(UserName,
-                            $"Try to delete folder {projectInstallFullPath} {tryCount}...",
+                            $"Try to delete folder {checkedProjectInstallFullPath} {tryCount}...",
                             cancellationToken);
-                    Logger.LogInformation("Try to delete folder {projectInstallFullPath} {tryCount}...",
-                        projectInstallFullPath, tryCount);
-                    Directory.Delete(projectInstallFullPath, true);
+                    Logger.LogInformation("Try to delete folder {checkedProjectInstallFullPath} {tryCount}...",
+                        checkedProjectInstallFullPath, tryCount);
+                    Directory.Delete(checkedProjectInstallFullPath, true);
                     if (MessagesDataManager is not null)
                         await MessagesDataManager.SendMessage(UserName,
-                            $"Folder {projectInstallFullPath} deleted successfully",
+                            $"Folder {checkedProjectInstallFullPath} deleted successfully",
                             cancellationToken);
-                    Logger.LogInformation("Folder {projectInstallFullPath} deleted successfully",
-                        projectInstallFullPath);
+                    Logger.LogInformation("Folder {checkedProjectInstallFullPath} deleted successfully",
+                        checkedProjectInstallFullPath);
                     deleteSuccess = true;
                 }
                 catch
                 {
                     if (MessagesDataManager is not null)
                         await MessagesDataManager.SendMessage(UserName,
-                                $"Folder {projectInstallFullPath} could not deleted on try {tryCount}",
+                                $"Folder {checkedProjectInstallFullPath} could not deleted on try {tryCount}",
                                 cancellationToken)
                             ;
                     Logger.LogWarning("Folder {projectInstallFullPath} could not deleted on try {tryCount}",
-                        projectInstallFullPath, tryCount);
+                        checkedProjectInstallFullPath, tryCount);
                     if (MessagesDataManager is not null)
                         await MessagesDataManager.SendMessage(UserName, "waiting for 3 seconds...", cancellationToken)
                             ;
@@ -614,64 +621,64 @@ public /*open*/ abstract class InstallerBase
         if (!deleteSuccess)
         {
             if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"folder {projectInstallFullPath} can not be Deleted",
+                await MessagesDataManager.SendMessage(UserName, $"folder {checkedProjectInstallFullPath} can not be Deleted",
                     cancellationToken);
-            Logger.LogError("folder {projectInstallFullPath} can not be Deleted", projectInstallFullPath);
+            Logger.LogError("folder {checkedProjectInstallFullPath} can not be Deleted", checkedProjectInstallFullPath);
             return new Err[]
             {
                 new()
                 {
                     ErrorCode = "FolderCanNotBeDeleted",
-                    ErrorMessage = $"folder {projectInstallFullPath} can not be Deleted"
+                    ErrorMessage = $"folder {checkedProjectInstallFullPath} can not be Deleted"
                 }
             };
         }
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName,
-                    $"Install {projectName} files to {projectInstallFullPath}...",
+                    $"Install {projectName} files to {checkedProjectInstallFullPath}...",
                     cancellationToken)
                 ;
-        Logger.LogInformation("Install {projectName} files to {projectInstallFullPath}...", projectName,
-            projectInstallFullPath);
+        Logger.LogInformation("Install {projectName} files to {checkedProjectInstallFullPath}...", projectName,
+            checkedProjectInstallFullPath);
 
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName,
-                    $"Move Files from {projectFilesFolderFullName} to {projectInstallFullPath}...",
+                    $"Move Files from {projectFilesFolderFullName} to {checkedProjectInstallFullPath}...",
                     cancellationToken)
                 ;
         Logger.LogInformation("Move Files from {projectFilesFolderFullName} to {projectInstallFullPath}...",
             projectFilesFolderFullName,
-            projectInstallFullPath);
+            checkedProjectInstallFullPath);
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
-        Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
+        Directory.Move(projectFilesFolderFullName, checkedProjectInstallFullPath);
 
         if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {projectInstallFullPath}...",
+            await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {checkedProjectInstallFullPath}...",
                 cancellationToken);
-        Logger.LogInformation("WriteAllTextToPath {projectInstallFullPath}...", projectInstallFullPath);
+        Logger.LogInformation("WriteAllTextToPath {checkedProjectInstallFullPath}...", checkedProjectInstallFullPath);
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
-        appSettingsFile?.WriteAllTextToPath(projectInstallFullPath);
+        appSettingsFile?.WriteAllTextToPath(checkedProjectInstallFullPath);
 
         await LogInfoAndSendMessage(
-            $"Change Owner for Path {projectInstallFullPath} for user {filesUserName} and group {filesUsersGroupName}",
+            $"Change Owner for Path {checkedProjectInstallFullPath} for user {filesUserName} and group {filesUsersGroupName}",
             cancellationToken);
 
         var changeOwnerResult =
-            await ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+            await ChangeOwner(checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsSome)
         {
             if (MessagesDataManager is not null)
                 await MessagesDataManager.SendMessage(UserName,
-                        $"folder {projectInstallFullPath} owner can not be changed",
+                        $"folder {checkedProjectInstallFullPath} owner can not be changed",
                         cancellationToken)
                     ;
-            Logger.LogError("folder {projectInstallFullPath} owner can not be changed", projectInstallFullPath);
+            Logger.LogError("folder {checkedProjectInstallFullPath} owner can not be changed", checkedProjectInstallFullPath);
             return Err.RecreateErrors((Err[])changeOwnerResult,
                 new Err
                 {
                     ErrorCode = "FolderOwnerCanNotBeChanged",
-                    ErrorMessage = $"Folder {projectInstallFullPath} owner can not be changed"
+                    ErrorMessage = $"Folder {checkedProjectInstallFullPath} owner can not be changed"
                 });
         }
 
@@ -686,7 +693,7 @@ public /*open*/ abstract class InstallerBase
                 cancellationToken);
 
             var isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName, serviceEnvName,
-                serviceUserName, projectInstallFullPath, serviceDescriptionSignature, projectDescription,
+                serviceUserName, checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription,
                 cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
                 return Err.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
@@ -722,7 +729,7 @@ public /*open*/ abstract class InstallerBase
             Logger.LogInformation("registering service {serviceEnvName}...", serviceEnvName);
 
             var registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
-                projectInstallFullPath, serviceDescriptionSignature, projectDescription, cancellationToken);
+                checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription, cancellationToken);
 
             if (registerServiceResult.IsSome)
             {
