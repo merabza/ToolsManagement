@@ -65,7 +65,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     public async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken)
     {
-        return await PostAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames", cancellationToken);
+        return await GetAsyncReturn<List<DatabaseInfoModel>>("databases/getdatabasenames", cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
