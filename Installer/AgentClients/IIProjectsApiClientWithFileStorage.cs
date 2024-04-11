@@ -6,7 +6,7 @@ using SystemToolsShared;
 
 namespace Installer.AgentClients;
 
-public interface IIProjectsApiClientWithFileStorage
+public interface IIProjectsApiClientWithFileStorage// : IDisposable
 {
     Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName, string? serviceName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,

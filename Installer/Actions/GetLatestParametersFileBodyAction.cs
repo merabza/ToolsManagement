@@ -42,12 +42,6 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     public string? AppSettingsVersion { get; private set; }
 
-
-    protected override bool CheckValidate()
-    {
-        return true;
-    }
-
     protected override async Task<bool> RunAction(CancellationToken cancellationToken)
     {
         LatestParametersFileContent = await GetParametersFileBody(cancellationToken);

@@ -48,12 +48,12 @@ public sealed class MaskManager
 
     public string GetFullMask(string extension)
     {
-        return _fileNamePrefix + getMasked(_dateMask) + extension.AddNeedLeadPart(".");
+        return _fileNamePrefix + GetMasked(_dateMask) + extension.AddNeedLeadPart(".");
     }
 
     public string GetTempFullMask(string extension, string tempExtension)
     {
-        return _fileNamePrefix + getMasked(_dateMask) + extension.AddNeedLeadPart(".") +
+        return _fileNamePrefix + GetMasked(_dateMask) + extension.AddNeedLeadPart(".") +
                tempExtension.AddNeedLeadPart(".");
     }
 
@@ -62,7 +62,7 @@ public sealed class MaskManager
         return _fileNamePrefix + forDate.ToString(_dateMask) + extension.AddNeedLeadPart(".");
     }
 
-    private string getMasked(string str)
+    private static string GetMasked(string str)
     {
         var sb = new StringBuilder();
         foreach (var c in str) sb.Append(c != '_' ? '?' : c);

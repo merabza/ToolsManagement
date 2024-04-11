@@ -8,6 +8,7 @@ namespace LibToolActions.BackgroundTasks;
 public /*open*/ class ProcessesToolAction : ToolAction
 {
     //საჭიროა ApAgent-ისთვის
+    // ReSharper disable once MemberCanBePrivate.Global
     protected readonly ProcessManager? ProcessManager;
 
     protected ProcessesToolAction(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
@@ -20,9 +21,10 @@ public /*open*/ class ProcessesToolAction : ToolAction
 
     public int ProcLineId { get; }
 
-    public Task RunAsync(CancellationToken cancellationToken)
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
-        var task = Task.Run(async () =>
+        // ReSharper disable once using
+        using var task = Task.Run(async () =>
         {
             if (ProcessManager is not null && ProcessManager.CheckCancellation())
                 return;
@@ -32,16 +34,18 @@ public /*open*/ class ProcessesToolAction : ToolAction
             var nextAction = GetNextAction();
             await RunNextAction(nextAction, cancellationToken);
         }, cancellationToken);
-        return task;
+        await task.WaitAsync(cancellationToken);
     }
 
     //public საჭიროა ApAgent-ისათვის
+    // ReSharper disable once MemberCanBeProtected.Global
     public virtual ProcessesToolAction? GetNextAction()
     {
         return null;
     }
 
     //protected საჭიროა ApAgent-ისათვის
+    // ReSharper disable once MemberCanBePrivate.Global
     protected async Task RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken)
     {
         while (true)

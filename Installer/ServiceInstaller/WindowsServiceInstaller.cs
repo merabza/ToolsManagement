@@ -19,14 +19,15 @@ public sealed class WindowsServiceInstaller : InstallerBase
     private readonly string? _projectDescription;
     private readonly string? _serviceDescriptionSignature;
 
-    public WindowsServiceInstaller(bool useConsole, ILogger logger, string? serviceDescriptionSignature,
-        string? projectDescription, IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole,
-        logger, "win10-x64", messagesDataManager, userName)
-    {
-        _serviceDescriptionSignature = serviceDescriptionSignature;
-        _projectDescription = projectDescription;
-    }
+    //public WindowsServiceInstaller(bool useConsole, ILogger logger, string? serviceDescriptionSignature,
+    //    string? projectDescription, IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole,
+    //    logger, "win10-x64", messagesDataManager, userName)
+    //{
+    //    _serviceDescriptionSignature = serviceDescriptionSignature;
+    //    _projectDescription = projectDescription;
+    //}
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     public WindowsServiceInstaller(bool useConsole, ILogger logger,
         IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger, "win10-x64",
         messagesDataManager, userName)
@@ -38,7 +39,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
     protected override bool IsServiceExists(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
+        // ReSharper disable once using
+        using var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
         return sc != null;
 #pragma warning restore CA1416 // Validate platform compatibility
     }
@@ -46,7 +48,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
     protected override bool IsServiceRunning(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
+        // ReSharper disable once using
+        using var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
         if (sc == null)
             return false;
         return !(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
@@ -57,7 +60,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
     protected override Option<Err[]> RemoveService(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var sc = new ServiceController(serviceEnvName);
+        // ReSharper disable once using
+        // ReSharper disable once DisposableConstructor
+        using var sc = new ServiceController(serviceEnvName);
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
@@ -72,6 +77,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning restore CA1416 // Validate platform compatibility
 
         // create empty pipeline
+        // ReSharper disable once using
         using var ps = PowerShell.Create();
 
         // add command
@@ -87,7 +93,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var sc = new ServiceController(serviceEnvName);
+        // ReSharper disable once using
+        // ReSharper disable once DisposableConstructor
+        using var sc = new ServiceController(serviceEnvName);
 
         if (sc.Status.Equals(ServiceControllerStatus.Stopped) ||
             sc.Status.Equals(ServiceControllerStatus.StopPending))
@@ -126,7 +134,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var sc = new ServiceController(serviceEnvName);
+        // ReSharper disable once using
+        // ReSharper disable once DisposableConstructor
+        using var sc = new ServiceController(serviceEnvName);
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
@@ -261,15 +271,6 @@ public sealed class WindowsServiceInstaller : InstallerBase
         };
     }
 
-
-//    private static string GetServiceInstallPath(string serviceName)
-//    {
-//#pragma warning disable CA1416 // Validate platform compatibility
-//      RegistryKey regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceName}");
-//      return regKey?.GetValue("ImagePath")?.ToString();
-//#pragma warning restore CA1416 // Validate platform compatibility
-//    }
-
     protected override async Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken)
@@ -283,7 +284,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         //   Find the service you want to redirect,
         //   locate the ImagePath subkey value.
 #pragma warning disable CA1416 // Validate platform compatibility
-        var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
+        // ReSharper disable once using
+        using var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
         var imagePath = regKey?.GetValue("ImagePath")?.ToString();
         var description = regKey?.GetValue("Description")?.ToString();
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -298,6 +300,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         string? projectDescription, CancellationToken cancellationToken)
     {
         // create empty pipeline
+        // ReSharper disable once using
         using var ps = PowerShell.Create();
 
         // add command
