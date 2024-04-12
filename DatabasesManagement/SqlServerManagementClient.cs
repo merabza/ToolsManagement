@@ -332,7 +332,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     {
         var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager);
+            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager, _userName);
 
         if (dc is not null)
             return dc;

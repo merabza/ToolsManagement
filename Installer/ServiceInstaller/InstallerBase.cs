@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
+using Installer.ErrorModels;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -15,21 +16,15 @@ using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;
 
-public /*open*/ abstract class InstallerBase
+public /*open*/ abstract class InstallerBase : MessageLogger
 {
-    protected readonly ILogger Logger;
-    protected readonly IMessagesDataManager? MessagesDataManager;
     public readonly string Runtime;
     protected readonly bool UseConsole;
-    protected readonly string? UserName;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
-        string? userName)
+        string? userName) : base(logger, messagesDataManager, userName)
     {
-        Logger = logger;
         Runtime = runtime;
-        MessagesDataManager = messagesDataManager;
-        UserName = userName;
         UseConsole = useConsole;
     }
 
@@ -40,7 +35,7 @@ public /*open*/ abstract class InstallerBase
     protected abstract Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken);
 
-    protected abstract Task<Option<Err[]>> ChangeOwner(string folderPath, string filesUserName,
+    protected abstract Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken);
 
     protected abstract Option<Err[]> RemoveService(string serviceEnvName);
@@ -102,10 +97,8 @@ public /*open*/ abstract class InstallerBase
             if (!string.IsNullOrWhiteSpace(currentAppSettingsVersion) &&
                 latestAppSettingsVersion == currentAppSettingsVersion)
             {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                        "Parameters file is already in latest version and not needs update", cancellationToken);
-                Logger.LogWarning("Parameters file is already in latest version and not needs update");
+                await LogWarningAndSendMessage("Parameters file is already in latest version and not needs update",
+                    cancellationToken);
                 return null;
             }
         }
@@ -121,80 +114,34 @@ public /*open*/ abstract class InstallerBase
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
             var serviceExists = IsServiceExists(serviceEnvName);
             if (serviceExists)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is exists",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
             else
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not exists",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
-            }
-
-            if (!serviceExists)
-            {
                 //ეს არის პარამეტრების განახლების პროცესი, ამიტომ თუ პროგრამა სერვისია და ეს სერვისი არ არსებობს განახლება ვერ მოხდება
                 //ასეთ შემთხვევაში უნდა გაეშვას უკვე მთლიანი პროგრამის განახლების პროცესი
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                        $"Service {serviceEnvName} does not exists, cannot update settings file ", cancellationToken);
-                Logger.LogError("Service {serviceEnvName} does not exists, cannot update settings file",
-                    serviceEnvName);
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ServiceDoesNotExists",
-                        ErrorMessage = $"Service {serviceEnvName} does not exists"
-                    }
-                };
-            }
+                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
+                    cancellationToken);
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Try to stop Service {serviceEnvName}",
-                    cancellationToken);
-            Logger.LogInformation("Try to stop Service {serviceEnvName}", serviceEnvName);
+            await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
             var stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
                 return (Err[])stopResult;
         }
-        else
-        {
-            if (IsProcessRunning(projectName))
-            {
-                //თუ სერვისი არ არის და პროგრამა მაინც გაშვებულია,
-                //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
-                //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
-                //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                        $"Process {projectName} is running and cannot be updated.", cancellationToken);
-                Logger.LogError("Process {projectName} is running and cannot be updated.", projectName);
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ProcessIsRunningAndCannotBeUpdated",
-                        ErrorMessage = $"Process {projectName} is running and cannot be updated"
-                    }
-                };
-            }
-        }
+        else if (IsProcessRunning(projectName))
+            //თუ სერვისი არ არის და პროგრამა მაინც გაშვებულია,
+            //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
+            //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
+            //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.ProcessIsRunningAndCannotBeUpdated(projectName),
+                cancellationToken);
 
         //შევეცადოთ პარამეტრების ფაილის წაშლა
         var appSettingsFileDeletedSuccess = true;
         if (File.Exists(appSettingsFileFullPath))
         {
             appSettingsFileDeletedSuccess = false;
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"File {appSettingsFileFullPath} is exists",
-                    cancellationToken);
-            Logger.LogInformation("File {appSettingsFileFullPath} is exists", appSettingsFileFullPath);
+            await LogInfoAndSendMessage("File {0} is exists", appSettingsFileFullPath, cancellationToken);
 
             var tryCount = 0;
             while (!appSettingsFileDeletedSuccess && tryCount < 10)
@@ -202,73 +149,37 @@ public /*open*/ abstract class InstallerBase
                 tryCount++;
                 try
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"Try to delete File {appSettingsFileFullPath} {tryCount}...", cancellationToken);
-                    Logger.LogInformation("Try to delete File {appSettingsFileFullPath} {tryCount}...",
-                        appSettingsFileFullPath, tryCount);
+                    await LogInfoAndSendMessage("Try to delete File {0} {1}...", appSettingsFileFullPath, tryCount,
+                        cancellationToken);
                     File.Delete(appSettingsFileFullPath);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"File {appSettingsFileFullPath} deleted successfully", cancellationToken);
-                    Logger.LogInformation("File {appSettingsFileFullPath} deleted successfully",
-                        appSettingsFileFullPath);
+                    await LogInfoAndSendMessage("File {0} deleted successfully", appSettingsFileFullPath,
+                        cancellationToken);
                     appSettingsFileDeletedSuccess = true;
                 }
                 catch
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"File {appSettingsFileFullPath} could not deleted on try {tryCount}", cancellationToken);
-                    Logger.LogWarning("File {appSettingsFileFullPath} could not deleted on try {tryCount}",
-                        appSettingsFileFullPath, tryCount);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName, "waiting for 3 seconds...", cancellationToken);
-                    Logger.LogInformation("waiting for 3 seconds...");
+                    await LogWarningAndSendMessage("File {0} could not deleted on try {1}", appSettingsFileFullPath,
+                        tryCount, cancellationToken);
+                    await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
                     Thread.Sleep(3000);
                 }
             }
         }
 
         if (!appSettingsFileDeletedSuccess)
-        {
-            //თუ მიმდინარე დაინსტალირებული პარამეტრების ფაილის წაშლა ვერ მოხერხდა,
-            //მაშინ პარამეტრების ფაილის განახლების პროცესი წყდება
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"File {appSettingsFileFullPath} can not Deleted",
-                    cancellationToken);
-            Logger.LogError("File {appSettingsFileFullPath} can not Deleted", appSettingsFileFullPath);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FileCanNotDeleted",
-                    ErrorMessage = $"File {appSettingsFileFullPath} can not Deleted"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FileCanNotBeDeleted(appSettingsFileFullPath),
+                cancellationToken);
 
 
         //შეიქმნას პარამეტრების ფაილი არსებულ ინფორმაციაზე დაყრდნობით
         await File.WriteAllTextAsync(appSettingsFileFullPath, appSettingsFileBody, cancellationToken);
         //შეიცვალოს პარამეტრების ფაილზე უფლებები საჭიროების მიხედვით.
         var changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
-            filesUsersGroupName,
-            cancellationToken);
+            filesUsersGroupName, cancellationToken);
         if (changeOneFileOwnerResult.IsSome)
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"File {appSettingsFileFullPath} owner can not be changed", cancellationToken);
-            Logger.LogError("File {appSettingsFileFullPath} owner can not be changed", appSettingsFileFullPath);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FileOwnerCanNotBeChanged",
-                    ErrorMessage = $"File {appSettingsFileFullPath} owner can not be changed"
-                }
-            };
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.FileOwnerCanNotBeChanged(appSettingsFileFullPath), cancellationToken);
         }
 
         //თუ ეს სერვისი არ არის პროცესი დასრულებულია, თანაც წარმატებით
@@ -281,64 +192,26 @@ public /*open*/ abstract class InstallerBase
             return null;
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {projectName} can not be started",
-                cancellationToken);
-        Logger.LogError("Service {projectName} can not be started", projectName);
-        return Err.RecreateErrors((Err[])startResult,
-            new Err
-            {
-                ErrorCode = "ServiceProjectNameCanNotStarted",
-                ErrorMessage = $"Service {projectName} can not be started"
-            });
+        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(projectName),
+            cancellationToken);
     }
 
     private async Task<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
         string environmentName, CancellationToken cancellationToken)
     {
         if (!Directory.Exists(installFolder))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"Installer install folder {installFolder} does not exists", cancellationToken);
-            Logger.LogError("Installer install folder {installFolder} does not exists", installFolder);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerFolderDoesNotExists",
-                    ErrorMessage = $"Installer install folder {installFolder} does not exists"
-                }
-            };
-        }
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Installer install folder is {installFolder}",
+            return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
                 cancellationToken);
-        Logger.LogInformation("Installer install folder is {installFolder}", installFolder);
+
+        await LogInfoAndSendMessage("Installer install folder is {0}", installFolder, cancellationToken);
 
         var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
         if (!Directory.Exists(projectInstallFullPath))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"Project install folder {projectInstallFullPath} does not exists",
-                    cancellationToken);
-            Logger.LogError("Project install folder {projectInstallFullPath} does not exists", projectInstallFullPath);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ProjectInstallFolderDoesNotExists",
-                    ErrorMessage = $"Project install folder {projectInstallFullPath} does not exists"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.ProjectInstallerFolderIsNotExists(projectName), cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Project install folder is {projectInstallFullPath}",
-                cancellationToken);
-        Logger.LogInformation("Project install folder is {projectInstallFullPath}", projectInstallFullPath);
+        await LogInfoAndSendMessage("Project install folder is {0}", projectInstallFullPath, cancellationToken);
+
         return projectInstallFullPath;
     }
 
@@ -354,110 +227,46 @@ public /*open*/ abstract class InstallerBase
 
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                        $"Installer work folder {installWorkFolder} does not created",
-                        cancellationToken)
-                    ;
-            Logger.LogError("Installer work folder {installWorkFolder} does not created", installWorkFolder);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerWorkFolderDoesNotCreated",
-                    ErrorMessage = $"Installer work folder {installWorkFolder} does not created"
-                }
-            };
-        }
-
-        //var projectInstallFolder = Path.Combine(installFolder, projectName);
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.InstallerWorkFolderDoesNotCreated(installWorkFolder), cancellationToken);
 
         var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
 
         var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
         if (checkedProjectInstallFullPath == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                        $"Installer install folder {installFolder} does not created",
-                        cancellationToken)
-                    ;
-            Logger.LogError("Installer install folder {installFolder} does not created", installFolder);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerInstallFolderDoesNotCreated",
-                    ErrorMessage = $"Installer work install {installWorkFolder} does not created"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.InstallerInstallFolderDoesNotCreated(projectInstallFullPath), cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"Installer project install folder is {checkedProjectInstallFullPath}",
-                cancellationToken);
-        Logger.LogInformation("Installer project install folder is {checkedProjectInstallFolder}",
-            checkedProjectInstallFullPath);
+        await LogInfoAndSendMessage("Installer project install folder is {0}", projectInstallFullPath,
+            cancellationToken);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
-        //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger, outputFolderPath, zipFileFullName);
         var folderName = Path.GetFileNameWithoutExtension(archiveFileName);
         var projectFilesFolderFullName = Path.Combine(checkedWorkFolder, folderName);
         var archiveFileFullName = Path.Combine(checkedWorkFolder, archiveFileName);
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"Delete Existing Project files in {projectFilesFolderFullName}",
-                    cancellationToken);
-            Logger.LogInformation("Delete Existing Project files in {projectFilesFolderFullName}",
-                projectFilesFolderFullName);
+            await LogInfoAndSendMessage("Delete Existing Project files in {0}", projectFilesFolderFullName,
+                cancellationToken);
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
         ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
 
         if (!Directory.Exists(projectFilesFolderFullName))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"Project files is not extracted to {projectFilesFolderFullName}",
-                    cancellationToken);
-            Logger.LogInformation("Project files is not extracted to {projectFilesFolderFullName}",
-                projectFilesFolderFullName);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ProjectFilesIsNotExtracted",
-                    ErrorMessage = $"Project files is not extracted to {projectFilesFolderFullName}"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.ProjectFilesIsNotExtracted(projectFilesFolderFullName), cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                    $"Project files is extracted to {projectFilesFolderFullName}",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Project files is extracted to {projectFilesFolderFullName}", projectFilesFolderFullName);
-
-        //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger);
-        //zipClassArchiver.ArchiveToPath(archiveFileFullName, projectFilesFolderFullName);
+        await LogInfoAndSendMessage("Project files is extracted to {0}", projectFilesFolderFullName, cancellationToken);
 
         //წავშალოთ გახსნილი არქივი, რადგან ის აღარ გვჭირდება
         //(შეიძლება ისე გავაკეთო, რომ არ წავშალო არქივი, რადგან მოქაჩვას შეიძლება დრო სჭირდებოდეს
         //ასეთ შემთხვევაში უნდა შევინარჩუნო არქივების ლიმიტირებული რაოდენობა
         //და ამ რაოდენობაზე მეტი რაც იქნება, უნდა წაიშალოს)
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Deleting {archiveFileFullName} file...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Deleting {archiveFileFullName} file...", archiveFileFullName);
+        await LogInfoAndSendMessage("Deleting {0} file...", archiveFileFullName, cancellationToken);
+
         //წაიშალოს ლოკალური ფაილი
         File.Delete(archiveFileFullName);
 
@@ -474,91 +283,32 @@ public /*open*/ abstract class InstallerBase
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
             serviceExists = IsServiceExists(serviceEnvName);
             if (serviceExists)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is exists",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
             else
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not exists",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is not exists", serviceEnvName, cancellationToken);
 
             //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
             var serviceIsRunning = IsServiceRunning(serviceEnvName);
             if (serviceIsRunning)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
             else
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not running",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
 
             if (!serviceExists && serviceIsRunning)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                        $"Service {serviceEnvName} does not exists, but process is running",
-                        cancellationToken);
-                Logger.LogError("Service {serviceEnvName} does not exists, but process is running", serviceEnvName);
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ServiceDoesNotExists",
-                        ErrorMessage = $"Service {serviceEnvName} does not exists, but process is running"
-                    }
-                };
-            }
+                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
+                    cancellationToken);
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Try to stop Service {serviceEnvName}",
-                        cancellationToken)
-                    ;
-            Logger.LogInformation("Try to stop Service {serviceEnvName}", serviceEnvName);
+            await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
+
             var stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not stopped",
-                        cancellationToken);
-                Logger.LogError("Service {serviceEnvName} does not stopped", serviceEnvName);
-                return Err.RecreateErrors((Err[])stopResult,
-                    new Err
-                    {
-                        ErrorCode = "ServiceDoesNotStopped", ErrorMessage = $"Service {serviceEnvName} does not stopped"
-                    });
-            }
+                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
+                    cancellationToken);
 
             if (IsProcessRunning(serviceEnvName))
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                            $"Process {serviceEnvName} is running and cannot be updated.",
-                            cancellationToken)
-                        ;
-                Logger.LogError("Process {serviceEnvName} is running and cannot be updated.", serviceEnvName);
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ProcessIsRunningAndCannotBeUpdated",
-                        ErrorMessage = $"Process {serviceEnvName} is running and cannot be updated"
-                    }
-                };
-            }
+                return await LogErrorAndSendMessageFromError(
+                    InstallerErrors.ServiceIsRunningAndCannotBeUpdated(serviceEnvName), cancellationToken);
         }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
@@ -568,16 +318,9 @@ public /*open*/ abstract class InstallerBase
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
 
-
-
-
         if (Directory.Exists(checkedProjectInstallFullPath))
         {
-            deleteSuccess = false;
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Folder {checkedProjectInstallFullPath} already exists",
-                    cancellationToken);
-            Logger.LogInformation("Folder {checkedProjectInstallFullPath} already exists", checkedProjectInstallFullPath);
+            await LogInfoAndSendMessage("Folder {0} already exists", checkedProjectInstallFullPath, cancellationToken);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
@@ -585,102 +328,47 @@ public /*open*/ abstract class InstallerBase
                 tryCount++;
                 try
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"Try to delete folder {checkedProjectInstallFullPath} {tryCount}...",
-                            cancellationToken);
-                    Logger.LogInformation("Try to delete folder {checkedProjectInstallFullPath} {tryCount}...",
-                        checkedProjectInstallFullPath, tryCount);
+                    await LogInfoAndSendMessage("Try to delete folder {0} {1}...", checkedProjectInstallFullPath,
+                        tryCount, cancellationToken);
                     Directory.Delete(checkedProjectInstallFullPath, true);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"Folder {checkedProjectInstallFullPath} deleted successfully",
-                            cancellationToken);
-                    Logger.LogInformation("Folder {checkedProjectInstallFullPath} deleted successfully",
-                        checkedProjectInstallFullPath);
+                    await LogInfoAndSendMessage("Folder {0} {1} deleted successfully", checkedProjectInstallFullPath,
+                        cancellationToken);
                     deleteSuccess = true;
                 }
                 catch
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                                $"Folder {checkedProjectInstallFullPath} could not deleted on try {tryCount}",
-                                cancellationToken)
-                            ;
-                    Logger.LogWarning("Folder {projectInstallFullPath} could not deleted on try {tryCount}",
-                        checkedProjectInstallFullPath, tryCount);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName, "waiting for 3 seconds...", cancellationToken)
-                            ;
-                    Logger.LogInformation("waiting for 3 seconds...");
+                    await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}",
+                        checkedProjectInstallFullPath, tryCount, cancellationToken);
+                    await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
                     Thread.Sleep(3000);
                 }
             }
         }
 
         if (!deleteSuccess)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"folder {checkedProjectInstallFullPath} can not be Deleted",
-                    cancellationToken);
-            Logger.LogError("folder {checkedProjectInstallFullPath} can not be Deleted", checkedProjectInstallFullPath);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FolderCanNotBeDeleted",
-                    ErrorMessage = $"folder {checkedProjectInstallFullPath} can not be Deleted"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.FolderCanNotBeDeleted(checkedProjectInstallFullPath), cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                    $"Install {projectName} files to {checkedProjectInstallFullPath}...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Install {projectName} files to {checkedProjectInstallFullPath}...", projectName,
-            checkedProjectInstallFullPath);
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                    $"Move Files from {projectFilesFolderFullName} to {checkedProjectInstallFullPath}...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Move Files from {projectFilesFolderFullName} to {projectInstallFullPath}...",
-            projectFilesFolderFullName,
-            checkedProjectInstallFullPath);
-        //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
-        Directory.Move(projectFilesFolderFullName, checkedProjectInstallFullPath);
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"WriteAllTextToPath {checkedProjectInstallFullPath}...",
-                cancellationToken);
-        Logger.LogInformation("WriteAllTextToPath {checkedProjectInstallFullPath}...", checkedProjectInstallFullPath);
-        //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
-        appSettingsFile?.WriteAllTextToPath(checkedProjectInstallFullPath);
-
-        await LogInfoAndSendMessage(
-            $"Change Owner for Path {checkedProjectInstallFullPath} for user {filesUserName} and group {filesUsersGroupName}",
+        await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, checkedProjectInstallFullPath,
             cancellationToken);
 
+        //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
+        await LogInfoAndSendMessage("Move Files from {0} to {1}...", projectFilesFolderFullName, projectInstallFullPath,
+            cancellationToken);
+        Directory.Move(projectFilesFolderFullName, checkedProjectInstallFullPath);
+
+        //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
+        await LogInfoAndSendMessage("WriteAllTextToPath {0}...", checkedProjectInstallFullPath, cancellationToken);
+        appSettingsFile?.WriteAllTextToPath(checkedProjectInstallFullPath);
+
+        await LogInfoAndSendMessage("Change Owner for Path {0} for user {1} and group {2}",
+            checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+
         var changeOwnerResult =
-            await ChangeOwner(checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+            await ChangeFolderOwner(checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsSome)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                        $"folder {checkedProjectInstallFullPath} owner can not be changed",
-                        cancellationToken)
-                    ;
-            Logger.LogError("folder {checkedProjectInstallFullPath} owner can not be changed", checkedProjectInstallFullPath);
-            return Err.RecreateErrors((Err[])changeOwnerResult,
-                new Err
-                {
-                    ErrorCode = "FolderOwnerCanNotBeChanged",
-                    ErrorMessage = $"Folder {checkedProjectInstallFullPath} owner can not be changed"
-                });
-        }
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
 
         if (string.IsNullOrWhiteSpace(serviceName))
             return assemblyVersion;
@@ -688,26 +376,20 @@ public /*open*/ abstract class InstallerBase
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
         {
-            await LogInfoAndSendMessage(
-                $"Because service {projectName}/{serviceEnvName} is exists, Check if Service registered properly",
-                cancellationToken);
+            await LogInfoAndSendMessage("Because service {0}/{1} is exists, Check if Service registered properly",
+                projectName, serviceEnvName, cancellationToken);
 
             var isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName, serviceEnvName,
                 serviceUserName, checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription,
                 cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
                 return Err.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
-                    new Err
-                    {
-                        ErrorCode = "IsServiceRegisteredProperlyError",
-                        ErrorMessage = "Error when check IsServiceRegisteredProperly"
-                    });
+                    InstallerErrors.IsServiceRegisteredProperlyError);
 
             if (!isServiceRegisteredProperlyResult.AsT0)
             {
-                await LogInfoAndSendMessage(
-                    $"Service {projectName}/{serviceEnvName} registration is not properly, so will be removed",
-                    cancellationToken);
+                await LogInfoAndSendMessage("Service {0}/{} registration is not properly, so will be removed",
+                    projectName, serviceEnvName, cancellationToken);
                 var removeServiceError = RemoveService(serviceEnvName);
                 if (removeServiceError.IsSome)
                 {
@@ -723,26 +405,14 @@ public /*open*/ abstract class InstallerBase
         //თუ სერვისი არ არის დარეგისტრირებული და პლატფორმა მოითხოვს დარეგისტრირებას, დავარეგისტრიროთ
         if (!serviceExists)
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"registering service {serviceEnvName}...",
-                    cancellationToken);
-            Logger.LogInformation("registering service {serviceEnvName}...", serviceEnvName);
+            await LogInfoAndSendMessage("registering service {0}...", serviceEnvName, cancellationToken);
 
             var registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
                 checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription, cancellationToken);
 
             if (registerServiceResult.IsSome)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"cannot register Service {serviceEnvName}",
-                        cancellationToken);
-                Logger.LogError("cannot register Service {serviceEnvName}", serviceEnvName);
-                return Err.RecreateErrors((Err[])registerServiceResult,
-                    new Err
-                    {
-                        ErrorCode = "CannotRegisterService", ErrorMessage = $"cannot register Service {serviceEnvName}"
-                    });
-            }
+                return await LogErrorAndSendMessageFromError(InstallerErrors.CannotRegisterService(serviceEnvName),
+                    cancellationToken);
         }
 
         //გავუშვათ სერვისი და დავრწმუნდეთ, რომ გაეშვა.
@@ -750,15 +420,8 @@ public /*open*/ abstract class InstallerBase
         if (startResult.IsNone)
             return assemblyVersion;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be started",
-                cancellationToken);
-        Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
-        return Err.RecreateErrors((Err[])startResult,
-            new Err
-            {
-                ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
-            });
+        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
+            cancellationToken);
     }
 
     public async Task<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
@@ -769,46 +432,8 @@ public /*open*/ abstract class InstallerBase
         //და თუ არ არსებობს, შევქმნათ
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                        $"Installer work folder {installWorkFolder} does not created",
-                        cancellationToken)
-                    ;
-            Logger.LogError("Installer work folder {installWorkFolder} does not created", installWorkFolder);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerWorkFolderDoesNotCreated",
-                    ErrorMessage = $"Installer work folder {installWorkFolder} does not created"
-                }
-            };
-        }
-
-        var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
-        if (checkedInstallFolder == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                        $"Installer install folder {installFolder} does not created",
-                        cancellationToken)
-                    ;
-            Logger.LogError("Installer install folder {installFolder} does not created", installFolder);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerInstallFolderDoesNotCreated",
-                    ErrorMessage = $"Installer install folder {installWorkFolder} does not created"
-                }
-            };
-        }
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Installer install folder is {checkedInstallFolder}",
-                cancellationToken);
-        Logger.LogInformation("Installer install folder is {checkedInstallFolder}", checkedInstallFolder);
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.InstallerWorkFolderDoesNotCreated(installWorkFolder), cancellationToken);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
@@ -819,37 +444,21 @@ public /*open*/ abstract class InstallerBase
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    $"Delete Existing Project files in {projectFilesFolderFullName}",
-                    cancellationToken);
-            Logger.LogInformation("Delete Existing Project files in {projectFilesFolderFullName}",
-                projectFilesFolderFullName);
+            await LogInfoAndSendMessage("Delete Existing Project files in {0}", projectFilesFolderFullName,
+                cancellationToken);
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
         ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                    $"Project files is extracted to {projectFilesFolderFullName}",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Project files is extracted to {projectFilesFolderFullName}", projectFilesFolderFullName);
-
-        //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger);
-        //zipClassArchiver.ArchiveToPath(archiveFileFullName, projectFilesFolderFullName);
+        await LogInfoAndSendMessage("Project files is extracted to {0}", projectFilesFolderFullName, cancellationToken);
 
         //წავშალოთ გახსნილი არქივი, რადგან ის აღარ გვჭირდება
         //(შეიძლება ისე გავაკეთო, რომ არ წავშალო არქივი, რადგან მოქაჩვას შეიძლება დრო სჭირდებოდეს
         //ასეთ შემთხვევაში უნდა შევინარჩუნო არქივების ლიმიტირებული რაოდენობა
         //და ამ რაოდენობაზე მეტი რაც იქნება, უნდა წაიშალოს)
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Deleting {archiveFileFullName} file...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Deleting {archiveFileFullName} file...", archiveFileFullName);
+
         //წაიშალოს ლოკალური ფაილი
+        await LogInfoAndSendMessage("Deleting {0} file...", archiveFileFullName, cancellationToken);
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
@@ -857,22 +466,26 @@ public /*open*/ abstract class InstallerBase
         var version = Assembly.LoadFile(projectMainExeFileName).GetName().Version;
         var assemblyVersion = version?.ToString();
 
-
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         //თუ არსებობს, დავაარქივოთ და გადავინახოთ პროგრამის მიმდინარე ფაილები
         //(ეს კეთდება იმისათვის, რომ შესაძლებელი იყოს წინა ვერსიაზე სწრაფად დაბრუნება)
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
+        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
+
+        var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
+        if (checkedProjectInstallFullPath == null)
+            return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
+                cancellationToken);
+
+        await LogInfoAndSendMessage("Installer project install folder is {0}", checkedProjectInstallFullPath,
+            cancellationToken);
 
         if (Directory.Exists(projectInstallFullPath))
         {
             deleteSuccess = false;
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Folder {projectInstallFullPath} already exists",
-                    cancellationToken);
-            Logger.LogInformation("Folder {projectInstallFullPath} already exists", projectInstallFullPath);
+            await LogInfoAndSendMessage("Folder {0} already exists", projectInstallFullPath, cancellationToken);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
@@ -880,83 +493,42 @@ public /*open*/ abstract class InstallerBase
                 tryCount++;
                 try
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"Try to delete folder {projectInstallFullPath} {tryCount}...",
-                            cancellationToken);
-                    Logger.LogInformation("Try to delete folder {projectInstallFullPath} {tryCount}...",
-                        projectInstallFullPath, tryCount);
+                    await LogInfoAndSendMessage("Try to delete folder {0} {1}...", projectInstallFullPath, tryCount,
+                        cancellationToken);
                     Directory.Delete(projectInstallFullPath, true);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                            $"Folder {projectInstallFullPath} deleted successfully",
-                            cancellationToken);
-                    Logger.LogInformation("Folder {projectInstallFullPath} deleted successfully",
-                        projectInstallFullPath);
+                    await LogInfoAndSendMessage("Folder {0} deleted successfully", projectInstallFullPath,
+                        cancellationToken);
                     deleteSuccess = true;
                 }
                 catch
                 {
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName,
-                                $"Folder {projectInstallFullPath} could not deleted on try {tryCount}",
-                                cancellationToken)
-                            ;
-                    Logger.LogWarning("Folder {projectInstallFullPath} could not deleted on try {tryCount}",
-                        projectInstallFullPath, tryCount);
-                    if (MessagesDataManager is not null)
-                        await MessagesDataManager.SendMessage(UserName, "waiting for 3 seconds...", cancellationToken)
-                            ;
-                    Logger.LogInformation("waiting for 3 seconds...");
+                    await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}", projectInstallFullPath,
+                        tryCount, cancellationToken);
+                    await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
                     Thread.Sleep(3000);
                 }
             }
         }
 
         if (!deleteSuccess)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"folder {projectInstallFullPath} can not Deleted",
-                    cancellationToken);
-            Logger.LogError("folder {projectInstallFullPath} can not Deleted", projectInstallFullPath);
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FolderCanNotBeDeleted",
-                    ErrorMessage = $"folder {projectInstallFullPath} can not be Deleted"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FolderCanNotBeDeleted(projectInstallFullPath),
+                cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                    $"Install {projectName} files to {projectInstallFullPath}...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Install {projectName} files to {projectInstallFullPath}...", projectName,
-            projectInstallFullPath);
+        await LogWarningAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPath,
+            cancellationToken);
+
+        await LogWarningAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPath,
+            cancellationToken);
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
 
         var changeOwnerResult =
-            await ChangeOwner(projectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+            await ChangeFolderOwner(projectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsNone)
             return assemblyVersion;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"folder {projectInstallFullPath} owner can not be changed",
-                    cancellationToken)
-                ;
-        Logger.LogError("folder {projectInstallFullPath} owner can not be changed", projectInstallFullPath);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "FolderOwnerCanNotBeChanged",
-                ErrorMessage = $"folder {projectInstallFullPath} owner can not be changed"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(
+            InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
     }
 
     public async Task<Option<Err[]>> Stop(string? serviceName, string environmentName,
@@ -965,66 +537,31 @@ public /*open*/ abstract class InstallerBase
         return await Stop(GetServiceEnvName(serviceName, environmentName), cancellationToken);
     }
 
-    private async Task LogInfoAndSendMessage(string message, CancellationToken cancellationToken)
-    {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, message,
-                cancellationToken);
-        Logger.LogInformation(message);
-    }
-
-    private async Task<Err[]> LogInfoAndSendMessageFromError(string errorCode, string message,
-        CancellationToken cancellationToken)
-    {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
-        Logger.LogInformation(message);
-        return [new Err { ErrorCode = errorCode, ErrorMessage = message }];
-    }
-
-    private async Task<Err[]> LogInfoAndSendMessageFromError(Err error, CancellationToken cancellationToken)
-    {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, error.ErrorMessage, cancellationToken);
-        Logger.LogInformation(error.ErrorMessage);
-        return [error];
-    }
-
     private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
-            await LogInfoAndSendMessage($"Service {serviceEnvName} is exists", cancellationToken);
+            await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
         else
-            return await LogInfoAndSendMessageFromError("ServiceDoesNotExists",
-                $"Service {serviceEnvName} does not exists", cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
+                cancellationToken);
 
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (!serviceIsRunning)
         {
-            await LogInfoAndSendMessage($"Service {serviceEnvName} is not running", cancellationToken);
+            await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
             return null;
         }
 
-        await LogInfoAndSendMessage($"Service {serviceEnvName} is running", cancellationToken);
+        await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
 
         var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
         if (stopServiceResult.IsNone)
             return stopServiceResult;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not stopped",
-                cancellationToken);
-        Logger.LogError("Service {serviceEnvName} can not stopped", serviceEnvName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ServiceCanNotStopped",
-                ErrorMessage = $"Service {serviceEnvName} can not stopped"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStopped(serviceEnvName),
+            cancellationToken);
     }
 
     public async Task<Option<Err[]>> Start(string? serviceName, string environmentName,
@@ -1038,34 +575,18 @@ public /*open*/ abstract class InstallerBase
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
+            await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
             return null;
         }
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not running",
-                cancellationToken);
-
-        Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
+        await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
 
         var startServiceResult = await StartService(serviceEnvName, cancellationToken);
         if (startServiceResult.IsNone)
             return null;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be started",
-                cancellationToken);
-
-        Logger.LogError("Service {serviceEnvName} can not be started", serviceEnvName);
-
-        return Err.RecreateErrors((Err[])startServiceResult,
-            new Err
-            {
-                ErrorCode = "ServiceCanNotBeStarted", ErrorMessage = $"Service {serviceEnvName} can not be started"
-            });
+        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
+            cancellationToken);
     }
 
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string serviceName,
@@ -1073,67 +594,30 @@ public /*open*/ abstract class InstallerBase
     {
         var serviceEnvName = GetServiceEnvName(serviceName, environmentName);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Remove service {serviceEnvName} started...",
-                cancellationToken);
-        Logger.LogInformation("Remove service {serviceEnvName} started...", serviceEnvName);
+        await LogInfoAndSendMessage("Remove service {0} started...", serviceEnvName, cancellationToken);
 
         var serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is exists",
-                        cancellationToken)
-                    ;
-            Logger.LogInformation("Service {serviceEnvName} is exists", serviceEnvName);
-        }
+            await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
         else
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not exists",
-                    cancellationToken);
-            Logger.LogInformation("Service {serviceEnvName} does not exists", serviceEnvName);
-        }
+            await LogInfoAndSendMessage("Service {0} is not exists", serviceEnvName, cancellationToken);
 
         var serviceIsRunning = false;
         if (serviceExists)
         {
             serviceIsRunning = IsServiceRunning(serviceEnvName);
-
-
             if (serviceIsRunning)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} is running",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} is running", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
             else
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} does not running",
-                        cancellationToken);
-                Logger.LogInformation("Service {serviceEnvName} does not running", serviceEnvName);
-            }
+                await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
         }
-
 
         if (serviceIsRunning)
         {
             var stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be stopped",
-                        cancellationToken);
-                Logger.LogError("Service {serviceEnvName} can not be stopped", serviceEnvName);
-                return Err.RecreateErrors((Err[])stopResult,
-                    new Err
-                    {
-                        ErrorCode = "ServiceCanNotBeStopped",
-                        ErrorMessage = $"Service {serviceEnvName} can not be stopped"
-                    });
-            }
+                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStopped(serviceEnvName),
+                    cancellationToken);
         }
 
         if (!serviceExists)
@@ -1142,51 +626,23 @@ public /*open*/ abstract class InstallerBase
         if (RemoveService(serviceEnvName))
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not be Removed",
-                cancellationToken);
-        Logger.LogError("Service {serviceEnvName} can not be Removed", serviceEnvName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ServiceCanNotBeRemoved",
-                ErrorMessage = $"Service {serviceEnvName} can not be Removed"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeRemoved(serviceEnvName), cancellationToken);
     }
 
     public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName, string installFolder,
         CancellationToken cancellationToken)
     {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Remove project {projectName} started...",
-                    cancellationToken)
-                ;
-        Logger.LogInformation("Remove project {projectName} started...", projectName);
+        await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);
+
         var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Installation folder does not found", cancellationToken)
-                    ;
-            Logger.LogError("Installation folder does not found");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallationFolderDoesNotFound",
-                    ErrorMessage = "Installation folder does not found"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
+                cancellationToken);
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Deleting files {projectName}...", cancellationToken);
-        Logger.LogInformation("Deleting files {projectName}...", projectName);
+        await LogInfoAndSendMessage("Deleting files {0}...", projectName, cancellationToken);
 
         if (Directory.Exists(projectInstallFullPath))
             Directory.Delete(projectInstallFullPath, true);

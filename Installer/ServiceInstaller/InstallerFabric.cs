@@ -17,21 +17,14 @@ public static class InstallerFabric
         {
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "Creating WindowsServiceInstaller", cancellationToken);
-            return new WindowsServiceInstaller(useConsole, logger,
-                //serviceDescriptionSignature,
-                //projectDescription,
-                messagesDataManager,
-                userName);
+            return new WindowsServiceInstaller(useConsole, logger, messagesDataManager, userName);
         }
 
         if (!string.IsNullOrWhiteSpace(dotnetRunner))
         {
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "Creating LinuxServiceInstaller", cancellationToken);
-            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner,
-                //serviceDescriptionSignature,
-                //projectDescription,
-                messagesDataManager, userName);
+            return new LinuxServiceInstaller(useConsole, logger, dotnetRunner, messagesDataManager, userName);
         }
 
         if (messagesDataManager is not null)
