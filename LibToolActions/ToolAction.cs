@@ -45,6 +45,8 @@ public /*open*/ class ToolAction
 
             await WriteMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
 
+            //StShared.Pause();
+
             return success;
         }
         catch (OperationCanceledException e)
