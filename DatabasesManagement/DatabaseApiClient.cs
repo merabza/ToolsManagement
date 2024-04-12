@@ -154,6 +154,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 
         ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
             apiClientSettings.WithMessaging);
+        // ReSharper disable once DisposableConstructor
         return new DatabaseApiClient(logger, apiClientSettingsDomain);
     }
 }

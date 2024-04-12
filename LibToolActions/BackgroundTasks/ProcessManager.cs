@@ -18,6 +18,7 @@ public sealed class ProcessManager : IDisposable
     {
         _logger = logger;
         _processLines = new ConcurrentDictionary<int, ProcessLine>();
+        // ReSharper disable once DisposableConstructor
         _source = new CancellationTokenSource();
         CancellationToken = _source.Token;
     }
@@ -67,6 +68,7 @@ public sealed class ProcessManager : IDisposable
         var procLineId = toolAction.ProcLineId;
         if (!_processLines.ContainsKey(procLineId))
         {
+            // ReSharper disable once DisposableConstructor
             if (!_processLines.TryAdd(procLineId, new ProcessLine(_logger, _signal)))
             {
                 _logger.LogError("Cannot add New Process Line with Id {procLineId}", procLineId);

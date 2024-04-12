@@ -12,6 +12,7 @@ public sealed class ZipClassArchiver : Archiver
 {
     private readonly ILogger _logger;
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     public ZipClassArchiver(ILogger logger, bool useConsole, string fileExtension) : base(useConsole, fileExtension)
     {
         _logger = logger;
@@ -29,7 +30,9 @@ public sealed class ZipClassArchiver : Archiver
         if (UseConsole)
             Console.WriteLine($"Creating archive file {archiveFileName}");
 
+        // ReSharper disable once using
         using FileStream zipToOpen = new(archiveFileName, FileMode.CreateNew);
+        // ReSharper disable once using
         using ZipArchive archive = new(zipToOpen, ZipArchiveMode.Create);
         foreach (var source in sources)
         {
@@ -67,6 +70,7 @@ public sealed class ZipClassArchiver : Archiver
 
     public override bool ArchiveToPath(string archiveFileName, string path)
     {
+        // ReSharper disable once using
         using var archive = ZipFile.OpenRead(archiveFileName);
         var result =
             archive.Entries.Where(currentEntry => !string.IsNullOrWhiteSpace(currentEntry.FullName));
@@ -124,7 +128,9 @@ public sealed class ZipClassArchiver : Archiver
         var entryName = Path.GetRelativePath(startPath, file.FullName);
 
         var fileEntry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+        // ReSharper disable once using
         using var inFile = file.OpenRead();
+        // ReSharper disable once using
         using var entryStream = fileEntry.Open();
 
         //ნაწილ-ნაწილ ვარიანტი
@@ -155,27 +161,27 @@ public sealed class ZipClassArchiver : Archiver
         return false;
     }
 
-    private long CountDirectoryFilesLength(DirectoryInfo targetDirectory)
-    {
-        long countedLength = 0;
+    //private long CountDirectoryFilesLength(DirectoryInfo targetDirectory)
+    //{
+    //    long countedLength = 0;
 
-        try
-        {
-            countedLength += targetDirectory.GetDirectories().Sum(CountDirectoryFilesLength);
-            // Process the list of files found in the directory.
-            countedLength += targetDirectory.GetFiles().Sum(CountFileLength);
-        }
-        catch (Exception e)
-        {
-            StShared.WriteException(e, UseConsole, _logger);
-        }
+    //    try
+    //    {
+    //        countedLength += targetDirectory.GetDirectories().Sum(CountDirectoryFilesLength);
+    //        // Process the list of files found in the directory.
+    //        countedLength += targetDirectory.GetFiles().Sum(CountFileLength);
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        StShared.WriteException(e, UseConsole, _logger);
+    //    }
 
-        return countedLength;
-    }
+    //    return countedLength;
+    //}
 
     // Insert logic for processing found files here.
-    private long CountFileLength(FileInfo targetFile)
-    {
-        return targetFile.Length;
-    }
+    //private long CountFileLength(FileInfo targetFile)
+    //{
+    //    return targetFile.Length;
+    //}
 }

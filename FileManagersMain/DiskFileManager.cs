@@ -152,7 +152,8 @@ public sealed class DiskFileManager : FileManager
     {
         var fullFileName = Path.Combine(GetDirectoryInfo(null).FullName, fileName);
         Logger.LogInformation("Get content from text file {fullFileName}", fullFileName);
-        StreamReader reader = new(fullFileName);
+        // ReSharper disable once using
+        using StreamReader reader = new(fullFileName);
         return reader.ReadToEnd();
     }
 
