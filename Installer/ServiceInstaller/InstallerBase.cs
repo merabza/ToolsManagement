@@ -231,14 +231,15 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerWorkFolderDoesNotCreated(installWorkFolder), cancellationToken);
 
-        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
-
+        var projectInstallFullPath = Path.Combine(installFolder, projectName);
         var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
         if (checkedProjectInstallFullPath == null)
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerInstallFolderDoesNotCreated(projectInstallFullPath), cancellationToken);
 
-        await LogInfoAndSendMessage("Installer project install folder is {0}", checkedProjectInstallFullPath,
+        var projectInstallFullPathWithEnv = Path.Combine(projectInstallFullPath, environmentName);
+
+        await LogInfoAndSendMessage("Installer project install folder is {0}", projectInstallFullPathWithEnv,
             cancellationToken);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
@@ -317,11 +318,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //(ეს კეთდება იმისათვის, რომ შესაძლებელი იყოს წინა ვერსიაზე სწრაფად დაბრუნება)
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
-        if (Directory.Exists(checkedProjectInstallFullPath))
+        if (Directory.Exists(projectInstallFullPathWithEnv))
         {
             var deleteSuccess = false;
 
-            await LogInfoAndSendMessage("Folder {0} already exists", checkedProjectInstallFullPath, cancellationToken);
+            await LogInfoAndSendMessage("Folder {0} already exists", projectInstallFullPathWithEnv, cancellationToken);
 
             var tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
@@ -329,10 +330,10 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 tryCount++;
                 try
                 {
-                    await LogInfoAndSendMessage("Try to delete folder {0} {1}...", checkedProjectInstallFullPath,
+                    await LogInfoAndSendMessage("Try to delete folder {0} {1}...", projectInstallFullPathWithEnv,
                         tryCount, cancellationToken);
-                    Directory.Delete(checkedProjectInstallFullPath, true);
-                    await LogInfoAndSendMessage("Folder {0} {1} deleted successfully", checkedProjectInstallFullPath,
+                    Directory.Delete(projectInstallFullPathWithEnv, true);
+                    await LogInfoAndSendMessage("Folder {0} {1} deleted successfully", projectInstallFullPathWithEnv,
                         cancellationToken);
                     deleteSuccess = true;
                 }
@@ -340,7 +341,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 {
                     Logger.LogError(ex, "Folder could not deleted");
                     await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}",
-                        checkedProjectInstallFullPath, tryCount, cancellationToken);
+                        projectInstallFullPathWithEnv, tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
                     Thread.Sleep(3000);
                 }
@@ -348,30 +349,30 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
             if (!deleteSuccess)
                 return await LogErrorAndSendMessageFromError(
-                    InstallerErrors.FolderCanNotBeDeleted(checkedProjectInstallFullPath), cancellationToken);
+                    InstallerErrors.FolderCanNotBeDeleted(projectInstallFullPathWithEnv), cancellationToken);
 
         }
 
-        await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, checkedProjectInstallFullPath,
+        await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPathWithEnv,
             cancellationToken);
 
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
-        await LogInfoAndSendMessage("Move Files from {0} to {1}...", projectFilesFolderFullName, checkedProjectInstallFullPath,
+        await LogInfoAndSendMessage("Move Files from {0} to {1}...", projectFilesFolderFullName, projectInstallFullPathWithEnv,
             cancellationToken);
-        Directory.Move(projectFilesFolderFullName, checkedProjectInstallFullPath);
+        Directory.Move(projectFilesFolderFullName, projectInstallFullPathWithEnv);
 
         //ჩავაგდოთ პარამეტრების ფაილი ახლადდაინსტალირებულ ფოლდერში
-        await LogInfoAndSendMessage("WriteAllTextToPath {0}...", checkedProjectInstallFullPath, cancellationToken);
-        appSettingsFile?.WriteAllTextToPath(checkedProjectInstallFullPath);
+        await LogInfoAndSendMessage("WriteAllTextToPath {0}...", projectInstallFullPathWithEnv, cancellationToken);
+        appSettingsFile?.WriteAllTextToPath(projectInstallFullPathWithEnv);
 
         await LogInfoAndSendMessage("Change Owner for Path {0} for user {1} and group {2}",
-            checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+            projectInstallFullPathWithEnv, filesUserName, filesUsersGroupName, cancellationToken);
 
         var changeOwnerResult =
-            await ChangeFolderOwner(checkedProjectInstallFullPath, filesUserName, filesUsersGroupName, cancellationToken);
+            await ChangeFolderOwner(projectInstallFullPathWithEnv, filesUserName, filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsSome)
             return await LogErrorAndSendMessageFromError(
-                InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
+                InstallerErrors.FolderOwnerCanNotBeChanged(projectInstallFullPathWithEnv), cancellationToken);
 
         if (string.IsNullOrWhiteSpace(serviceName))
             return assemblyVersion;
@@ -383,7 +384,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 projectName, serviceEnvName, cancellationToken);
 
             var isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName, serviceEnvName,
-                serviceUserName, checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription,
+                serviceUserName, projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription,
                 cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
                 return Err.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
@@ -411,7 +412,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             await LogInfoAndSendMessage("registering service {0}...", serviceEnvName, cancellationToken);
 
             var registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
-                checkedProjectInstallFullPath, serviceDescriptionSignature, projectDescription, cancellationToken);
+                projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription, cancellationToken);
 
             if (registerServiceResult.IsSome)
                 return await LogErrorAndSendMessageFromError(InstallerErrors.CannotRegisterService(serviceEnvName),
