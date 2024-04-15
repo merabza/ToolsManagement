@@ -238,7 +238,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerInstallFolderDoesNotCreated(projectInstallFullPath), cancellationToken);
 
-        await LogInfoAndSendMessage("Installer project install folder is {0}", projectInstallFullPath,
+        await LogInfoAndSendMessage("Installer project install folder is {0}", checkedProjectInstallFullPath,
             cancellationToken);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
@@ -356,7 +356,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
 
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
-        await LogInfoAndSendMessage("Move Files from {0} to {1}...", projectFilesFolderFullName, projectInstallFullPath,
+        await LogInfoAndSendMessage("Move Files from {0} to {1}...", projectFilesFolderFullName, checkedProjectInstallFullPath,
             cancellationToken);
         Directory.Move(projectFilesFolderFullName, checkedProjectInstallFullPath);
 
