@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -335,8 +336,9 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                         cancellationToken);
                     deleteSuccess = true;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.LogError(ex, "Folder could not deleted");
                     await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}",
                         checkedProjectInstallFullPath, tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
