@@ -317,10 +317,10 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //(ეს კეთდება იმისათვის, რომ შესაძლებელი იყოს წინა ვერსიაზე სწრაფად დაბრუნება)
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
-        var deleteSuccess = false;
-
         if (Directory.Exists(checkedProjectInstallFullPath))
         {
+            var deleteSuccess = false;
+
             await LogInfoAndSendMessage("Folder {0} already exists", checkedProjectInstallFullPath, cancellationToken);
 
             var tryCount = 0;
@@ -345,11 +345,12 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     Thread.Sleep(3000);
                 }
             }
-        }
 
-        if (!deleteSuccess)
-            return await LogErrorAndSendMessageFromError(
-                InstallerErrors.FolderCanNotBeDeleted(checkedProjectInstallFullPath), cancellationToken);
+            if (!deleteSuccess)
+                return await LogErrorAndSendMessageFromError(
+                    InstallerErrors.FolderCanNotBeDeleted(checkedProjectInstallFullPath), cancellationToken);
+
+        }
 
         await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, checkedProjectInstallFullPath,
             cancellationToken);
