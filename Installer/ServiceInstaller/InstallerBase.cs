@@ -345,6 +345,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
                     Thread.Sleep(3000);
                 }
+
+                deleteSuccess = !Directory.Exists(projectInstallFullPathWithEnv);
             }
 
             if (!deleteSuccess)
