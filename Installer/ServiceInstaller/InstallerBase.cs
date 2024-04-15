@@ -316,7 +316,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //(ეს კეთდება იმისათვის, რომ შესაძლებელი იყოს წინა ვერსიაზე სწრაფად დაბრუნება)
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
-        var deleteSuccess = true;
+        var deleteSuccess = false;
 
         if (Directory.Exists(checkedProjectInstallFullPath))
         {
