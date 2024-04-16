@@ -289,24 +289,27 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             else
                 await LogInfoAndSendMessage("Service {0} is not exists", serviceEnvName, cancellationToken);
 
-            //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
-            var serviceIsRunning = IsServiceRunning(serviceEnvName);
-            if (serviceIsRunning)
-                await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
-            else
-                await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
+            if (serviceExists)
+            {
+                //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
+                var serviceIsRunning = IsServiceRunning(serviceEnvName);
+                if (serviceIsRunning)
+                    await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
+                else
+                    await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
 
-            if (!serviceExists && serviceIsRunning)
-                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
-                    cancellationToken);
+                if (serviceIsRunning)
+                {
+                    //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
+                    await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
 
-            //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
-            await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
-
-            var stopResult = await Stop(serviceEnvName, cancellationToken);
-            if (stopResult.IsSome)
-                return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
-                    cancellationToken);
+                    var stopResult = await Stop(serviceEnvName, cancellationToken);
+                    if (stopResult.IsSome)
+                        return await LogErrorAndSendMessageFromError(
+                            InstallerErrors.ServiceIsNotStopped(serviceEnvName),
+                            cancellationToken);
+                }
+            }
 
             if (IsProcessRunning(serviceEnvName))
                 return await LogErrorAndSendMessageFromError(
@@ -335,7 +338,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     Directory.Delete(projectInstallFullPathWithEnv, true);
                     await LogInfoAndSendMessage("Folder {0} {1} deleted successfully", projectInstallFullPathWithEnv,
                         cancellationToken);
-                    deleteSuccess = true;
                 }
                 catch (Exception ex)
                 {
