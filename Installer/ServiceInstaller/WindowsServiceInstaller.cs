@@ -100,7 +100,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             sc.Status.Equals(ServiceControllerStatus.StopPending))
             return null;
 
-        await LogInfoAndSendMessage("Stopping the {serviceName} service...", serviceEnvName, cancellationToken);
+        await LogInfoAndSendMessage("Stopping the {0} service...", serviceEnvName, cancellationToken);
 
         sc.Stop();
         sc.WaitForStatus(ServiceControllerStatus.Stopped);
@@ -135,7 +135,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
             return null;
 
-        await LogInfoAndSendMessage("Starting the {serviceName} service...", serviceEnvName, cancellationToken);
+        await LogInfoAndSendMessage("Starting the {0} service...", serviceEnvName, cancellationToken);
 
         sc.Start();
         sc.WaitForStatus(ServiceControllerStatus.Running);

@@ -394,7 +394,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
             if (!isServiceRegisteredProperlyResult.AsT0)
             {
-                await LogInfoAndSendMessage("Service {0}/{} registration is not properly, so will be removed",
+                await LogInfoAndSendMessage("Service {0}/{1} registration is not properly, so will be removed",
                     projectName, serviceEnvName, cancellationToken);
                 var removeServiceError = RemoveService(serviceEnvName);
                 if (removeServiceError.IsSome)
