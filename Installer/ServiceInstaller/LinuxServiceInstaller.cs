@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Installer.ErrorModels;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -11,25 +12,18 @@ namespace Installer.ServiceInstaller;
 public sealed class LinuxServiceInstaller : InstallerBase
 {
     private readonly string _dotnetRunner;
-    //private readonly string? _serviceDescriptionSignature;
-    //private readonly string? _projectDescription;
-
 
     public LinuxServiceInstaller(bool useConsole, ILogger logger, string dotnetRunner,
-        //string? serviceDescriptionSignature, string? projectDescription, 
-        IMessagesDataManager? messagesDataManager,
-        string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
+        IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger, "linux-x64",
+        messagesDataManager, userName)
     {
         _dotnetRunner = dotnetRunner;
-        //_serviceDescriptionSignature = serviceDescriptionSignature;
-        //_projectDescription = projectDescription;
     }
 
     public LinuxServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
     {
         _dotnetRunner = "";
-        //_serviceDescriptionSignature = "";
     }
 
     protected override bool IsServiceExists(string serviceEnvName)
@@ -40,7 +34,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
     private static string GetServiceConfigFileName(string serviceName)
     {
-        var systemFolderFullName = "/etc/systemd/system";
+        const string systemFolderFullName = "/etc/systemd/system";
         var serviceFileName = $"{serviceName}.service";
         var serviceConfigFileName = Path.Combine(systemFolderFullName, serviceFileName);
         return serviceConfigFileName;
@@ -118,13 +112,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         var checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsT1)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "dotnet location can not found", cancellationToken);
-            Logger.LogError("dotnet location can not found");
-            return Err.RecreateErrors(checkedDotnetRunnerResult.AsT1,
-                new Err { ErrorCode = "DotnetLocationCanNotFound", ErrorMessage = "dotnet location can not found" });
-        }
+            return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.DotnetLocationIsNotFound,
+                cancellationToken);
 
         var checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
 
@@ -167,45 +156,21 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return generateServiceFileTextResult.AsT1;
         var serviceFileText = generateServiceFileTextResult.AsT0;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Create service file {serviceConfigFileName}",
-                cancellationToken);
-        Logger.LogInformation("Create service file {serviceConfigFileName}", serviceConfigFileName);
+        await LogInfoAndSendMessage("Create service file {0}", serviceConfigFileName,
+            cancellationToken);
         await File.WriteAllTextAsync(serviceConfigFileName, (string?)serviceFileText, cancellationToken);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Enable service {serviceEnvName}", cancellationToken);
-        Logger.LogInformation("Enable service {serviceName}", serviceEnvName);
-
+        await LogInfoAndSendMessage("Enable service {0}", serviceEnvName, cancellationToken);
         var processResult = StShared.RunProcess(UseConsole, Logger, "systemctl",
             $"--no-ask-password --no-block --quiet enable {serviceEnvName}");
 
-        if (processResult.IsNone)
-        {
-            if (IsServiceExists(serviceEnvName))
-                return null;
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ServiceIsNotEnabled",
-                    ErrorMessage = $"Service {serviceEnvName} is not enabled"
-                }
-            };
-        }
-
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Service {serviceEnvName} can not enabled",
-                cancellationToken);
-        Logger.LogError("Service {serviceEnvName} can not enabled", serviceEnvName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ServiceCanNotEnabled",
-                ErrorMessage = $"Service {serviceEnvName} can not enabled"
-            }
-        };
+        if (processResult.IsSome)
+            return await LogErrorAndSendMessageFromError(
+                LinuxServiceInstallerErrors.ServiceCanNotBeEnabled(serviceEnvName), cancellationToken);
+        if (IsServiceExists(serviceEnvName))
+            return null;
+        return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.ServiceIsNotEnabled(serviceEnvName),
+            cancellationToken);
     }
 
     private OneOf<string, Err[]> CheckDotnetRunner(string? dotnetRunner)
@@ -214,32 +179,23 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return dotnetRunner;
         var runProcessWithOutputResult = StShared.RunProcessWithOutput(UseConsole, Logger, "which", "dotnet");
         if (runProcessWithOutputResult.IsT1)
-            return Err.RecreateErrors(runProcessWithOutputResult.AsT1,
-                new Err { ErrorCode = "WhichDotnetError", ErrorMessage = "Which Dotnet finished with Errors" });
+            return Err.RecreateErrors(runProcessWithOutputResult.AsT1, LinuxServiceInstallerErrors.WhichDotnetError);
         var newDotnetRunner = runProcessWithOutputResult.AsT0.Item1;
         if (!string.IsNullOrWhiteSpace(newDotnetRunner) && File.Exists(newDotnetRunner))
             return newDotnetRunner;
-        return Err.RecreateErrors(runProcessWithOutputResult.AsT1,
-            new Err { ErrorCode = "DotnetDetectError", ErrorMessage = "Dotnet detect Errors" });
+        return new[] { LinuxServiceInstallerErrors.DotnetDetectError };
     }
 
     protected override async Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "File name is empty", CancellationToken.None);
-            Logger.LogError("File name is empty");
-            return new Err[] { new() { ErrorCode = "FileNameIsEmpty", ErrorMessage = "File name is empty" } };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty,
+                cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "user name is empty. owner not changed",
-                    cancellationToken);
-            Logger.LogWarning("user name is empty. owner not changed");
+            await LogWarningAndSendMessage("user name is empty. owner not changed", cancellationToken);
             return null;
         }
 
@@ -247,44 +203,18 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return StShared.RunProcess(UseConsole, Logger, "chown",
                 $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {filePath}");
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Error changing owner to file {filePath}",
-                cancellationToken);
-        Logger.LogError("Error changing owner to file {filePath}", filePath);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ErrorChangingOwnerToFile",
-                ErrorMessage = $"Error changing owner to file {filePath}"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
 
-    protected override async Task<Option<Err[]>> ChangeOwner(string folderPath, string filesUserName,
+    protected override async Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Folder name is empty", cancellationToken);
-            Logger.LogError("Folder name is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FolderNameIsEmpty",
-                    ErrorMessage = "Folder name is empty"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "user name is empty. owner not changed",
-                    cancellationToken);
-            Logger.LogWarning("user name is empty. owner not changed");
+            await LogWarningAndSendMessage("user name is empty. owner not changed", cancellationToken);
             return null;
         }
 
@@ -292,17 +222,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return StShared.RunProcess(UseConsole, Logger, "chown",
                 $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {folderPath}");
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Error changing owner to folder {folderPath}",
-                cancellationToken);
-        Logger.LogError("Error changing owner to folder {folderPath}", folderPath);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ErrorChangingOwner",
-                ErrorMessage = $"Error changing owner to folder {folderPath}"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.FolderOwnerCanNotBeChanged(folderPath),
+            cancellationToken);
     }
 }

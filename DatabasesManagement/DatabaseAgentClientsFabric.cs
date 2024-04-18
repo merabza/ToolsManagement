@@ -57,6 +57,7 @@ public static class DatabaseAgentClientsFabric
     }
 
     //public იყენებს ApAgent
+    // ReSharper disable once MemberCanBePrivate.Global
     public static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)

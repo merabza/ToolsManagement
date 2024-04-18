@@ -73,7 +73,7 @@ public static class ArchiverFabric
         FileInfo decompressProgram = new(decompressProgramPatch);
 
         if (decompressProgram.Exists)
-            return new ZipArchiver(logger, compressProgramPatch, decompressProgramPatch, useConsole, fileExtension);
+            return new ZipArchiver(useConsole, fileExtension);
         logger.LogError("Archiver decompress program path is invalid for {archiveType}", archiveType);
         return null;
     }

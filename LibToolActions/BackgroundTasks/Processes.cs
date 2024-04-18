@@ -3,12 +3,14 @@ using Microsoft.Extensions.Logging;
 
 namespace LibToolActions.BackgroundTasks;
 
+//ეს კლასი გამოიყენება ApAgent-ში
 public sealed class Processes : IProcesses
 {
     private readonly ILogger _logger;
 
     private ProcessManager? _processManager;
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     public Processes(ILogger<Processes> logger)
     {
         _logger = logger;
@@ -33,6 +35,7 @@ public sealed class Processes : IProcesses
 
     public ProcessManager GetNewProcessManager()
     {
+        // ReSharper disable once DisposableConstructor
         _processManager = new ProcessManager(_logger);
         return _processManager;
     }
