@@ -8,9 +8,8 @@ namespace Installer.AgentClients;
 
 public interface IIProjectsApiClientWithFileStorage // : IDisposable
 {
-    Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName, bool isService,
-        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken);
+    Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName, string appSettingsFileName,
+        string parametersFileDateMask, string parametersFileExtension, CancellationToken cancellationToken);
 
     Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,

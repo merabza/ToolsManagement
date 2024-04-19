@@ -18,14 +18,13 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
     }
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
-        bool isService, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
         var body = new UpdateSettingsRequest
         {
             ProjectName = projectName,
             EnvironmentName = environmentName,
-            IsService = isService,
             AppSettingsFileName = appSettingsFileName,
             ParametersFileDateMask = parametersFileDateMask,
             ParametersFileExtension = parametersFileExtension

@@ -33,7 +33,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     }
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
-        bool isService, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+        string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
         var applicationUpdater = await AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
@@ -50,7 +50,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
                     ErrorMessage = "AppParametersFileUpdater does not created"
                 }
             };
-        return await applicationUpdater.UpdateParameters(projectName, environmentName, isService, appSettingsFileName,
+        return await applicationUpdater.UpdateParameters(projectName, environmentName, appSettingsFileName,
             cancellationToken);
     }
 

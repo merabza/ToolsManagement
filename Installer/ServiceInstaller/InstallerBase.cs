@@ -72,9 +72,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return Process.GetProcessesByName(processName).Length > 1;
     }
 
-    public async Task<Option<Err[]>> RunUpdateSettings(string projectName, bool isService, string environmentName,
-        string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
-        string installFolder, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName, string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName, string installFolder, CancellationToken cancellationToken)
     {
         var checkBeforeStartUpdateResult =
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
@@ -182,10 +180,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.FileOwnerCanNotBeChanged(appSettingsFileFullPath), cancellationToken);
         }
-
-        //თუ ეს სერვისი არ არის პროცესი დასრულებულია, თანაც წარმატებით
-        if (!isService)
-            return null;
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
         var startResult = await Start(serviceEnvName, cancellationToken);
