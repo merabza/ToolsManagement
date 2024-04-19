@@ -33,7 +33,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     }
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
-        string? serviceName, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+        bool isService, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
         var applicationUpdater = await AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
@@ -50,7 +50,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
                     ErrorMessage = "AppParametersFileUpdater does not created"
                 }
             };
-        return await applicationUpdater.UpdateParameters(projectName, environmentName, serviceName, appSettingsFileName,
+        return await applicationUpdater.UpdateParameters(projectName, environmentName, isService, appSettingsFileName,
             cancellationToken);
     }
 
@@ -81,7 +81,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     }
 
     public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
-        string? serviceName, string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
+        string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
@@ -96,13 +96,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
             return applicationUpdaterCreateResult.AsT1;
         var applicationUpdater = applicationUpdaterCreateResult.AsT0;
         var updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(projectName,
-            environmentName, serviceUserName, serviceName, appSettingsFileName, serviceDescriptionSignature,
-            projectDescription, cancellationToken);
+            environmentName, serviceUserName, appSettingsFileName, serviceDescriptionSignature, projectDescription,
+            cancellationToken);
         return updateServiceWithParametersResult;
-    }
-
-    public async Task<bool> CheckValidation(CancellationToken cancellationToken)
-    {
-        return await Task.FromResult(true);
     }
 }

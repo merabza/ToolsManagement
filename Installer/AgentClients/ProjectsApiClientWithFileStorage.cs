@@ -18,14 +18,14 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
     }
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
-        string? serviceName, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
+        bool isService, string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
         var body = new UpdateSettingsRequest
         {
             ProjectName = projectName,
             EnvironmentName = environmentName,
-            ServiceName = serviceName,
+            IsService = isService,
             AppSettingsFileName = appSettingsFileName,
             ParametersFileDateMask = parametersFileDateMask,
             ParametersFileExtension = parametersFileExtension
@@ -55,7 +55,7 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
     }
 
     public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
-        string? serviceName, string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
+        string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
@@ -64,7 +64,6 @@ public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiC
             ProjectName = projectName,
             EnvironmentName = environmentName,
             ServiceUserName = serviceUserName,
-            ServiceName = serviceName,
             AppSettingsFileName = appSettingsFileName,
             ProgramArchiveDateMask = programArchiveDateMask,
             ProgramArchiveExtension = programArchiveExtension,

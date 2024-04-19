@@ -305,16 +305,16 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     }
 
     public async Task<OneOf<string, Err[]>> UpdateServiceWithParameters(string projectName, string environmentName,
-        string serviceUserName, string? serviceName, string? appSettingsFileName, string? serviceDescriptionSignature,
+        string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken)
     {
         if (MessagesDataManager is not null)
             await MessagesDataManager.SendMessage(UserName,
-                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}",
+                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}",
                 cancellationToken);
         Logger.LogInformation(
-            "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}, serviceName={serviceName}",
-            projectName, environmentName, serviceUserName, serviceName);
+            "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}",
+            projectName, environmentName, serviceUserName);
 
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
@@ -431,15 +431,6 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                     await MessagesDataManager.SendMessage(UserName,
                         $"Cannot Update {projectName}, because cannot get latest parameters file", cancellationToken);
                 Logger.LogError("Cannot Update {projectName}, because cannot get latest parameters file", projectName);
-                if (string.IsNullOrWhiteSpace(serviceName))
-                    return new Err[]
-                    {
-                        new()
-                        {
-                            ErrorCode = "CannotUpdateProject",
-                            ErrorMessage = $"Cannot Update {projectName}, because cannot get latest parameters file"
-                        }
-                    };
             }
 
             if (appSettingsFileBody is not null)
@@ -450,7 +441,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         var resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
-        var runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName, projectName, serviceName,
+        var runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName, projectName,
             environmentName, appSettingsFile, resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription,

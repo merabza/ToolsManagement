@@ -76,7 +76,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     }
 
 
-    public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName, string? serviceName,
+    public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName, bool isService,
         string appSettingsFileName, CancellationToken cancellationToken)
     {
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
@@ -109,7 +109,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
                 }
             };
 
-        return await _serviceInstaller.RunUpdateSettings(projectName, serviceName, environmentName, appSettingsFileName,
+        return await _serviceInstaller.RunUpdateSettings(projectName, isService, environmentName, appSettingsFileName,
             appSettingsFileBody, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallFolder,
             cancellationToken);

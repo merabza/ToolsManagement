@@ -32,10 +32,10 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return File.Exists(serviceConfigFileName);
     }
 
-    private static string GetServiceConfigFileName(string serviceName)
+    private static string GetServiceConfigFileName(string serviceEnvName)
     {
         const string systemFolderFullName = "/etc/systemd/system";
-        var serviceFileName = $"{serviceName}.service";
+        var serviceFileName = $"{serviceEnvName}.service";
         var serviceConfigFileName = Path.Combine(systemFolderFullName, serviceFileName);
         return serviceConfigFileName;
     }
@@ -51,7 +51,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
         var disableProcessResult = StShared.RunProcess(UseConsole, Logger, "systemctl",
-            $"--no-ask-password --no-block --quiet disable {serviceEnvName}", new[] { 1 });
+            $"--no-ask-password --no-block --quiet disable {serviceEnvName}", [1]);
 
         if (disableProcessResult.IsSome)
             return Err.RecreateErrors((Err[])disableProcessResult,
@@ -106,7 +106,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return serviceFileText == existingServiceFileText;
     }
 
-    private async Task<OneOf<string, Err[]>> GenerateServiceFileText(string projectName, string serviceName,
+    private async Task<OneOf<string, Err[]>> GenerateServiceFileText(string projectName, string serviceDescription,
         string installFolderPath, string serviceUserName, string dotnetRunner, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken)
     {
@@ -118,11 +118,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
 
         var mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
-        var syslogIdentifier = serviceName.Replace(".", "");
+        var syslogIdentifier = serviceDescription.Replace(".", "");
 
         return $"""
                 [Unit]
-                Description={serviceName} service {serviceDescriptionSignature ?? ""} {projectDescription ?? ""}
+                Description={serviceDescription} service {serviceDescriptionSignature ?? ""} {projectDescription ?? ""}
 
                 [Service]
                 WorkingDirectory={installFolderPath}

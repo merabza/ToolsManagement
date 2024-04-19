@@ -14,23 +14,22 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     {
     }
 
-    public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string serviceName,
-        string environmentName,
+    public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken)
     {
-        return await DeleteAsync($"projects/removeservice/{projectName}/{serviceName}/{environmentName}",
+        return await DeleteAsync($"projects/removeservice/{projectName}/{environmentName}/{isService}",
             cancellationToken);
     }
 
-    public async Task<Option<Err[]>> StopService(string serviceName, string environmentName,
+    public async Task<Option<Err[]>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken)
     {
-        return await PostAsync($"projects/stop/{serviceName}/{environmentName}", cancellationToken);
+        return await PostAsync($"projects/stop/{projectName}/{environmentName}", cancellationToken);
     }
 
-    public async Task<Option<Err[]>> StartService(string serviceName, string environmentName,
+    public async Task<Option<Err[]>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken)
     {
-        return await PostAsync($"projects/start/{serviceName}/{environmentName}", cancellationToken);
+        return await PostAsync($"projects/start/{projectName}/{environmentName}", cancellationToken);
     }
 }
