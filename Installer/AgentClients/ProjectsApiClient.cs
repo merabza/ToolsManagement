@@ -17,7 +17,7 @@ public sealed class ProjectsApiClient : ApiClient, IProjectsApiClient
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken)
     {
-        return await DeleteAsync($"projects/removeservice/{projectName}/{environmentName}/{isService}",
+        return await DeleteAsync($"projects/removeprojectservice/{projectName}/{environmentName}/{isService}",
             cancellationToken);
     }
 
