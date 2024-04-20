@@ -10,14 +10,15 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
-    private readonly string _toolActionName;
+    //protected საჭიროა ProcessorWorker პროექტისათვის
+    protected readonly string ToolActionName;
     private readonly bool _useConsole;
 
 
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
         bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
-        _toolActionName = actionName;
+        ToolActionName = actionName;
         _useConsole = useConsole;
     }
 
@@ -28,7 +29,7 @@ public /*open*/ class ToolAction : MessageLogger
             if (!CheckValidate())
                 return false;
 
-            await WriteMessage($"{_toolActionName} Started...", _useConsole, cancellationToken);
+            await WriteMessage($"{ToolActionName} Started...", _useConsole, cancellationToken);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
@@ -37,7 +38,7 @@ public /*open*/ class ToolAction : MessageLogger
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            await WriteMessage($"{_toolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
+            await WriteMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
 
             //StShared.Pause();
 
