@@ -25,8 +25,8 @@ public /*open*/ class ToolAction : MessageLogger
     {
         try
         {
-            //if (!CheckValidate())
-            //    return false;
+            if (!CheckValidate())
+                return false;
 
             await WriteMessage($"{_toolActionName} Started...", _useConsole, cancellationToken);
 
@@ -65,17 +65,11 @@ public /*open*/ class ToolAction : MessageLogger
             Logger.LogInformation(message);
     }
 
-    //protected virtual string GetActionDescription()
-    //{
-    //    if (!string.IsNullOrWhiteSpace(_actionDescription) && _actionName != _actionDescription)
-    //        return _actionDescription;
-    //    return _actionName;
-    //}
-
-    //protected virtual bool CheckValidate()
-    //{
-    //    return true;
-    //}
+    //გამოყენებულაი SupportTools-ში
+    protected virtual bool CheckValidate()
+    {
+        return true;
+    }
 
     protected virtual Task<bool> RunAction(CancellationToken cancellationToken)
     {
