@@ -8,20 +8,14 @@ using SystemToolsShared;
 
 namespace Installer;
 
-public /*open*/ class ApplicationUpdaterBase
+public /*open*/ class ApplicationUpdaterBase : MessageLogger
 {
-    protected readonly ILogger Logger;
-    protected readonly IMessagesDataManager? MessagesDataManager;
     protected readonly bool UseConsole;
-    protected readonly string? UserName;
 
     protected ApplicationUpdaterBase(ILogger logger, bool useConsole, IMessagesDataManager? messagesDataManager,
-        string? userName)
+        string? userName) : base(logger, messagesDataManager, userName, useConsole)
     {
-        Logger = logger;
         UseConsole = useConsole;
-        MessagesDataManager = messagesDataManager;
-        UserName = userName;
     }
 
     protected async Task<string?> GetParametersFileBody(string projectName, string environmentName,

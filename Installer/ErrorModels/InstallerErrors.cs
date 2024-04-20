@@ -5,9 +5,39 @@ namespace Installer.ErrorModels;
 public static class InstallerErrors
 {
 
+    public static Err CannotUpdateProject(string projectName, string environmentName) => new()
+    {
+        ErrorCode = nameof(CannotUpdateProject),
+        ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
+    };
+
+    public static Err ProjectArchiveFileWasNotDownloaded => new()
+    {
+        ErrorCode = nameof(ProjectArchiveFileWasNotDownloaded),
+        ErrorMessage = "Project archive file not downloaded"
+    };
+
+    public static Err ProjectArchiveFilesNotFoundOnExchangeStorage => new()
+    {
+        ErrorCode = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
+        ErrorMessage = "Project archive files not found on exchange storage"
+    };
+
+    public static Err CannotUpdateSelf => new()
+    {
+        ErrorCode = nameof(CannotUpdateSelf),
+        ErrorMessage = "Cannot update self"
+    };
+
+    public static Err ExchangeFileManagerIsNull => new()
+    {
+        ErrorCode = nameof(ExchangeFileManagerIsNull),
+        ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
+    };
+
     public static Err CannotRegisterService(string serviceEnvName) => new()
     {
-        ErrorCode = nameof(CannotRegisterService),
+        ErrorCode = nameof(ExchangeFileManagerIsNull),
         ErrorMessage = $"cannot register Service {serviceEnvName}"
     };
 
@@ -16,13 +46,13 @@ public static class InstallerErrors
         ErrorCode = nameof(FileCanNotBeDeleted),
         ErrorMessage = $"File {fileName} can not Deleted"
     };
-        
+
     public static Err FileIsNotExists(string fileName) => new()
     {
         ErrorCode = nameof(FileIsNotExists),
         ErrorMessage = $"File {fileName} is not exists"
     };
-        
+
     public static Err FileNameIsEmpty => new()
     {
         ErrorCode = nameof(FileNameIsEmpty),
@@ -40,13 +70,13 @@ public static class InstallerErrors
         ErrorCode = nameof(FileCanNotBeDeleted),
         ErrorMessage = $"Folder {folderName} can not be Deleted"
     };
-            
+
     public static Err FolderIsNotExists(string folderName) => new()
     {
         ErrorCode = nameof(FolderIsNotExists),
         ErrorMessage = $"File {folderName} is not exists"
     };
-    
+
     public static Err FolderNameIsEmpty => new()
     {
         ErrorCode = nameof(FolderNameIsEmpty),
@@ -136,5 +166,4 @@ public static class InstallerErrors
         ErrorCode = nameof(ServiceIsNotStopped),
         ErrorMessage = $"Service {serviceEnvName} is running and cannot be updated"
     };
-
 }

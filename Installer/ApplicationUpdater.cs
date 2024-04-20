@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FileManagersMain;
 using Installer.Domain;
+using Installer.ErrorModels;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -171,111 +172,49 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
         CancellationToken cancellationToken)
     {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}",
-                cancellationToken);
-        Logger.LogInformation(
-            "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}",
-            projectName, environmentName);
 
+        await LogInfoAndSendMessage(
+            "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}", projectName,
+            environmentName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Cannot update self", cancellationToken);
-            Logger.LogError("Cannot update self");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotUpdateSelf",
-                    ErrorMessage = "Cannot update self"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, Logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    "exchangeFileManager is null when UpdateProgramWithParameters", cancellationToken);
-            Logger.LogError("exchangeFileManager is null when UpdateProgramWithParameters");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "exchangeFileManagerIsNull",
-                    ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
 
         var runTime = _installer.Runtime;
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runTime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
-                cancellationToken);
-        Logger.LogInformation(
-            "GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runTime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
-            projectName, environmentName, runTime, programArchiveExtension);
+
+        await LogInfoAndSendMessage(
+            "GetFileParameters with parameters: projectName={0}, environmentName={1}, _serviceInstaller.Runtime={2}, _applicationUpdaterParameters.ProgramArchiveExtension={3}",
+            projectName, environmentName, runTime, programArchiveExtension, cancellationToken);
 
         var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
-                cancellationToken);
-        Logger.LogInformation("GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
-            prefix, dateMask, suffix);
+        await LogInfoAndSendMessage("GetFileParameters results is: prefix={0}, dateMask={1}, suffix={2}", prefix,
+            dateMask, suffix, cancellationToken);
 
         //დავადგინოთ გაცვლით სერვერზე
         //{_projectName} სახელით არსებული საინსტალაციო არქივები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Project archive files not found on exchange storage",
-                    cancellationToken);
-            Logger.LogError("Project archive files not found on exchange storage");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ProjectArchiveFilesNotFoundOnExchangeStorage",
-                    ErrorMessage = "Project archive files not found on exchange storage"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
+                cancellationToken);
 
         var localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
-        if (!File.Exists(localArchiveFileName))
-            //მოვქაჩოთ არჩეული საინსტალაციო არქივი
-            if (!exchangeFileManager.DownloadFile(lastFileInfo.FileName,
-                    _applicationUpdaterParameters.DownloadTempExtension))
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, "Project archive file not downloaded",
-                        cancellationToken);
-                Logger.LogError("Project archive file not downloaded");
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ProjectArchiveFileWasNotDownloaded",
-                        ErrorMessage = "Project archive file not downloaded"
-                    }
-                };
-            }
+        if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
+                _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
+                cancellationToken);
 
         var assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName,
             environmentName,
@@ -290,134 +229,59 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}",
-                cancellationToken);
-        Logger.LogError("Cannot Update {projectName}/{environmentName}", projectName, environmentName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "CannotUpdateProject",
-                ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+            cancellationToken);
     }
 
     public async Task<OneOf<string, Err[]>> UpdateServiceWithParameters(string projectName, string environmentName,
         string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken)
     {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}",
-                cancellationToken);
-        Logger.LogInformation(
-            "starting UpdateProgramWithParameters with parameters: projectName={projectName}, environmentName={environmentName}, serviceUserName={serviceUserName}",
-            projectName, environmentName, serviceUserName);
-
+        await LogInfoAndSendMessage(
+            "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",
+            projectName, environmentName, serviceUserName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Cannot update self", cancellationToken);
-            Logger.LogError("Cannot update self");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotUpdateSelf",
-                    ErrorMessage = "Cannot update self"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, Logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName,
-                    "exchangeFileManager is null when UpdateProgramWithParameters", cancellationToken);
-            Logger.LogError("exchangeFileManager is null when UpdateProgramWithParameters");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "exchangeFileManagerIsNull",
-                    ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
 
         var runtime = _installer.Runtime;
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
-                cancellationToken);
-        Logger.LogInformation(
-            "GetFileParameters with parameters: projectName={projectName}, environmentName={environmentName}, _serviceInstaller.Runtime={runtime}, _applicationUpdaterParameters.ProgramArchiveExtension={programArchiveExtension}",
-            projectName, environmentName, runtime, programArchiveExtension);
+        await LogInfoAndSendMessage(
+            "GetFileParameters with parameters: projectName={0}, environmentName={1}, _serviceInstaller.Runtime={2}, _applicationUpdaterParameters.ProgramArchiveExtension={3}",
+            projectName, environmentName, runtime, programArchiveExtension, cancellationToken);
 
         var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
             _applicationUpdaterParameters.ProgramArchiveExtension);
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
-                cancellationToken);
-        Logger.LogInformation("GetFileParameters results is: prefix={prefix}, dateMask={dateMask}, suffix={suffix}",
-            prefix, dateMask, suffix);
-
+        await LogInfoAndSendMessage("GetFileParameters results is: prefix={0}, dateMask={1}, suffix={2}", prefix,
+            dateMask, suffix, cancellationToken);
 
         //დავადგინოთ გაცვლით სერვერზე
         //{_projectName} სახელით არსებული საინსტალაციო არქივები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Project archive files not found on exchange storage",
-                    cancellationToken);
-            Logger.LogError("Project archive files not found on exchange storage");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ProjectArchiveFilesNotFoundOnExchangeStorage",
-                    ErrorMessage = "Project archive files not found on exchange storage"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
+                cancellationToken);
 
         var localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
-        if (!File.Exists(localArchiveFileName))
-            //მოვქაჩოთ არჩეული საინსტალაციო არქივი
-            if (!exchangeFileManager.DownloadFile(lastFileInfo.FileName,
-                    _applicationUpdaterParameters.DownloadTempExtension))
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName, "Project archive file was not downloaded",
-                        cancellationToken);
-                Logger.LogError("Project archive file was not downloaded");
-                return new Err[]
-                {
-                    new()
-                    {
-                        ErrorCode = "ProjectArchiveFileWasNotDownloaded",
-                        ErrorMessage = "Project archive file was not downloaded"
-                    }
-                };
-            }
+        if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
+                _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
+                cancellationToken);
 
         FileNameAndTextContent? appSettingsFile = null;
-        //string? appSettingsFileBody = null;
+
         if (!string.IsNullOrWhiteSpace(appSettingsFileName))
         {
             //მოვქაჩოთ ბოლო პარამეტრების ფაილი
@@ -426,16 +290,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 _applicationUpdaterParameters.ParametersFileDateMask,
                 _applicationUpdaterParameters.ParametersFileExtension, cancellationToken);
             if (appSettingsFileBody is null)
-            {
-                if (MessagesDataManager is not null)
-                    await MessagesDataManager.SendMessage(UserName,
-                        $"Cannot Update {projectName}, because cannot get latest parameters file", cancellationToken);
-                Logger.LogError("Cannot Update {projectName}, because cannot get latest parameters file", projectName);
-            }
+                return await LogErrorAndSendMessageFromError(
+                    InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
 
-            if (appSettingsFileBody is not null)
-                appSettingsFile =
-                    new FileNameAndTextContent(appSettingsFileName, appSettingsFileBody);
+            appSettingsFile = new FileNameAndTextContent(appSettingsFileName, appSettingsFileBody);
         }
 
 
@@ -454,18 +312,9 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, $"Cannot Update {projectName}/{environmentName}",
-                cancellationToken);
-        Logger.LogError("Cannot Update {projectName}/{environmentName}", projectName, environmentName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "CannotUpdateProjectEnvironment",
-                ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
-            }
-        };
+        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+            cancellationToken);
+
     }
 
     private (string, string, string) GetFileParameters(string projectName, string environmentName, string runtime,

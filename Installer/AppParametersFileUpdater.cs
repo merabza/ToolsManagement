@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
+using Installer.ErrorModels;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using LibFileParameters.Models;
@@ -80,19 +81,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         string appSettingsFileName, CancellationToken cancellationToken)
     {
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
-        {
-            if (MessagesDataManager is not null)
-                await MessagesDataManager.SendMessage(UserName, "Installer does Not Created", cancellationToken);
-            Logger.LogError("Cannot update self");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotUpdateSelf",
-                    ErrorMessage = "Cannot update self"
-                }
-            };
-        }
+            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
         var appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
@@ -100,14 +89,8 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
             _applicationUpdaterParameters.ParametersFileDateMask, _applicationUpdaterParameters.ParametersFileExtension,
             cancellationToken);
         if (appSettingsFileBody == null)
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "CannotUpdateSelf",
-                    ErrorMessage = "Cannot update self"
-                }
-            };
+            return await LogErrorAndSendMessageFromError(
+                InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
 
         return await _serviceInstaller.RunUpdateSettings(projectName, environmentName, appSettingsFileName,
             appSettingsFileBody, _applicationUpdaterParameters.FilesUserName,

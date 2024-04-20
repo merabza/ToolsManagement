@@ -8,22 +8,16 @@ using SystemToolsShared;
 
 namespace LibToolActions;
 
-public /*open*/ class ToolAction
+public /*open*/ class ToolAction : MessageLogger
 {
     private readonly string _toolActionName;
-    protected readonly ILogger Logger;
-    protected readonly IMessagesDataManager? MessagesDataManager;
-    protected readonly string? UserName;
     private readonly bool _useConsole;
 
 
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
-        bool useConsole = false)
+        bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
-        Logger = logger;
         _toolActionName = actionName;
-        MessagesDataManager = messagesDataManager;
-        UserName = userName;
         _useConsole = useConsole;
     }
 
@@ -31,8 +25,8 @@ public /*open*/ class ToolAction
     {
         try
         {
-            if (!CheckValidate())
-                return false;
+            //if (!CheckValidate())
+            //    return false;
 
             await WriteMessage($"{_toolActionName} Started...", _useConsole, cancellationToken);
 
@@ -78,10 +72,10 @@ public /*open*/ class ToolAction
     //    return _actionName;
     //}
 
-    protected virtual bool CheckValidate()
-    {
-        return true;
-    }
+    //protected virtual bool CheckValidate()
+    //{
+    //    return true;
+    //}
 
     protected virtual Task<bool> RunAction(CancellationToken cancellationToken)
     {

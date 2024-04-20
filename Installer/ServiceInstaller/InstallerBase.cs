@@ -23,7 +23,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     protected readonly bool UseConsole;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
-        string? userName) : base(logger, messagesDataManager, userName)
+        string? userName) : base(logger, messagesDataManager, userName, useConsole)
     {
         Runtime = runtime;
         UseConsole = useConsole;
@@ -72,7 +72,9 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return Process.GetProcessesByName(processName).Length > 1;
     }
 
-    public async Task<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName, string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName, string installFolder, CancellationToken cancellationToken)
+    public async Task<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName,
+        string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
+        string installFolder, CancellationToken cancellationToken)
     {
         var checkBeforeStartUpdateResult =
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
@@ -591,7 +593,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     {
         if (!isService)
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
-        
+
         var serviceEnvName = GetServiceEnvName(projectName, environmentName);
 
         await LogInfoAndSendMessage("Remove service {0} started...", serviceEnvName, cancellationToken);

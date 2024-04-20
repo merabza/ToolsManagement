@@ -62,21 +62,18 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName,
-                $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}",
-                cancellationToken);
-        Console.WriteLine(
-            $"Check files on exchange storage for Prefix {prefix}, Date Mask {_dateMask} and extension {_parametersFileExtension}");
+        await LogInfoAndSendMessage("Check files on exchange storage for Prefix {0}, Date Mask {1} and extension {2}",
+            prefix, _dateMask, _parametersFileExtension, cancellationToken);
+
         var lastParametersFileInfo =
             exchangeFileManager?.GetLastFileInfo(prefix, _dateMask, _parametersFileExtension);
         if (lastParametersFileInfo != null)
             //მოვქაჩოთ არჩეული პარამეტრების ფაილის შიგთავსი
             return exchangeFileManager?.GetTextFileContent(lastParametersFileInfo.FileName);
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, "Project Parameter files not found on exchange storage",
-                cancellationToken);
-        Logger.LogWarning("Project Parameter files not found on exchange storage");
+
+        await LogInfoAndSendMessage("Project Parameter files not found on exchange storage", cancellationToken);
+
+
         return null;
     }
 
