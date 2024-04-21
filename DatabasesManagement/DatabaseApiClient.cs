@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiClientsManagement;
+using DbTools.ErrorModels;
 using DbTools.Models;
 using LanguageExt;
 using LibApiClientParameters;
@@ -35,15 +36,8 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
     {
         if (string.IsNullOrWhiteSpace(backupBaseName))
         {
-            _logger.LogError("Database Name does Not Specified For Backup");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "DatabaseNameDoesNotSpecified",
-                    ErrorMessage = "Database Name does Not Specified For Backup"
-                }
-            };
+            _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
+            return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
         }
 
         var bodyJsonData = JsonConvert.SerializeObject(new CreateBackupRequest

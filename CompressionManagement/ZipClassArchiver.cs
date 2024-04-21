@@ -160,28 +160,4 @@ public sealed class ZipClassArchiver : Archiver
 
         return false;
     }
-
-    //private long CountDirectoryFilesLength(DirectoryInfo targetDirectory)
-    //{
-    //    long countedLength = 0;
-
-    //    try
-    //    {
-    //        countedLength += targetDirectory.GetDirectories().Sum(CountDirectoryFilesLength);
-    //        // Process the list of files found in the directory.
-    //        countedLength += targetDirectory.GetFiles().Sum(CountFileLength);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        StShared.WriteException(e, UseConsole, _logger);
-    //    }
-
-    //    return countedLength;
-    //}
-
-    // Insert logic for processing found files here.
-    //private long CountFileLength(FileInfo targetFile)
-    //{
-    //    return targetFile.Length;
-    //}
 }

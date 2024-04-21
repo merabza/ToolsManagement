@@ -16,14 +16,15 @@ namespace Installer;
 
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {
+    private readonly ILogger _logger;
     private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
-
     private readonly InstallerBase _installer;
 
     private ApplicationUpdater(ILogger logger, ApplicationUpdaterParameters applicationUpdaterParameters,
         InstallerBase serviceInstaller, bool useConsole, IMessagesDataManager? messagesDataManager, string? userName) :
         base(logger, useConsole, messagesDataManager, userName)
     {
+        _logger = logger;
         _applicationUpdaterParameters = applicationUpdaterParameters;
         _installer = serviceInstaller;
     }
@@ -180,7 +181,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
-        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, Logger,
+        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
@@ -244,7 +245,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
-        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, Logger,
+        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 

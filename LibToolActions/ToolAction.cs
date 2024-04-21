@@ -10,7 +10,9 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
+    private readonly ILogger _logger;
     //protected საჭიროა ProcessorWorker პროექტისათვის
+    // ReSharper disable once MemberCanBePrivate.Global
     protected readonly string ToolActionName;
     private readonly bool _useConsole;
 
@@ -18,6 +20,7 @@ public /*open*/ class ToolAction : MessageLogger
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
         bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
+        _logger = logger;
         ToolActionName = actionName;
         _useConsole = useConsole;
     }
@@ -29,7 +32,7 @@ public /*open*/ class ToolAction : MessageLogger
             if (!CheckValidate())
                 return false;
 
-            await WriteMessage($"{ToolActionName} Started...", _useConsole, cancellationToken);
+            await LogInfoAndSendMessage($"{ToolActionName} Started...", _useConsole, cancellationToken);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
@@ -38,7 +41,7 @@ public /*open*/ class ToolAction : MessageLogger
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            await WriteMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
+            await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
 
             //StShared.Pause();
 
@@ -46,24 +49,14 @@ public /*open*/ class ToolAction : MessageLogger
         }
         catch (OperationCanceledException e)
         {
-            Logger.LogError(e, "Operation Canceled");
+            _logger.LogError(e, "Operation Canceled");
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error when run Tool Action");
+            _logger.LogError(e, "Error when run Tool Action");
         }
 
         return false;
-    }
-
-    private async Task WriteMessage(string message, bool useConsole, CancellationToken cancellationToken)
-    {
-        if (MessagesDataManager is not null)
-            await MessagesDataManager.SendMessage(UserName, message, cancellationToken);
-        if (useConsole)
-            Console.WriteLine(message);
-        else
-            Logger.LogInformation(message);
     }
 
     //გამოყენებულაი SupportTools-ში

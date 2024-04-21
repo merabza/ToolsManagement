@@ -117,7 +117,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
-        return await dc.ExecuteCommandAsync(executeQueryCommand, cancellationToken, true, true);
+        return await dc.ExecuteCommand(executeQueryCommand, true, true, cancellationToken);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
@@ -198,7 +198,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
                 ? _databaseServerConnectionDataDomain.BackupFolderName
                 : restoreFromFolderPath).AddNeedLastPart(dirSeparator) + backupFileParameters.Name;
 
-        var getRestoreFilesResult = dc.GetRestoreFiles(backupFileFullName);
+        var getRestoreFilesResult = await dc.GetRestoreFiles(backupFileFullName, cancellationToken);
         if (getRestoreFilesResult.IsT1)
         {
             if (_messagesDataManager is not null)
@@ -227,7 +227,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
-        return dc.TestConnection(databaseName != null);
+        return await dc.TestConnection(databaseName is not null, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება

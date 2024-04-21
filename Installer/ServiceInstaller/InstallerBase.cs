@@ -21,12 +21,14 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 {
     public readonly string Runtime;
     protected readonly bool UseConsole;
+    private readonly ILogger _logger;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)
     {
         Runtime = runtime;
         UseConsole = useConsole;
+        _logger = logger;
     }
 
     protected abstract Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName, string serviceEnvName,
@@ -333,7 +335,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex, "Folder could not deleted");
+                    _logger.LogError(ex, "Folder could not deleted");
                     await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}",
                         projectInstallFullPathWithEnv, tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);

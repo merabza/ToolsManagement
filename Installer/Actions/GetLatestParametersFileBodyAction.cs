@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using FileManagersMain;
 using LibFileParameters.Models;
@@ -17,11 +16,10 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     private readonly string _dateMask;
     private readonly string _environmentName;
     private readonly FileStorageData _fileStorageForDownload;
-
     private readonly string _parametersFileExtension;
-
     private readonly string _projectName;
     private readonly string _serverName;
+    private readonly ILogger _logger;
     private readonly bool _useConsole;
 
     public GetLatestParametersFileBodyAction(ILogger logger, bool useConsole, FileStorageData fileStorageForDownload,
@@ -29,6 +27,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         IMessagesDataManager? messagesDataManager, string? userName) : base(logger, "Get latest Parameters File Body",
         messagesDataManager, userName)
     {
+        _logger = logger;
         _useConsole = useConsole;
         _fileStorageForDownload = fileStorageForDownload;
         _projectName = projectName;
@@ -58,7 +57,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 
         var exchangeFileManager =
-            FileManagersFabric.CreateFileManager(_useConsole, Logger, null, _fileStorageForDownload, true);
+            FileManagersFabric.CreateFileManager(_useConsole, _logger, null, _fileStorageForDownload, true);
 
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი

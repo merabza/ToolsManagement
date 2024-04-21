@@ -37,6 +37,7 @@ public /*open*/ class FileManager
     }
 
     //public for UsbCopyRunner
+    // ReSharper disable once MemberCanBeProtected.Global
     public virtual List<string> GetFileNames(string? relativePath, string? searchPattern)
     {
         return [];
