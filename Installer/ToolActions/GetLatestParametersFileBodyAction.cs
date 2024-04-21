@@ -9,7 +9,7 @@ using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.Actions;
+namespace Installer.ToolActions;
 
 public sealed class GetLatestParametersFileBodyAction : ToolAction
 {
