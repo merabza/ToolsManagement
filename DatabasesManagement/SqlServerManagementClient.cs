@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using DatabasesManagement.Responses;
 using DbTools;
 using DbTools.Models;
 using DbToolsFabric;
@@ -11,7 +12,6 @@ using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
-using WebAgentProjectsApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
