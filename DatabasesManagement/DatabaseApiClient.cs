@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiClientsManagement;
+using DatabasesManagement.Requests;
 using DatabasesManagement.Responses;
 using DbTools.ErrorModels;
 using DbTools.Models;
@@ -13,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
-using WebAgentDatabasesApiContracts.V1.Requests;
 using WebAgentProjectsApiContracts.V1.Requests;
 
 namespace DatabasesManagement;
