@@ -162,6 +162,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -215,8 +216,9 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         var files = getRestoreFilesResult.AsT0;
 
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
-            _databaseServerConnectionDataDomain.DataFolderName, _databaseServerConnectionDataDomain.DataLogFolderName,
-            dirSeparator, cancellationToken);
+            destinationDbServerSideDataFolderPath ?? _databaseServerConnectionDataDomain.DataFolderName,
+            destinationDbServerSideLogFolderPath ?? _databaseServerConnectionDataDomain.DataLogFolderName, dirSeparator,
+            cancellationToken);
     }
 
     public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken)

@@ -28,8 +28,9 @@ public interface IDatabaseApiClient
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
-    Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
-        CancellationToken cancellationToken, string? restoreFromFolderPath = null);
+    Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
+        string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
     Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken);

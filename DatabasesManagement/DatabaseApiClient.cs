@@ -72,6 +72,7 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
         var bodyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
@@ -79,10 +80,10 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             Prefix = backupFileParameters.Prefix,
             Suffix = backupFileParameters.Suffix,
             Name = backupFileParameters.Name,
-            DateMask = backupFileParameters.DateMask
+            DateMask = backupFileParameters.DateMask,
+            DestinationDbServerSideDataFolderPath = destinationDbServerSideDataFolderPath,
+            DestinationDbServerSideLogFolderPath = destinationDbServerSideLogFolderPath
         });
-
-
         return await PutAsync($"databases/restorebackup/{databaseName}", cancellationToken, bodyJsonData);
     }
 
