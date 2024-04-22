@@ -135,6 +135,12 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
             cancellationToken);
     }
 
+    public Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
+        CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public static async Task<DatabaseApiClient?> Create(ILogger logger, ApiClientSettings? apiClientSettings,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {

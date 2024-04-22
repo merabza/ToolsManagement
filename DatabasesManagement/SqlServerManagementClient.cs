@@ -242,6 +242,18 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
 
+    public async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
+        string defLogFolder, CancellationToken cancellationToken)
+    {
+        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.SetDefaultFolders(defBackupFolder, defDataFolder, defLogFolder, cancellationToken);
+    }
+
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken)
     {
