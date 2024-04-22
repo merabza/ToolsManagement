@@ -14,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OneOf;
 using SystemToolsShared;
-using WebAgentProjectsApiContracts.V1.Requests;
 
 namespace DatabasesManagement;
 
