@@ -4,7 +4,6 @@ namespace Installer.ErrorModels;
 
 public static class InstallerErrors
 {
-
     public static Err CannotUpdateProject(string projectName, string environmentName) => new()
     {
         ErrorCode = nameof(CannotUpdateProject),

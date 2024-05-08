@@ -4,7 +4,6 @@ namespace Installer.ErrorModels;
 
 public static class LinuxServiceInstallerErrors
 {
-
     public static Err DotnetDetectError => new()
     {
         ErrorCode = nameof(DotnetDetectError),
@@ -16,7 +15,7 @@ public static class LinuxServiceInstallerErrors
         ErrorCode = nameof(DotnetLocationIsNotFound),
         ErrorMessage = "dotnet location can not found"
     };
-    
+
     public static Err ServiceCanNotBeEnabled(string serviceEnvName) => new()
     {
         ErrorCode = nameof(ServiceCanNotBeEnabled),
@@ -34,6 +33,4 @@ public static class LinuxServiceInstallerErrors
         ErrorCode = nameof(WhichDotnetError),
         ErrorMessage = "Which Dotnet finished with Errors"
     };
-
 }
-

@@ -173,7 +173,6 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
         CancellationToken cancellationToken)
     {
-
         await LogInfoAndSendMessage(
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}", projectName,
             environmentName, cancellationToken);
@@ -315,7 +314,6 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
             cancellationToken);
-
     }
 
     private (string, string, string) GetFileParameters(string projectName, string environmentName, string runtime,

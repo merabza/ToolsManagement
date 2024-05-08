@@ -1,5 +1,4 @@
-﻿
-namespace ApiClientsManagement;
+﻿namespace ApiClientsManagement;
 
 public sealed class ApiClientSettingsDomain
 {

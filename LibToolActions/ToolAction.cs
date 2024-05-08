@@ -11,6 +11,7 @@ namespace LibToolActions;
 public /*open*/ class ToolAction : MessageLogger
 {
     private readonly ILogger _logger;
+
     //protected საჭიროა ProcessorWorker პროექტისათვის
     // ReSharper disable once MemberCanBePrivate.Global
     protected readonly string ToolActionName;
@@ -41,7 +42,8 @@ public /*open*/ class ToolAction : MessageLogger
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole, cancellationToken);
+            await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole,
+                cancellationToken);
 
             //StShared.Pause();
 

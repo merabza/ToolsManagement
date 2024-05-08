@@ -48,11 +48,15 @@ public interface IDatabaseApiClient
     //რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
     //გამოიყენება ApAgent-ში
     Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken);
+
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
     Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken);
+
     Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken);
+
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
     Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken);
+
     Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
         CancellationToken cancellationToken);
 }

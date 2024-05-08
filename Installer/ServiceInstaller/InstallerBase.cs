@@ -223,7 +223,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //და თუ არ არსებობს, შევქმნათ
 
 
-
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
             return await LogErrorAndSendMessageFromError(
@@ -348,7 +347,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             if (!deleteSuccess)
                 return await LogErrorAndSendMessageFromError(
                     InstallerErrors.FolderCanNotBeDeleted(projectInstallFullPathWithEnv), cancellationToken);
-
         }
 
         await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPathWithEnv,
@@ -629,7 +627,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeRemoved(serviceEnvName),
             cancellationToken);
-
     }
 
     public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName, string installFolder,

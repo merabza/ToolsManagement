@@ -12,6 +12,7 @@ public interface IProjectsApiClient
     //Task<bool> RemoveProject(string projectName);
     Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken);
+
     Task<Option<Err[]>> StopService(string projectName, string environmentName, CancellationToken cancellationToken);
     Task<Option<Err[]>> StartService(string projectName, string environmentName, CancellationToken cancellationToken);
 }
