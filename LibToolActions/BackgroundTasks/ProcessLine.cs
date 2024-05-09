@@ -18,6 +18,11 @@ public sealed class ProcessLine : IDisposable
 
     public bool IsBusy => _queue.IsBusy() || _runner.IsBusy;
 
+    public void Dispose()
+    {
+        _runner.Dispose();
+    }
+
     internal void StartAsync(CancellationToken token)
     {
         _runner.StartAsync(token);
@@ -31,10 +36,5 @@ public sealed class ProcessLine : IDisposable
     public void WaitForFinish()
     {
         _runner.WaitForFinish();
-    }
-
-    public void Dispose()
-    {
-        _runner.Dispose();
     }
 }
