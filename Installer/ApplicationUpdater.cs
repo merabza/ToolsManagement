@@ -16,9 +16,9 @@ namespace Installer;
 
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {
-    private readonly ILogger _logger;
     private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
     private readonly InstallerBase _installer;
+    private readonly ILogger _logger;
 
     private ApplicationUpdater(ILogger logger, ApplicationUpdaterParameters applicationUpdaterParameters,
         InstallerBase serviceInstaller, bool useConsole, IMessagesDataManager? messagesDataManager, string? userName) :

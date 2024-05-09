@@ -16,21 +16,27 @@ public static class LinuxServiceInstallerErrors
         ErrorMessage = "dotnet location can not found"
     };
 
-    public static Err ServiceCanNotBeEnabled(string serviceEnvName) => new()
-    {
-        ErrorCode = nameof(ServiceCanNotBeEnabled),
-        ErrorMessage = $"Service {serviceEnvName} is not enabled"
-    };
-
-    public static Err ServiceIsNotEnabled(string serviceEnvName) => new()
-    {
-        ErrorCode = nameof(ServiceIsNotEnabled),
-        ErrorMessage = $"Service {serviceEnvName} is not enabled"
-    };
-
     public static Err WhichDotnetError => new()
     {
         ErrorCode = nameof(WhichDotnetError),
         ErrorMessage = "Which Dotnet finished with Errors"
     };
+
+    public static Err ServiceCanNotBeEnabled(string serviceEnvName)
+    {
+        return new Err
+        {
+            ErrorCode = nameof(ServiceCanNotBeEnabled),
+            ErrorMessage = $"Service {serviceEnvName} is not enabled"
+        };
+    }
+
+    public static Err ServiceIsNotEnabled(string serviceEnvName)
+    {
+        return new Err
+        {
+            ErrorCode = nameof(ServiceIsNotEnabled),
+            ErrorMessage = $"Service {serviceEnvName} is not enabled"
+        };
+    }
 }
