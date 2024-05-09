@@ -19,9 +19,9 @@ namespace Installer.ServiceInstaller;
 
 public /*open*/ abstract class InstallerBase : MessageLogger
 {
+    private readonly ILogger _logger;
     public readonly string Runtime;
     protected readonly bool UseConsole;
-    private readonly ILogger _logger;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)
@@ -135,9 +135,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
             //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
             //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.ProcessIsRunningAndCannotBeUpdated(projectName),
                 cancellationToken);
+        }
 
         //შევეცადოთ პარამეტრების ფაილის წაშლა
         var appSettingsFileDeletedSuccess = true;
@@ -180,10 +182,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         var changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOneFileOwnerResult.IsSome)
-        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.FileOwnerCanNotBeChanged(appSettingsFileFullPath), cancellationToken);
-        }
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
         var startResult = await Start(serviceEnvName, cancellationToken);

@@ -16,10 +16,10 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     private readonly string _dateMask;
     private readonly string _environmentName;
     private readonly FileStorageData _fileStorageForDownload;
+    private readonly ILogger _logger;
     private readonly string _parametersFileExtension;
     private readonly string _projectName;
     private readonly string _serverName;
-    private readonly ILogger _logger;
     private readonly bool _useConsole;
 
     public GetLatestParametersFileBodyAction(ILogger logger, bool useConsole, FileStorageData fileStorageForDownload,
