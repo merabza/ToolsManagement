@@ -11,8 +11,8 @@ namespace Installer.ServiceInstaller;
 
 public sealed class LinuxServiceInstaller : InstallerBase
 {
-    private readonly ILogger _logger;
     private readonly string _dotnetRunner;
+    private readonly ILogger _logger;
 
     public LinuxServiceInstaller(bool useConsole, ILogger logger, string dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole, logger, "linux-x64",
