@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
+using SignalRContracts;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

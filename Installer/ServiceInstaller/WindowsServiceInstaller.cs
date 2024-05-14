@@ -11,6 +11,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;

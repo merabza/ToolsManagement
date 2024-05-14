@@ -11,6 +11,7 @@ using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace DatabasesManagement;

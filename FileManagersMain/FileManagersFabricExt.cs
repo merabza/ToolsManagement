@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using SignalRContracts;
 
 namespace FileManagersMain;
 

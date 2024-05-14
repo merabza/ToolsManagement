@@ -5,7 +5,7 @@ using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using SignalRContracts;
 
 namespace DatabasesManagement;
 
