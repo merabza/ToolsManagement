@@ -4,7 +4,7 @@ using Installer.Domain;
 using Installer.Models;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using SignalRContracts;
 
 namespace Installer.AgentClients;
 

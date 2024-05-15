@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Installer.ToolActions;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer;

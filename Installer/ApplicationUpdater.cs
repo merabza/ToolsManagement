@@ -10,6 +10,7 @@ using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer;
@@ -30,11 +31,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     }
 
     public static async Task<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
-        string programArchiveDateMask,
-        string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        FileStorageData fileStorageForUpload, string? installerWorkFolder, string? filesUserName,
-        string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension, string? installFolder,
-        string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
+        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
+        string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
+        string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
+        string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken)
     {
         var serviceInstaller = await InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,

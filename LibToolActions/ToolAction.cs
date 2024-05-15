@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging;
 using SignalRContracts;
 using SystemToolsShared;
 
-// ReSharper disable ConvertToPrimaryConstructor
-
 namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger

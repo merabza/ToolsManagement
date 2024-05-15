@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Installer.Models;
 using Microsoft.Extensions.Logging;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer.Domain;
@@ -51,7 +52,7 @@ public sealed class LocalInstallerSettingsDomain
     }
 
 
-    public static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
+    private static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
         string? installerWorkFolder, string? filesUserName, string? filesUsersGroupName, string? serviceUserName,
         string? downloadTempExtension, string? installFolder, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)

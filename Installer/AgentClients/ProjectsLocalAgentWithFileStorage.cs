@@ -5,6 +5,7 @@ using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
@@ -59,9 +60,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
         string parametersFileExtension, CancellationToken cancellationToken)
     {
         var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
-            programArchiveDateMask,
-            programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
-            _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
+            programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
+            _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
@@ -86,9 +86,8 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
     {
         var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
-            programArchiveDateMask,
-            programArchiveExtension, parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
-            _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
+            programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
+            _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
             _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);

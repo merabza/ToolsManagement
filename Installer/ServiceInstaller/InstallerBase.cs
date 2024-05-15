@@ -11,6 +11,7 @@ using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

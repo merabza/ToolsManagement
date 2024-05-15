@@ -5,6 +5,7 @@ using Installer.ErrorModels;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;
