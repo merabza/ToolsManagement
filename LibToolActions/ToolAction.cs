@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SignalRContracts;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
