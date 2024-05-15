@@ -1,6 +1,9 @@
 appsettingsEncoded.json
-/Properties/launchSettings.json
-appsettingsEncoded.json
+Properties/launchSettings.json
+
+bin/
+obj/
+
 #################
 ## Visual Studio
 #################
