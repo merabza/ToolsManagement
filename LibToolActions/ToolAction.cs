@@ -9,7 +9,7 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
-    private readonly ILogger _logger;
+    public readonly ILogger Logger;
     private readonly bool _useConsole;
 
     //protected საჭიროა ProcessorWorker პროექტისათვის
@@ -20,7 +20,7 @@ public /*open*/ class ToolAction : MessageLogger
     protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
         bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
-        _logger = logger;
+        Logger = logger;
         ToolActionName = actionName;
         _useConsole = useConsole;
     }
@@ -50,11 +50,11 @@ public /*open*/ class ToolAction : MessageLogger
         }
         catch (OperationCanceledException e)
         {
-            _logger.LogError(e, "Operation Canceled");
+            Logger.LogError(e, "Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error when run Tool Action");
+            Logger.LogError(e, "Error when run Tool Action");
         }
 
         return false;
