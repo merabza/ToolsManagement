@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using DbTools;
@@ -12,9 +13,9 @@ namespace DatabasesManagement;
 public static class DatabaseAgentClientsFabric
 {
     public static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(bool useConsole, ILogger logger,
-        string? apiClientName, ApiClients apiClients, string? databaseConnectionName,
-        DatabaseServerConnections databaseServerConnections, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken)
+        IHttpClientFactory httpClientFactory, string? apiClientName, ApiClients apiClients,
+        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(apiClientName) && string.IsNullOrWhiteSpace(databaseConnectionName))
         {
@@ -39,21 +40,21 @@ public static class DatabaseAgentClientsFabric
         }
 
         if (!string.IsNullOrWhiteSpace(apiClientName))
-            return await CreateDatabaseManagementClient(logger, apiClientName, apiClients, messagesDataManager,
-                userName, cancellationToken);
+            return await CreateDatabaseManagementClient(logger, httpClientFactory, apiClientName, apiClients,
+                messagesDataManager, userName, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
             return await CreateDatabaseManagementClient(useConsole, logger, databaseConnectionName,
                 databaseServerConnections, messagesDataManager, userName, cancellationToken);
         return null;
     }
 
-    private static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(ILogger logger, string apiClientName,
-        ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName,
-        CancellationToken cancellationToken)
+    private static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(ILogger logger,
+        IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
-        return await DatabaseApiClient.Create(logger, apiClientSettings, messagesDataManager, userName,
-            cancellationToken);
+        return await DatabaseApiClient.Create(logger, httpClientFactory, apiClientSettings, messagesDataManager,
+            userName, cancellationToken);
     }
 
     //public იყენებს ApAgent

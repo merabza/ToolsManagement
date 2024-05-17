@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -8,8 +9,11 @@ namespace ApiClientsManagement;
 
 public class TestApiClient : ApiClient
 {
+    //public const string ApiName = "TestApi";
+
     // ReSharper disable once ConvertToPrimaryConstructor
-    public TestApiClient(ILogger logger, string server) : base(logger, server, null, null, false)
+    public TestApiClient(ILogger logger, IHttpClientFactory httpClientFactory, string server) : base(logger,
+        httpClientFactory, server, null, null, false)
     {
     }
 

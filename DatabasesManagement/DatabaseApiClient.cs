@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiClientsManagement;
@@ -20,9 +21,12 @@ namespace DatabasesManagement;
 
 public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
 {
+    //public const string ApiName = "DatabaseApi";
+
     private readonly ILogger _logger;
 
-    private DatabaseApiClient(ILogger logger, ApiClientSettingsDomain apiClientSettingsDomain) : base(logger,
+    private DatabaseApiClient(ILogger logger, IHttpClientFactory httpClientFactory,
+        ApiClientSettingsDomain apiClientSettingsDomain) : base(logger, httpClientFactory,
         apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey, null, apiClientSettingsDomain.WithMessaging)
     {
         _logger = logger;
@@ -142,7 +146,8 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
         throw new NotImplementedException();
     }
 
-    public static async Task<DatabaseApiClient?> Create(ILogger logger, ApiClientSettings? apiClientSettings,
+    public static async Task<DatabaseApiClient?> Create(ILogger logger, IHttpClientFactory httpClientFactory,
+        ApiClientSettings? apiClientSettings,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
@@ -156,6 +161,6 @@ public sealed class DatabaseApiClient : ApiClient, IDatabaseApiClient
         ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
             apiClientSettings.WithMessaging);
         // ReSharper disable once DisposableConstructor
-        return new DatabaseApiClient(logger, apiClientSettingsDomain);
+        return new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain);
     }
 }
