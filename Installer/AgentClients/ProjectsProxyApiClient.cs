@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -9,8 +10,8 @@ namespace Installer.AgentClients;
 public sealed class ProjectsProxyApiClient : ApiClient
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public ProjectsProxyApiClient(ILogger logger, string server, string? apiKey, bool withMessaging) : base(logger,
-        server, apiKey, null, withMessaging)
+    public ProjectsProxyApiClient(ILogger logger, IHttpClientFactory httpClientFactory, string server, string? apiKey,
+        bool withMessaging) : base(logger, httpClientFactory, server, apiKey, null, withMessaging)
     {
     }
 
