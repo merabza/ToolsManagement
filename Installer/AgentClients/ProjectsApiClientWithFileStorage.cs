@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -12,8 +13,8 @@ namespace Installer.AgentClients;
 public sealed class ProjectsApiClientWithFileStorage : ApiClient, IIProjectsApiClientWithFileStorage
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public ProjectsApiClientWithFileStorage(ILogger logger, string server, string? apiKey, bool withMessaging) : base(
-        logger, server, apiKey, null, withMessaging)
+    public ProjectsApiClientWithFileStorage(ILogger logger, IHttpClientFactory httpClientFactory, string server,
+        string? apiKey, bool withMessaging) : base(logger, httpClientFactory, server, apiKey, null, withMessaging)
     {
     }
 
