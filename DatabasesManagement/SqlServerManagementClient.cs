@@ -12,12 +12,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SystemToolsShared;
-using WebAgentDatabasesApiContracts;
 using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public sealed class SqlServerManagementClient : IDatabaseApiClient
+public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly ILogger _logger;
@@ -25,7 +24,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    private SqlServerManagementClient(ILogger logger, bool useConsole,
+    private SqlServerDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
@@ -283,7 +282,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
         return await dc.IsServerLocal(cancellationToken);
     }
 
-    public static async Task<SqlServerManagementClient?> Create(ILogger logger, bool useConsole,
+    public static async Task<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
         DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken)
     {
@@ -339,7 +338,7 @@ public sealed class SqlServerManagementClient : IDatabaseApiClient
             databaseServerConnectionData.BackupFolderName, databaseServerConnectionData.DataFolderName,
             databaseServerConnectionData.DataLogFolderName);
 
-        return new SqlServerManagementClient(logger, useConsole, databaseServerConnectionDataDomain,
+        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
             messagesDataManager, userName);
     }
 

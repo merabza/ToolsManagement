@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using ApiClientsManagement;
 using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
@@ -13,7 +14,7 @@ namespace DatabasesManagement;
 
 public static class DatabaseAgentClientsFabric
 {
-    public static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         IHttpClientFactory httpClientFactory, string? apiClientName, ApiClients apiClients,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
@@ -41,39 +42,62 @@ public static class DatabaseAgentClientsFabric
         }
 
         if (!string.IsNullOrWhiteSpace(apiClientName))
-            return await CreateDatabaseManagementClient(logger, httpClientFactory, apiClientName, apiClients,
+            return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
                 messagesDataManager, userName, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
-            return await CreateDatabaseManagementClient(useConsole, logger, databaseConnectionName,
+            return await CreateDatabaseManager(useConsole, logger, databaseConnectionName,
                 databaseServerConnections, messagesDataManager, userName, cancellationToken);
         return null;
     }
 
-    private static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(ILogger logger,
+    private static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
-        return await DatabaseApiClient.Create(logger, httpClientFactory, apiClientSettings, messagesDataManager,
-            userName, cancellationToken);
+
+        if (apiClientSettings is null )
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "DatabaseApiClient settings is null", cancellationToken);
+            logger.LogError("cannot create DatabaseApiClient");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(apiClientSettings.Server))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "Server name is empty, cannot create DatabaseApiClient", cancellationToken);
+            logger.LogError("cannot create DatabaseApiClient");
+            return null;
+        }
+
+
+        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server,
+            apiClientSettings.ApiKey, apiClientSettings.WithMessaging);
+
+        return new RemoteDatabaseManager(logger,databaseApiClient);
+
+        //return await DatabaseApiClient.Create(logger, httpClientFactory, apiClientSettings, messagesDataManager,
+        //    userName, cancellationToken);
     }
 
     //public იყენებს ApAgent
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
         var databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
-        return await CreateDatabaseManagementClient(useConsole, logger, databaseServerConnection, messagesDataManager,
+        return await CreateDatabaseManager(useConsole, logger, databaseServerConnection, messagesDataManager,
             userName, cancellationToken);
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<IDatabaseApiClient?> CreateDatabaseManagementClient(bool useConsole, ILogger logger,
+    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken)
     {
@@ -83,10 +107,36 @@ public static class DatabaseAgentClientsFabric
         return databaseServerConnection.DataProvider switch
         {
             EDataProvider.None => null,
-            EDataProvider.Sql => await SqlServerManagementClient.Create(logger, useConsole, databaseServerConnection,
+            EDataProvider.Sql => await SqlServerDatabaseManager.Create(logger, useConsole, databaseServerConnection,
                 messagesDataManager, userName, cancellationToken),
             EDataProvider.SqLite => null,
             _ => throw new ArgumentOutOfRangeException()
         };
     }
+
+    public static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger, IHttpClientFactory httpClientFactory,
+        ApiClientSettings? apiClientSettings,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+    {
+        if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName, "cannot create DatabaseApiClient", cancellationToken);
+            logger.LogError("cannot create DatabaseApiClient");
+            return null;
+        }
+
+        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
+            apiClientSettings.WithMessaging);
+
+        
+        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain.Server,
+            apiClientSettingsDomain.ApiKey, apiClientSettingsDomain.WithMessaging);
+
+        return new RemoteDatabaseManager(logger,databaseApiClient);
+    }
+
+
+
+
 }
