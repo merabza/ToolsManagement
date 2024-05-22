@@ -7,6 +7,7 @@ using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using SignalRContracts;
+using WebAgentDatabasesApiContracts;
 
 namespace DatabasesManagement;
 

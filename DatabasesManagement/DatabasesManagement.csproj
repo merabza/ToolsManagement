@@ -15,7 +15,12 @@
         <ProjectReference Include="..\..\DatabaseTools\DbToolsFabric\DbToolsFabric.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
-        <ProjectReference Include="..\ApiClientsManagement\ApiClientsManagement.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Requests\" />
+      <Folder Include="Responses\" />
     </ItemGroup>
 
 </Project>
