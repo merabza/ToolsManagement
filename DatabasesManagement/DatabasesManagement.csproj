@@ -7,6 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Requests\**" />
+      <Compile Remove="Responses\**" />
+      <EmbeddedResource Remove="Requests\**" />
+      <EmbeddedResource Remove="Responses\**" />
+      <None Remove="Requests\**" />
+      <None Remove="Responses\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
         <PackageReference Include="OneOf" Version="3.0.271" />
     </ItemGroup>
@@ -17,11 +26,6 @@
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
         <ProjectReference Include="..\ApiClientsManagement\ApiClientsManagement.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Requests\" />
-      <Folder Include="Responses\" />
     </ItemGroup>
 
 </Project>
