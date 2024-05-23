@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using LanguageExt;
 using SystemToolsShared;
 
-namespace Installer.AgentClients;
+namespace Installer.ProjectManagers;
 
-public interface IProjectsApiClient
+public interface IProjectsManager
 {
     //არასერვისი პროგრამებისათვის მოშორებული წაშლა არ მოხდება, რადგან ასეთი პროგრამებისათვის სერვერზე დაინსტალირება გათვალისწინებული არ გვაქვს
     //თუ მომავალში გადავაკეთებთ, ისე, რომ არასერვისული პროგრამებისათვის სერვერის მითითება შესაძლებელი იქნება და მოშორებულ სერვერზე ასეთი პროგრამის დაყენება შესაძლებელი იქნება, მაშინ RemoveProject უნდა აღდგეს

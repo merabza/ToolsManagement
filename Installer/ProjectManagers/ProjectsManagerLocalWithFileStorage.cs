@@ -10,9 +10,9 @@ using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.AgentClients;
+namespace Installer.ProjectManagers;
 
-public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithFileStorage
+public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithFileStorage
 {
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
@@ -21,7 +21,7 @@ public sealed class ProjectsLocalAgentWithFileStorage : IIProjectsApiClientWithF
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    public ProjectsLocalAgentWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
+    public ProjectsManagerLocalWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
         LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager? messagesDataManager,
         string? userName)
     {

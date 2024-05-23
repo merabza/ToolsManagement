@@ -16,14 +16,11 @@ namespace DatabasesManagement;
 
 public sealed class RemoteDatabaseManager : IDatabaseManager
 {
-    //public const string ApiName = "DatabaseApi";
-
     private readonly ILogger _logger;
     private readonly DatabaseApiClient _databaseApiClient;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public RemoteDatabaseManager(ILogger logger, DatabaseApiClient databaseApiClient)
-        //: base(logger, httpClientFactory, apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey, null, apiClientSettingsDomain.WithMessaging)
     {
         _logger = logger;
         _databaseApiClient = databaseApiClient;

@@ -8,9 +8,9 @@ using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.AgentClients;
+namespace Installer.ProjectManagers;
 
-public sealed class ProjectsLocalAgent : IProjectsApiClient
+public sealed class ProjectsManagerLocal : IProjectsManager
 {
     private readonly string _installFolder;
     private readonly ILogger _logger;
@@ -18,9 +18,8 @@ public sealed class ProjectsLocalAgent : IProjectsApiClient
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    public ProjectsLocalAgent(ILogger logger, bool useConsole, string installFolder,
-        IMessagesDataManager? messagesDataManager,
-        string? userName)
+    public ProjectsManagerLocal(ILogger logger, bool useConsole, string installFolder,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         _logger = logger;
         _useConsole = useConsole;

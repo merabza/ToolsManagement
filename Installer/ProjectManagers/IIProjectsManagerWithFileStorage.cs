@@ -4,9 +4,9 @@ using LanguageExt;
 using OneOf;
 using SystemToolsShared;
 
-namespace Installer.AgentClients;
+namespace Installer.ProjectManagers;
 
-public interface IIProjectsApiClientWithFileStorage // : IDisposable
+public interface IIProjectsManagerWithFileStorage // : IDisposable
 {
     Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName, string appSettingsFileName,
         string parametersFileDateMask, string parametersFileExtension, CancellationToken cancellationToken);

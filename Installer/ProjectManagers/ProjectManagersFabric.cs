@@ -6,11 +6,11 @@ using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SignalRContracts;
 
-namespace Installer.AgentClients;
+namespace Installer.ProjectManagers;
 
-public static class AgentClientsFabric
+public static class ProjectManagersFabric
 {
-    public static async Task<IIProjectsApiClientWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
+    public static async Task<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
         InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
@@ -22,7 +22,7 @@ public static class AgentClientsFabric
             webAgentInstallerSettings, messagesDataManager, userName, cancellationToken);
 
         if (localInstallerSettingsDomain is not null)
-            return new ProjectsLocalAgentWithFileStorage(logger, useConsole, fileStorageForUpload,
+            return new ProjectsManagerLocalWithFileStorage(logger, useConsole, fileStorageForUpload,
                 localInstallerSettingsDomain,
                 messagesDataManager, userName);
 
@@ -34,7 +34,7 @@ public static class AgentClientsFabric
     }
 
 
-    public static async Task<IProjectsApiClient?> CreateAgentClient(ILogger logger, bool useConsole,
+    public static async Task<IProjectsManager?> CreateAgentClient(ILogger logger, bool useConsole,
         string? installFolder,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public static class AgentClientsFabric
             await messagesDataManager.SendMessage(userName, "Creating local Agent", cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(installFolder))
-            return new ProjectsLocalAgent(logger, useConsole, installFolder, messagesDataManager, userName);
+            return new ProjectsManagerLocal(logger, useConsole, installFolder, messagesDataManager, userName);
 
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "installFolder name in parameters is empty",
