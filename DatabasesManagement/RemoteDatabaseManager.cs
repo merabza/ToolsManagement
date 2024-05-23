@@ -3,7 +3,6 @@ using DbTools.Models;
 using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using OneOf;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts;
-using WebAgentDatabasesApiContracts.V1.Requests;
 using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
@@ -37,26 +35,15 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName,
         CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(backupBaseName))
+            return await _databaseApiClient.CreateBackup(databaseBackupParametersModel.BackupNamePrefix,
+                databaseBackupParametersModel.DateMask, databaseBackupParametersModel.BackupFileExtension,
+                databaseBackupParametersModel.BackupNameMiddlePart, databaseBackupParametersModel.Compress,
+                databaseBackupParametersModel.Verify, databaseBackupParametersModel.BackupType,
+                databaseBackupParametersModel.DbServerSideBackupPath, backupBaseName, cancellationToken);
 
-        if (string.IsNullOrWhiteSpace(backupBaseName))
-        {
-            _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
-            return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
-        }
-
-        var bodyJsonData = JsonConvert.SerializeObject(new CreateBackupRequest
-        {
-            BackupNamePrefix = databaseBackupParametersModel.BackupNamePrefix,
-            DateMask = databaseBackupParametersModel.DateMask,
-            BackupFileExtension = databaseBackupParametersModel.BackupFileExtension,
-            BackupNameMiddlePart = databaseBackupParametersModel.BackupNameMiddlePart,
-            Compress = databaseBackupParametersModel.Compress,
-            Verify = databaseBackupParametersModel.Verify,
-            BackupType = databaseBackupParametersModel.BackupType,
-            DbServerSideBackupPath = databaseBackupParametersModel.DbServerSideBackupPath
-        });
-
-        return await _databaseApiClient.CreateBackup(bodyJsonData, backupBaseName, cancellationToken);
+        _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
+        return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
@@ -78,16 +65,10 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, CancellationToken cancellationToken, string? restoreFromFolderPath = null)
     {
-        var bodyJsonData = JsonConvert.SerializeObject(new RestoreBackupRequest
-        {
-            Prefix = backupFileParameters.Prefix,
-            Suffix = backupFileParameters.Suffix,
-            Name = backupFileParameters.Name,
-            DateMask = backupFileParameters.DateMask,
-            DestinationDbServerSideDataFolderPath = destinationDbServerSideDataFolderPath,
-            DestinationDbServerSideLogFolderPath = destinationDbServerSideLogFolderPath
-        });
-        return await _databaseApiClient.RestoreDatabaseFromBackup(bodyJsonData, databaseName, cancellationToken);
+        return await _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix,
+            backupFileParameters.Suffix, backupFileParameters.Name, backupFileParameters.DateMask,
+            destinationDbServerSideDataFolderPath, destinationDbServerSideLogFolderPath, databaseName,
+            cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
