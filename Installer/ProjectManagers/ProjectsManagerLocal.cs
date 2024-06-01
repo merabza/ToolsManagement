@@ -1,9 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Installer.ServiceInstaller;
+﻿using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
-using SignalRContracts;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

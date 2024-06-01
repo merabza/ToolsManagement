@@ -1,8 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Installer.Models;
+﻿using Installer.Models;
 using Microsoft.Extensions.Logging;
-using SignalRContracts;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer.Domain;

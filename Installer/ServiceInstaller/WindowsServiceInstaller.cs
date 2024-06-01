@@ -1,4 +1,9 @@
-﻿using System.IO;
+﻿using Installer.ErrorModels;
+using LanguageExt;
+using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
+using OneOf;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Security.AccessControl;
@@ -6,12 +11,6 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.ErrorModels;
-using LanguageExt;
-using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
-using OneOf;
-using SignalRContracts;
 using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;
