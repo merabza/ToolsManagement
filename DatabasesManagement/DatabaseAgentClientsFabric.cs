@@ -3,11 +3,11 @@ using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
-using SignalRContracts;
 using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using SystemToolsShared;
 using WebAgentDatabasesApiContracts;
 
 namespace DatabasesManagement;
@@ -73,8 +73,7 @@ public static class DatabaseAgentClientsFabric
         }
 
 
-        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server,
-            apiClientSettings.ApiKey, apiClientSettings.WithMessaging);
+        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server, apiClientSettings.ApiKey);
 
         return new RemoteDatabaseManager(logger,databaseApiClient);
 
@@ -126,12 +125,10 @@ public static class DatabaseAgentClientsFabric
             return null;
         }
 
-        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
-            apiClientSettings.WithMessaging);
+        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
 
         
-        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain.Server,
-            apiClientSettingsDomain.ApiKey, apiClientSettingsDomain.WithMessaging);
+        DatabaseApiClient databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain.Server, apiClientSettingsDomain.ApiKey);
 
         return new RemoteDatabaseManager(logger,databaseApiClient);
     }
