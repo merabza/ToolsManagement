@@ -1,7 +1,7 @@
-﻿using LibFileParameters.Models;
-using Microsoft.Extensions.Logging;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using LibFileParameters.Models;
+using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
 namespace FileManagersMain;

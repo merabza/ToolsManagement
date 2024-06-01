@@ -1,13 +1,13 @@
-﻿using DbTools.ErrorModels;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using DbTools.ErrorModels;
 using DbTools.Models;
 using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 using WebAgentDatabasesApiContracts;
 using WebAgentDatabasesApiContracts.V1.Responses;
@@ -16,8 +16,8 @@ namespace DatabasesManagement;
 
 public sealed class RemoteDatabaseManager : IDatabaseManager
 {
-    private readonly ILogger _logger;
     private readonly DatabaseApiClient _databaseApiClient;
+    private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public RemoteDatabaseManager(ILogger logger, DatabaseApiClient databaseApiClient)
