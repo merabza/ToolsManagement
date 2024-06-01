@@ -1,8 +1,8 @@
-﻿using Installer.ServiceInstaller;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

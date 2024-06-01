@@ -1,10 +1,10 @@
-﻿using Installer.ErrorModels;
+﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Installer.ErrorModels;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;

@@ -1,16 +1,16 @@
-﻿using Installer.Domain;
-using Installer.ErrorModels;
-using LanguageExt;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using OneOf;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Installer.Domain;
+using Installer.ErrorModels;
+using LanguageExt;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using OneOf;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor

@@ -19,7 +19,8 @@ public sealed class ProjectsManagerRemote : IProjectsManager
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken)
     {
-        return await _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService, cancellationToken);
+        return await _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService,
+            cancellationToken);
     }
 
     public async Task<Option<Err[]>> StopService(string projectName, string environmentName,

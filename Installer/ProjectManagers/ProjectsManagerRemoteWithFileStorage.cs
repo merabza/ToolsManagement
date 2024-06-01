@@ -21,7 +21,6 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken)
     {
-
         return await _projectsApiClient.UpdateAppParametersFile(projectName, environmentName, appSettingsFileName,
             parametersFileDateMask, parametersFileExtension, cancellationToken);
     }

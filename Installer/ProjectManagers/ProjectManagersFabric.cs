@@ -1,9 +1,9 @@
-﻿using Installer.Domain;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Installer.Domain;
 using Installer.Models;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer.ProjectManagers;

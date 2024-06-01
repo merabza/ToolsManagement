@@ -1,7 +1,7 @@
-﻿using Installer.Models;
-using Microsoft.Extensions.Logging;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Installer.Models;
+using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 
 namespace Installer.Domain;

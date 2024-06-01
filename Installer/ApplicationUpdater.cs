@@ -1,15 +1,15 @@
-﻿using FileManagersMain;
+﻿using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using FileManagersMain;
 using Installer.Domain;
 using Installer.ErrorModels;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer;

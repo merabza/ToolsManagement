@@ -1,11 +1,11 @@
-﻿using Installer.Domain;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Installer.Domain;
 using Installer.ErrorModels;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer;

@@ -1,10 +1,10 @@
-﻿using Installer.Domain;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Installer.Domain;
 using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 
 // ReSharper disable ConvertToPrimaryConstructor
