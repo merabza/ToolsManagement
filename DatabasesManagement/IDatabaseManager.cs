@@ -5,7 +5,7 @@ using DbTools.Models;
 using LanguageExt;
 using LibDatabaseParameters;
 using OneOf;
-using SystemToolsShared;
+using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;

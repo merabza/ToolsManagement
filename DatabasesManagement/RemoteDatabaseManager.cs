@@ -8,7 +8,7 @@ using LanguageExt;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using SystemToolsShared;
+using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts;
 using WebAgentDatabasesApiContracts.V1.Responses;
 

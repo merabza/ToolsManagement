@@ -12,6 +12,7 @@ using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
+using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
