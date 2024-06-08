@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.ErrorModels;
+using Installer.Errors;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
@@ -57,8 +57,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             $"--no-ask-password --no-block --quiet disable {serviceEnvName}", [1]);
 
         if (disableProcessResult.IsSome)
-            return Err.RecreateErrors((Err[])disableProcessResult,
-                new Err { ErrorCode = "TheServiceWasNotRemoved", ErrorMessage = "The service was not Removed" });
+            return Err.RecreateErrors((Err[])disableProcessResult, InstallerErrors.TheServiceWasNotRemoved);
 
         File.Delete(serviceConfigFileName);
 
@@ -72,7 +71,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         return stopProcessResult.IsSome
             ? await Task.FromResult(Err.RecreateErrors((Err[])stopProcessResult,
-                new Err { ErrorCode = "TheServiceWasNotStopped", ErrorMessage = "The service was not Stopped" }))
+                InstallerErrors.TheServiceWasNotStopped))
             : null;
     }
 
@@ -84,7 +83,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         return startProcessResult.IsSome
             ? await Task.FromResult(Err.RecreateErrors((Err[])startProcessResult,
-                new Err { ErrorCode = "TheServiceWasNotStarted", ErrorMessage = "The service was not Started" }))
+                InstallerErrors.TheServiceWasNotStarted))
             : null;
     }
 

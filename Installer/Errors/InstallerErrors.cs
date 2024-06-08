@@ -1,6 +1,6 @@
 ﻿using SystemToolsShared;
 
-namespace Installer.ErrorModels;
+namespace Installer.Errors;
 
 public static class InstallerErrors
 {
@@ -225,4 +225,20 @@ public static class InstallerErrors
             ErrorMessage = $"Service {serviceEnvName} is running and cannot be updated"
         };
     }
+
+    public static readonly Err TheServiceWasNotRemoved = new()
+        { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
+
+    public static readonly Err TheServiceWasNotStopped = new()
+        { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
+
+    public static readonly Err TheServiceWasNotStarted = new()
+        { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
+
+    public static Err ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName) => new()
+    {
+        ErrorCode = nameof(ServiceIsRunningAndCanNotBeRemoved),
+        ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
+    };
+
 }

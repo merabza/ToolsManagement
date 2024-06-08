@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Installer.Errors;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
@@ -44,14 +45,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             await _messagesDataManager.SendMessage(_userName,
                 $"Service {projectName}/{environmentName} can not removed", cancellationToken);
         _logger.LogError("Service {projectName}/{environmentName} can not removed", projectName, environmentName);
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ProjectServiceCanNotRemoved",
-                ErrorMessage = $"Project {projectName} => service {projectName}/{environmentName} can not removed"
-            }
-        };
+        return new[] { ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName) };
     }
 
     public async Task<Option<Err[]>> StopService(string projectName, string environmentName,
@@ -62,16 +56,9 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             _userName, cancellationToken);
 
         var stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
-        if (stopResult.IsNone)
-            return null;
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ServiceCanNotBeStopped",
-                ErrorMessage = $"service {projectName}/{environmentName} can not be stopped"
-            }
-        };
+        return stopResult.IsNone
+            ? null
+            : new[] { ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName) };
     }
 
     public async Task<Option<Err[]>> StartService(string projectName, string environmentName,
@@ -83,16 +70,9 @@ public sealed class ProjectsManagerLocal : IProjectsManager
 
 
         var stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
-        if (stopResult.IsNone)
-            return null;
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "ServiceCanNotBeStarted",
-                ErrorMessage = $"service {projectName}/{environmentName} can not be started"
-            }
-        };
+        return stopResult.IsNone
+            ? null
+            : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
     }
 
     public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName,
@@ -112,9 +92,6 @@ public sealed class ProjectsManagerLocal : IProjectsManager
                 cancellationToken);
         _logger.LogError("Project {projectName} can not removed", projectName);
         return Err.RecreateErrors((Err[])removeProjectResult,
-            new Err
-            {
-                ErrorCode = "ProjectCanNotBeRemoved", ErrorMessage = $"Project {projectName} can not be removed"
-            });
+            ProjectManagersErrors.ProjectCanNotBeRemoved(projectName));
     }
 }

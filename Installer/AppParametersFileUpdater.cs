@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
-using Installer.ErrorModels;
+using Installer.Errors;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using LibFileParameters.Models;

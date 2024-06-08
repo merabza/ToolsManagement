@@ -6,7 +6,7 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.ErrorModels;
+using Installer.Errors;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
@@ -66,14 +66,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ServiceIsRunningAndCanNotBeRemoved",
-                    ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
-                }
-            };
+            return new[] { InstallerErrors.ServiceIsRunningAndCanNotBeRemoved(serviceEnvName) };
 #pragma warning restore CA1416 // Validate platform compatibility
 
         // create empty pipeline

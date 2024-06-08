@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DbTools.ErrorModels;
+using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
 using LibDatabaseParameters;
@@ -114,21 +114,4 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         throw new NotImplementedException();
     }
 
-    //public static async Task<DatabaseApiClient?> Create(ILogger logger, IHttpClientFactory httpClientFactory,
-    //    ApiClientSettings? apiClientSettings,
-    //    IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
-    //{
-    //    if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
-    //    {
-    //        if (messagesDataManager is not null)
-    //            await messagesDataManager.SendMessage(userName, "cannot create DatabaseApiClient", cancellationToken);
-    //        logger.LogError("cannot create DatabaseApiClient");
-    //        return null;
-    //    }
-
-    //    ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey,
-    //        apiClientSettings.WithMessaging);
-    //    // ReSharper disable once DisposableConstructor
-    //    return new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain);
-    //}
 }

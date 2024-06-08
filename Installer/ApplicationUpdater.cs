@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FileManagersMain;
 using Installer.Domain;
-using Installer.ErrorModels;
+using Installer.Errors;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -44,14 +44,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "Installer was Not Created", cancellationToken);
             logger.LogError("Installer was Not Created");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "InstallerWasNotCreated",
-                    ErrorMessage = "Installer was Not Created"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.InstallerWasNotCreated };
         }
 
         if (string.IsNullOrWhiteSpace(installerWorkFolder))
@@ -59,14 +52,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "installerWorkFolder is empty", cancellationToken);
             logger.LogError("installerWorkFolder is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "installerWorkFolderIsEmpty",
-                    ErrorMessage = "installerWorkFolder is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.InstallerWorkFolderIsEmpty };
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
@@ -74,14 +60,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "filesUserName is empty", cancellationToken);
             logger.LogError("filesUserName is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "FilesUserNameIsEmpty",
-                    ErrorMessage = "filesUserName is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.FilesUserNameIsEmpty };
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
@@ -89,14 +68,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "filesUsersGroupName is empty", cancellationToken);
             logger.LogError("filesUsersGroupName is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "filesUsersGroupNameIsEmpty",
-                    ErrorMessage = "filesUsersGroupName is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.FilesUsersGroupNameIsEmpty };
         }
 
         if (string.IsNullOrWhiteSpace(serviceUserName))
@@ -104,14 +76,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "serviceUserName is empty", cancellationToken);
             logger.LogError("serviceUserName is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "serviceUserNameIsEmpty",
-                    ErrorMessage = "serviceUserName is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.ServiceUserNameIsEmpty };
         }
 
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
@@ -119,14 +84,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "downloadTempExtension is empty", cancellationToken);
             logger.LogError("downloadTempExtension is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "downloadTempExtensionIsEmpty",
-                    ErrorMessage = "downloadTempExtension is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.DownloadTempExtensionIsEmpty };
         }
 
         if (string.IsNullOrWhiteSpace(installFolder))
@@ -134,14 +92,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName, "installFolder is empty", cancellationToken);
             logger.LogError("installFolder is empty");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "installFolderIsEmpty",
-                    ErrorMessage = "installFolder is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.InstallFolderIsEmpty };
         }
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrWhiteSpace(dotnetRunner))
@@ -150,14 +101,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 await messagesDataManager.SendMessage(userName,
                     "dotnetRunner is empty. This parameter required for this OS", cancellationToken);
             logger.LogError("dotnetRunner is empty. This parameter required for this OS");
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "dotnetRunnerIsEmpty",
-                    ErrorMessage = "dotnetRunner is empty"
-                }
-            };
+            return new[] { ApplicationUpdaterErrors.DotnetRunnerIsEmpty };
         }
 
         var applicationUpdaterParameters = new ApplicationUpdaterParameters(

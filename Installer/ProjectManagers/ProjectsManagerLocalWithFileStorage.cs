@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
+using Installer.Errors;
 using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
@@ -42,14 +43,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
 
         if (applicationUpdater is null)
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "AppParametersFileUpdaterCreateError",
-                    ErrorMessage = "AppParametersFileUpdater does not created"
-                }
-            };
+            return new[] { ProjectManagersErrors.AppParametersFileUpdaterCreateError };
         return await applicationUpdater.UpdateParameters(projectName, environmentName, appSettingsFileName,
             cancellationToken);
     }
@@ -68,14 +62,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             return applicationUpdaterCreateResult.AsT1;
         var applicationUpdater = applicationUpdaterCreateResult.AsT0;
         if (applicationUpdater is null)
-            return new Err[]
-            {
-                new()
-                {
-                    ErrorCode = "ApplicationUpdaterDoesNotCreated",
-                    ErrorMessage = $"ApplicationUpdater for {projectName}/{environmentName} does not created"
-                }
-            };
+            return new[] { ProjectManagersErrors.ApplicationUpdaterDoesNotCreated(projectName, environmentName) };
         return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 

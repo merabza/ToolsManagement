@@ -1,6 +1,6 @@
 ﻿using SystemToolsShared;
 
-namespace Installer.ErrorModels;
+namespace Installer.Errors;
 
 public static class LinuxServiceInstallerErrors
 {

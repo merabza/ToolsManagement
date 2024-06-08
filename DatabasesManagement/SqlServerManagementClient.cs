@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using DatabasesManagement.Errors;
 using DbTools;
 using DbTools.Models;
 using DbToolsFabric;
@@ -181,10 +182,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
                     cancellationToken);
             _logger.LogError("Host platform does not detected");
             return Err.RecreateErrors(hostPlatformResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "HostPlatformDoesNotDetected", ErrorMessage = "Host platform does not detected"
-                });
+                SqlServerDatabaseManagerErrors.HostPlatformDoesNotDetected);
         }
 
         var hostPlatformName = hostPlatformResult.AsT0;
@@ -207,10 +205,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
                     cancellationToken);
             _logger.LogError("Restore Files does not detected");
             return Err.RecreateErrors(getRestoreFilesResult.AsT1,
-                new Err
-                {
-                    ErrorCode = "RestoreFilesDoesNotDetected", ErrorMessage = "Restore Files does not detected"
-                });
+                SqlServerDatabaseManagerErrors.RestoreFilesDoesNotDetected);
         }
 
         var files = getRestoreFilesResult.AsT0;
@@ -355,13 +350,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             await _messagesDataManager.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
                 cancellationToken);
         _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
-        //throw new Exception($"Cannot create DbClient for database {databaseName}");
-        return new Err[]
-        {
-            new()
-            {
-                ErrorCode = "CannotCreateDbClient", ErrorMessage = $"Cannot create DbClient for database {databaseName}"
-            }
-        };
+        return new[] {SqlServerDatabaseManagerErrors.CannotCreateDbClient(databaseName) };
     }
 }
