@@ -7,6 +7,7 @@ using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+using SystemToolsShared.Errors;
 
 namespace Installer;
 

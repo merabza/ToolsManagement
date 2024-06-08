@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using OneOf;
 using SystemToolsShared;
+using SystemToolsShared.Errors;
 
 namespace Installer.ServiceInstaller;
 

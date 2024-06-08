@@ -1,4 +1,4 @@
-﻿using SystemToolsShared;
+﻿using SystemToolsShared.Errors;
 
 namespace Installer.Errors;
 

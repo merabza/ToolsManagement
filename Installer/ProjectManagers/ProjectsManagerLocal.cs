@@ -5,6 +5,7 @@ using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
+using SystemToolsShared.Errors;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
