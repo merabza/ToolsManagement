@@ -43,7 +43,7 @@ public static class DatabaseAgentClientsFabric
 
         if (!string.IsNullOrWhiteSpace(apiClientName))
             return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
-                messagesDataManager, userName, cancellationToken);
+                messagesDataManager, userName, useConsole, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
             return await CreateDatabaseManager(useConsole, logger, databaseConnectionName,
                 databaseServerConnections, messagesDataManager, userName, cancellationToken);
@@ -52,7 +52,8 @@ public static class DatabaseAgentClientsFabric
 
     private static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
+        CancellationToken cancellationToken)
     {
         var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
 
@@ -75,8 +76,8 @@ public static class DatabaseAgentClientsFabric
         }
 
 
-        var databaseApiClient =
-            new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server, apiClientSettings.ApiKey);
+        var databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server,
+            apiClientSettings.ApiKey, useConsole);
 
         return new RemoteDatabaseManager(logger, databaseApiClient);
 
@@ -117,9 +118,9 @@ public static class DatabaseAgentClientsFabric
     }
 
     public static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
-        IHttpClientFactory httpClientFactory,
-        ApiClientSettings? apiClientSettings,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IHttpClientFactory httpClientFactory, ApiClientSettings? apiClientSettings,
+        IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
+        CancellationToken cancellationToken)
     {
         if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
         {
@@ -131,9 +132,8 @@ public static class DatabaseAgentClientsFabric
 
         ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
 
-
         var databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain.Server,
-            apiClientSettingsDomain.ApiKey);
+            apiClientSettingsDomain.ApiKey, useConsole);
 
         return new RemoteDatabaseManager(logger, databaseApiClient);
     }

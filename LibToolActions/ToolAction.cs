@@ -8,7 +8,7 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
-    private readonly bool _useConsole;
+    protected readonly bool UseConsole;
     public readonly ILogger Logger;
 
     //protected საჭიროა ProcessorWorker პროექტისათვის
@@ -21,7 +21,7 @@ public /*open*/ class ToolAction : MessageLogger
     {
         Logger = logger;
         ToolActionName = actionName;
-        _useConsole = useConsole;
+        UseConsole = useConsole;
     }
 
     public async Task<bool> Run(CancellationToken cancellationToken)
@@ -31,7 +31,7 @@ public /*open*/ class ToolAction : MessageLogger
             if (!CheckValidate())
                 return false;
 
-            await LogInfoAndSendMessage($"{ToolActionName} Started...", _useConsole, cancellationToken);
+            await LogInfoAndSendMessage($"{ToolActionName} Started...", UseConsole, cancellationToken);
 
             //დავინიშნოთ დრო პროცესისათვის
             var startDateTime = DateTime.Now;
@@ -40,7 +40,7 @@ public /*open*/ class ToolAction : MessageLogger
 
             var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
-            await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", _useConsole,
+            await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", UseConsole,
                 cancellationToken);
 
             //StShared.Pause();
