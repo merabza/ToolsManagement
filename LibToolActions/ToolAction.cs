@@ -9,14 +9,14 @@ namespace LibToolActions;
 public /*open*/ class ToolAction : MessageLogger
 {
     protected readonly bool UseConsole;
-    public readonly ILogger Logger;
+    public readonly ILogger? Logger;
 
     //protected საჭიროა ProcessorWorker პროექტისათვის
     // ReSharper disable once MemberCanBePrivate.Global
     protected readonly string ToolActionName;
 
 
-    protected ToolAction(ILogger logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
+    protected ToolAction(ILogger? logger, string actionName, IMessagesDataManager? messagesDataManager, string? userName,
         bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
         Logger = logger;
@@ -47,13 +47,13 @@ public /*open*/ class ToolAction : MessageLogger
 
             return success;
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            Logger.LogError(e, "Operation Canceled");
+            StShared.WriteErrorLine("Operation Canceled", UseConsole, Logger);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error when run Tool Action");
+            StShared.WriteErrorLine($"Error when run Tool Action: {e.Message}", UseConsole, Logger);
         }
 
         return false;
