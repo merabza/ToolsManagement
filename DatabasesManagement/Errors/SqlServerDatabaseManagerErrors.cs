@@ -4,7 +4,6 @@ namespace DatabasesManagement.Errors;
 
 public static class SqlServerDatabaseManagerErrors
 {
-
     public static readonly Err HostPlatformDoesNotDetected = new()
         { ErrorCode = nameof(HostPlatformDoesNotDetected), ErrorMessage = "Host platform does not detected" };
 
@@ -15,5 +14,4 @@ public static class SqlServerDatabaseManagerErrors
     {
         ErrorCode = nameof(CannotCreateDbClient), ErrorMessage = $"Cannot create DbClient for database {databaseName}"
     };
-
 }

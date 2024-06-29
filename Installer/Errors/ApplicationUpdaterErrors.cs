@@ -27,6 +27,4 @@ public static class ApplicationUpdaterErrors
 
     public static readonly Err DotnetRunnerIsEmpty = new()
         { ErrorCode = nameof(DotnetRunnerIsEmpty), ErrorMessage = "dotnetRunner is empty" };
-
-
 }

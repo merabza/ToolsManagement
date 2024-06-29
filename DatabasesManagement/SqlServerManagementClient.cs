@@ -351,6 +351,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             await _messagesDataManager.SendMessage(_userName, $"Cannot create DbClient for database {databaseName}",
                 cancellationToken);
         _logger.LogError("Cannot create DbClient for database {databaseName}", databaseName);
-        return new[] {SqlServerDatabaseManagerErrors.CannotCreateDbClient(databaseName) };
+        return new[] { SqlServerDatabaseManagerErrors.CannotCreateDbClient(databaseName) };
     }
 }

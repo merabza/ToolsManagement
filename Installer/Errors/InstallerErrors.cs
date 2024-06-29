@@ -240,5 +240,4 @@ public static class InstallerErrors
         ErrorCode = nameof(ServiceIsRunningAndCanNotBeRemoved),
         ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
     };
-
 }

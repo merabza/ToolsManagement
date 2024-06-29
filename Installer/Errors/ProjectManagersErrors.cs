@@ -4,7 +4,6 @@ namespace Installer.Errors;
 
 public static class ProjectManagersErrors
 {
-
     public static readonly Err AppParametersFileUpdaterCreateError = new()
     {
         ErrorCode = nameof(AppParametersFileUpdaterCreateError),
@@ -37,8 +36,4 @@ public static class ProjectManagersErrors
         ErrorCode = nameof(ApplicationUpdaterDoesNotCreated),
         ErrorMessage = $"ApplicationUpdater for {projectName}/{environmentName} does not created"
     };
-
-
-
-
 }

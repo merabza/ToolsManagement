@@ -113,5 +113,4 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     {
         throw new NotImplementedException();
     }
-
 }
