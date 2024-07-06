@@ -79,7 +79,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     private static string GetPrefix(string projectName, string serverName, string environmentName, string? runtime)
     {
-        var prefix = $"{serverName}-{environmentName}-{projectName}-{(runtime == null ? "" : $"{runtime}-")}";
+        var prefix = $"{serverName}-{environmentName}-{projectName}-{(runtime == null ? string.Empty : $"{runtime}-")}";
         return prefix;
     }
 }

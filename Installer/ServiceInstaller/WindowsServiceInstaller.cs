@@ -214,7 +214,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         var mustBeDescription =
-            $"{serviceEnvName} service {_serviceDescriptionSignature ?? ""} {_projectDescription ?? ""}";
+            $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}";
         //თუ სერვისი უკვე დარეგისტრირებულია და გვინდა დავადგინოთ გამშვები ფაილი რომელია, გვაქვს 2 გზა
         //1. გამოვიყენოთ sc qc <service name> და გავარჩიოთ რას დააბრუნებს
         //2. HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services.
@@ -244,7 +244,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         ps.AddCommand("New-Service").AddParameter("Name", serviceEnvName)
             .AddParameter("Description",
-                $"{serviceEnvName} service {_serviceDescriptionSignature ?? ""} {_projectDescription ?? ""}")
+                $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}")
             .AddParameter("BinaryPathName", exeFilePath).AddParameter("StartupType", "Automatic");
 
         await ps.InvokeAsync();

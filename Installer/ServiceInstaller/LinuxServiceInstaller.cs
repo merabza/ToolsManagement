@@ -27,7 +27,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string? userName) : base(useConsole, logger, "linux-x64", messagesDataManager, userName)
     {
         _logger = logger;
-        _dotnetRunner = "";
+        _dotnetRunner = string.Empty;
     }
 
     protected override bool IsServiceExists(string serviceEnvName)
@@ -121,11 +121,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
         var checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
 
         var mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
-        var syslogIdentifier = serviceDescription.Replace(".", "");
+        var syslogIdentifier = serviceDescription.Replace(".", string.Empty);
 
         return $"""
                 [Unit]
-                Description={serviceDescription} service {serviceDescriptionSignature ?? ""} {projectDescription ?? ""}
+                Description={serviceDescription} service {serviceDescriptionSignature ?? string.Empty} {projectDescription ?? string.Empty}
 
                 [Service]
                 WorkingDirectory={installFolderPath}
@@ -204,7 +204,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         if (File.Exists(filePath))
             return StShared.RunProcess(UseConsole, _logger, "chown",
-                $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {filePath}");
+                $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {filePath}");
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
@@ -223,7 +223,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         if (Directory.Exists(folderPath))
             return StShared.RunProcess(UseConsole, _logger, "chown",
-                $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? "" : $":{filesUsersGroupName}")} {folderPath}");
+                $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {folderPath}");
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.FolderOwnerCanNotBeChanged(folderPath),
             cancellationToken);
