@@ -1,7 +1,7 @@
-﻿using LanguageExt;
-using OneOf;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
+using OneOf;
 using SystemToolsShared.Errors;
 
 namespace Installer.ProjectManagers;

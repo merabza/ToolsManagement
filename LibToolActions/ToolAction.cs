@@ -8,12 +8,12 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
-    protected readonly bool UseConsole;
     public readonly ILogger? Logger;
 
     //protected საჭიროა ProcessorWorker პროექტისათვის
     // ReSharper disable once MemberCanBePrivate.Global
     protected readonly string ToolActionName;
+    protected readonly bool UseConsole;
 
 
     protected ToolAction(ILogger? logger, string actionName, IMessagesDataManager? messagesDataManager,

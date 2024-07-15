@@ -10,8 +10,12 @@ public static class SqlServerDatabaseManagerErrors
     public static readonly Err RestoreFilesDoesNotDetected = new()
         { ErrorCode = nameof(RestoreFilesDoesNotDetected), ErrorMessage = "Restore Files does not detected" };
 
-    public static Err CannotCreateDbClient(string? databaseName) => new()
+    public static Err CannotCreateDbClient(string? databaseName)
     {
-        ErrorCode = nameof(CannotCreateDbClient), ErrorMessage = $"Cannot create DbClient for database {databaseName}"
-    };
+        return new Err
+        {
+            ErrorCode = nameof(CannotCreateDbClient),
+            ErrorMessage = $"Cannot create DbClient for database {databaseName}"
+        };
+    }
 }

@@ -1,6 +1,6 @@
-﻿using LanguageExt;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
 using SystemToolsShared.Errors;
 using WebAgentProjectsApiContracts;
 

@@ -10,6 +10,15 @@ public static class InstallerErrors
         ErrorMessage = "Error when check IsServiceRegisteredProperly"
     };
 
+    public static readonly Err TheServiceWasNotRemoved = new()
+        { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
+
+    public static readonly Err TheServiceWasNotStopped = new()
+        { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
+
+    public static readonly Err TheServiceWasNotStarted = new()
+        { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
+
     public static Err ProjectArchiveFileWasNotDownloaded => new()
     {
         ErrorCode = nameof(ProjectArchiveFileWasNotDownloaded),
@@ -226,18 +235,12 @@ public static class InstallerErrors
         };
     }
 
-    public static readonly Err TheServiceWasNotRemoved = new()
-        { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
-
-    public static readonly Err TheServiceWasNotStopped = new()
-        { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
-
-    public static readonly Err TheServiceWasNotStarted = new()
-        { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
-
-    public static Err ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName) => new()
+    public static Err ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)
     {
-        ErrorCode = nameof(ServiceIsRunningAndCanNotBeRemoved),
-        ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
-    };
+        return new Err
+        {
+            ErrorCode = nameof(ServiceIsRunningAndCanNotBeRemoved),
+            ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
+        };
+    }
 }
