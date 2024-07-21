@@ -32,7 +32,7 @@ public sealed class RarArchiver : Archiver
 
         //დავადგინოთ გვაქვს თუ არა გამორიცხვები გამოყენებული.
         //string[] excludes = GetExcludeList();
-        if (excludes != null && excludes.Length > 0)
+        if (excludes is { Length: > 0 })
             //თუ გამორიცხვების რაოდენობა ცოტაა 3-მდე, მაშინ გამოვიყენოთ -X<file> გადამრთველი
             //if (Excludes.Length <= 10)
             //{
