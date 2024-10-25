@@ -8,13 +8,13 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-        <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.4.5" />
-        <PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.4.5" />
-        <PackageReference Include="Microsoft.PowerShell.Commands.Utility" Version="7.4.5" />
-        <PackageReference Include="Microsoft.PowerShell.ConsoleHost" Version="7.4.5" />
-        <PackageReference Include="Microsoft.WSMan.Management" Version="7.4.5" />
+        <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.4.6" />
+        <PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.4.6" />
+        <PackageReference Include="Microsoft.PowerShell.Commands.Utility" Version="7.4.6" />
+        <PackageReference Include="Microsoft.PowerShell.ConsoleHost" Version="7.4.6" />
+        <PackageReference Include="Microsoft.WSMan.Management" Version="7.4.6" />
         <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
-        <PackageReference Include="System.Management.Automation" Version="7.4.5" />
+        <PackageReference Include="System.Management.Automation" Version="7.4.6" />
         <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.1" />
     </ItemGroup>
 
@@ -22,8 +22,7 @@
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\FileManagersMain\FileManagersMain.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\LibToolActions\LibToolActions.csproj" />
-        <ProjectReference
-            Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
     </ItemGroup>
 
 </Project>
