@@ -4,6 +4,7 @@ namespace Installer.Domain;
 
 public sealed class ApplicationUpdaterParameters
 {
+    // ReSharper disable once ConvertToPrimaryConstructor
     public ApplicationUpdaterParameters(string programArchiveExtension, FileStorageData programExchangeFileStorage,
         string parametersFileDateMask, string parametersFileExtension, string filesUserName, string filesUsersGroupName,
         string programArchiveDateMask, string serviceUserName, string downloadTempExtension, string installerWorkFolder,
@@ -11,7 +12,6 @@ public sealed class ApplicationUpdaterParameters
     {
         InstallerWorkFolder = installerWorkFolder;
         InstallFolder = installFolder;
-        //DotnetRunner = dotnetRunner;
         ProgramArchiveExtension = programArchiveExtension;
         ProgramExchangeFileStorage = programExchangeFileStorage;
         ParametersFileDateMask = parametersFileDateMask;
@@ -27,7 +27,6 @@ public sealed class ApplicationUpdaterParameters
 
     public string InstallFolder { get; }
 
-    //public string? DotnetRunner { get; }
     public string ProgramArchiveExtension { get; }
     public FileStorageData ProgramExchangeFileStorage { get; }
 

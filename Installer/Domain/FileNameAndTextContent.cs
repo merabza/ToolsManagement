@@ -7,6 +7,7 @@ public sealed class FileNameAndTextContent
     private readonly string _fileName;
     private readonly string _textContent;
 
+    // ReSharper disable once ConvertToPrimaryConstructor
     public FileNameAndTextContent(string fileName, string textContent)
     {
         _fileName = fileName;

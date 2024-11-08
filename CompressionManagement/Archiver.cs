@@ -1,5 +1,4 @@
-﻿using System;
-using LibToolActions.BackgroundTasks;
+﻿using LibToolActions.BackgroundTasks;
 
 namespace CompressionManagement;
 
@@ -23,7 +22,7 @@ public /*open*/ class Archiver
 
     public bool PathToArchive(string path, string archiveFileName)
     {
-        return SourcesToArchive(new[] { path }, archiveFileName, Array.Empty<string>());
+        return SourcesToArchive([path], archiveFileName, []);
     }
 
     public virtual bool ArchiveToPath(string archiveFileName, string path)
