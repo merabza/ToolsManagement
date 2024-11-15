@@ -328,10 +328,9 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             return null;
 
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
-            databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress,
-            dbAuthSettings,
-            databaseServerConnectionData.BackupFolderName, databaseServerConnectionData.DataFolderName,
-            databaseServerConnectionData.DataLogFolderName);
+            databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress, dbAuthSettings,
+            databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.BackupFolderName,
+            databaseServerConnectionData.DataFolderName, databaseServerConnectionData.DataLogFolderName);
 
         return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
             messagesDataManager, userName);
@@ -342,6 +341,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     {
         var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
+            _databaseServerConnectionDataDomain.TrustServerCertificate,
             ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager, _userName);
 
         if (dc is not null)
