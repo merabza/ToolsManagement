@@ -331,7 +331,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                         tryCount, cancellationToken);
                     Directory.Delete(projectInstallFullPathWithEnv, true);
                     await LogInfoAndSendMessage("Folder {0} {1} deleted successfully", projectInstallFullPathWithEnv,
-                        cancellationToken);
+                        tryCount, cancellationToken);
                 }
                 catch (Exception ex)
                 {
