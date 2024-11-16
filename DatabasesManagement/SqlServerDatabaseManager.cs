@@ -341,8 +341,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     {
         var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            _databaseServerConnectionDataDomain.TrustServerCertificate,
-            ProgramAttributes.Instance.GetAttribute<string>("AppName"), databaseName, _messagesDataManager, _userName);
+            _databaseServerConnectionDataDomain.TrustServerCertificate, ProgramAttributes.Instance.AppName,
+            databaseName, _messagesDataManager, _userName);
 
         if (dc is not null)
             return dc;
