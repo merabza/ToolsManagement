@@ -121,7 +121,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}", projectName,
             environmentName, cancellationToken);
 
-        if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
+        if (projectName == ProgramAttributes.Instance.AppName)
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
@@ -185,7 +185,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",
             projectName, environmentName, serviceUserName, cancellationToken);
 
-        if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
+        if (projectName == ProgramAttributes.Instance.AppName)
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
