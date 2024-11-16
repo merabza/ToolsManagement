@@ -81,7 +81,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName,
         string appSettingsFileName, CancellationToken cancellationToken)
     {
-        if (projectName == ProgramAttributes.Instance.GetAttribute<string>("AppName"))
+        if (projectName == ProgramAttributes.Instance.AppName)
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
