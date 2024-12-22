@@ -36,7 +36,7 @@ public sealed class ProcessManager : IDisposable
         return _processLines.Any(runner => runner.Value.IsBusy);
     }
 
-    public async Task WaitForFinishAll()
+    public async ValueTask WaitForFinishAll()
     {
         while (IsBusy())
         {

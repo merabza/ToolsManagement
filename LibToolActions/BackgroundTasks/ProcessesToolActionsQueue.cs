@@ -23,7 +23,7 @@ public sealed class ProcessesToolActionsQueue
         return !_workItems.IsEmpty;
     }
 
-    public async Task<ProcessesToolAction?> DequeueAsync(CancellationToken cancellationToken)
+    public async Task<ProcessesToolAction?> DequeueAsync(CancellationToken cancellationToken = default)
     {
         await _signal.WaitAsync(cancellationToken);
         _workItems.TryDequeue(out var workItem);

@@ -24,7 +24,7 @@ public /*open*/ class ToolAction : MessageLogger
         UseConsole = useConsole;
     }
 
-    public async Task<bool> Run(CancellationToken cancellationToken)
+    public async ValueTask<bool> Run(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -65,8 +65,8 @@ public /*open*/ class ToolAction : MessageLogger
         return true;
     }
 
-    protected virtual Task<bool> RunAction(CancellationToken cancellationToken)
+    protected virtual ValueTask<bool> RunAction(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(true);
+        return ValueTask.FromResult(true);
     }
 }

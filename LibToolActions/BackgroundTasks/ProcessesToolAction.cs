@@ -21,7 +21,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
 
     public int ProcLineId { get; }
 
-    public async Task RunAsync(CancellationToken cancellationToken)
+    public async Task RunAsync(CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
         using var task = Task.Run(async () =>
@@ -46,7 +46,7 @@ public /*open*/ class ProcessesToolAction : ToolAction
 
     //protected საჭიროა ApAgent-ისათვის
     // ReSharper disable once MemberCanBePrivate.Global
-    protected async Task RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken)
+    protected async ValueTask RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken = default)
     {
         while (true)
         {
