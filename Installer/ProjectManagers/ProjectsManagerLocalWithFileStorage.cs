@@ -36,7 +36,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var applicationUpdater = await AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
@@ -51,7 +51,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
 
     public async Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
-        string parametersFileExtension, CancellationToken cancellationToken)
+        string parametersFileExtension, CancellationToken cancellationToken = default)
     {
         var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
             programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
@@ -70,7 +70,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
     public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
         var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
             programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,

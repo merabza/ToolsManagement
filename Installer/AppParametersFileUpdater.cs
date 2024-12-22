@@ -28,7 +28,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
     public static async Task<AppParametersFileUpdater?> Create(ILogger logger, bool useConsole,
         string parametersFileDateMask, string parametersFileExtension, FileStorageData fileStorageForUpload,
         string? filesUserName, string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "creating AppParametersFileUpdater", cancellationToken);
@@ -79,7 +79,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
 
 
     public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName,
-        string appSettingsFileName, CancellationToken cancellationToken)
+        string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == ProgramAttributes.Instance.AppName)
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);

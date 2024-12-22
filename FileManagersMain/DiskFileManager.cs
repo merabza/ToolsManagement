@@ -115,7 +115,7 @@ public sealed class DiskFileManager : FileManager
     }
 
     public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
             _storageFolderName, serverSideFileName);

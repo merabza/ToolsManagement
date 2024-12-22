@@ -162,7 +162,7 @@ public sealed class RemoteFileManager : FileManager
     }
 
     public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
             _serverRootPaths, serverSideFileName);

@@ -16,7 +16,7 @@ public static class FileManagersFabricExt
 
     public static async Task<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole,
         ILogger logger, string localPatch, string? fileStorageName, FileStorages fileStorages,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         FileStorageData? fileStorageData = null;
         if (string.IsNullOrWhiteSpace(fileStorageName))

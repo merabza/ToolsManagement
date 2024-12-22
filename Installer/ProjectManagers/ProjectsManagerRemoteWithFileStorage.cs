@@ -19,7 +19,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
 
     public async Task<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.UpdateAppParametersFile(projectName, environmentName, appSettingsFileName,
             parametersFileDateMask, parametersFileExtension, cancellationToken);
@@ -27,7 +27,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
 
     public async Task<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
-        string parametersFileExtension, CancellationToken cancellationToken)
+        string parametersFileExtension, CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.InstallProgram(projectName, environmentName, programArchiveDateMask,
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, cancellationToken);
@@ -36,7 +36,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
     public async Task<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken)
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.InstallService(projectName, environmentName, serviceUserName,
             appSettingsFileName, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,

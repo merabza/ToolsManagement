@@ -36,7 +36,7 @@ public sealed class LocalInstallerSettingsDomain
 
     public static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
         InstallerSettings? lis,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (lis is not null)
             return await Create(logger, useConsole, lis.InstallerWorkFolder, lis.FilesUserName, lis.FilesUsersGroupName,
@@ -54,7 +54,7 @@ public sealed class LocalInstallerSettingsDomain
     private static async Task<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
         string? installerWorkFolder, string? filesUserName, string? filesUsersGroupName, string? serviceUserName,
         string? downloadTempExtension, string? installFolder, string? dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating LocalInstallerSettingsDomain", cancellationToken);

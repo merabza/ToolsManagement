@@ -12,7 +12,7 @@ public static class ProjectManagersFabric
 {
     public static async Task<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
         InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating local Agent With File Storage",
@@ -36,7 +36,7 @@ public static class ProjectManagersFabric
 
     public static async Task<IProjectsManager?> CreateAgentClient(ILogger logger, bool useConsole,
         string? installFolder,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating local Agent", cancellationToken);

@@ -26,7 +26,7 @@ public /*open*/ class ApplicationUpdaterBase : MessageLogger
 
     protected async Task<string?> GetParametersFileBody(string projectName, string environmentName,
         FileStorageData fileStorageForDownload, string parametersFileDateMask, string parametersFileExtension,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var getLatestParametersFileBodyAction = new GetLatestParametersFileBodyAction(_logger, UseConsole,
             fileStorageForDownload, projectName, Environment.MachineName, environmentName, parametersFileDateMask,

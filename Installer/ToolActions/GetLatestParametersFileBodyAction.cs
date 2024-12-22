@@ -41,7 +41,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     public string? AppSettingsVersion { get; private set; }
 
-    protected override async Task<bool> RunAction(CancellationToken cancellationToken)
+    protected override async ValueTask<bool> RunAction(CancellationToken cancellationToken = default)
     {
         LatestParametersFileContent = await GetParametersFileBody(cancellationToken);
         if (string.IsNullOrWhiteSpace(LatestParametersFileContent))
@@ -52,7 +52,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     }
 
 
-    private async Task<string?> GetParametersFileBody(CancellationToken cancellationToken)
+    private async Task<string?> GetParametersFileBody(CancellationToken cancellationToken = default)
     {
         var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 

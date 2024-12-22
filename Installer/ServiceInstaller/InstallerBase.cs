@@ -34,24 +34,24 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     protected abstract Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName, string serviceEnvName,
         string userName, string installFolderPath, string? serviceDescriptionSignature, string? projectDescription,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     protected abstract Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
-        string? filesUsersGroupName, CancellationToken cancellationToken);
+        string? filesUsersGroupName, CancellationToken cancellationToken = default);
 
     protected abstract Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
-        string filesUsersGroupName, CancellationToken cancellationToken);
+        string filesUsersGroupName, CancellationToken cancellationToken = default);
 
     protected abstract Option<Err[]> RemoveService(string serviceEnvName);
 
-    protected abstract Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken);
+    protected abstract Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default);
 
-    protected abstract Task<Option<Err[]>> StartService(string serviceEnvName, CancellationToken cancellationToken);
+    protected abstract Task<Option<Err[]>> StartService(string serviceEnvName, CancellationToken cancellationToken = default);
 
     protected abstract Task<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName,
         string installFolderPath, string? serviceDescriptionSignature, string? projectDescription,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     protected abstract bool IsServiceExists(string serviceEnvName);
 
@@ -77,7 +77,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     public async Task<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName,
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
-        string installFolder, CancellationToken cancellationToken)
+        string installFolder, CancellationToken cancellationToken = default)
     {
         var checkBeforeStartUpdateResult =
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
@@ -197,7 +197,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     private async Task<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
-        string environmentName, CancellationToken cancellationToken)
+        string environmentName, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(installFolder))
             return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
@@ -218,7 +218,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     public async Task<OneOf<string?, Err[]>> RunUpdateService(string archiveFileName, string projectName,
         string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
         string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken)
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -426,7 +426,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     public async Task<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
         string environmentName, string filesUserName, string filesUsersGroupName, string installWorkFolder,
-        string installFolder, CancellationToken cancellationToken)
+        string installFolder, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -532,12 +532,12 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     public async Task<Option<Err[]>> Stop(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken)
+    private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
@@ -565,12 +565,12 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     public async Task<Option<Err[]>> Start(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await Start(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async Task<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken)
+    private async Task<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
@@ -590,7 +590,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        string installFolder, CancellationToken cancellationToken)
+        string installFolder, CancellationToken cancellationToken = default)
     {
         if (!isService)
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
@@ -631,7 +631,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName, string installFolder,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);
 

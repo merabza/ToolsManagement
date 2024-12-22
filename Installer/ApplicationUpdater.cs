@@ -35,7 +35,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
         string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var serviceInstaller = await InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
             messagesDataManager, userName, cancellationToken);
@@ -115,7 +115,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     }
 
     public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}", projectName,
@@ -179,7 +179,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
     public async Task<OneOf<string, Err[]>> UpdateServiceWithParameters(string projectName, string environmentName,
         string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken)
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",

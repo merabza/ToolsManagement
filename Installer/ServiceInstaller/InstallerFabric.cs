@@ -9,7 +9,7 @@ namespace Installer.ServiceInstaller;
 public static class InstallerFabric
 {
     public static async Task<InstallerBase?> CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating installer", cancellationToken);
@@ -35,7 +35,7 @@ public static class InstallerFabric
     }
 
     public static async Task<InstallerBase> CreateInstaller(ILogger logger, bool useConsole,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating installer (without dotnetRunner)",

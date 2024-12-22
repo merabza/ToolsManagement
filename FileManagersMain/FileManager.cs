@@ -81,7 +81,7 @@ public /*open*/ class FileManager
 
     //ტექსტის ატვირთვა ფაილის სახით ასინქრონულად
     public virtual Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return Task.FromResult(false);
     }

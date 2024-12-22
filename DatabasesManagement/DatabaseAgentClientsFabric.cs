@@ -17,7 +17,7 @@ public static class DatabaseAgentClientsFabric
     public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         IHttpClientFactory httpClientFactory, string? apiClientName, ApiClients apiClients,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(apiClientName) && string.IsNullOrWhiteSpace(databaseConnectionName))
         {
@@ -53,7 +53,7 @@ public static class DatabaseAgentClientsFabric
     private static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
 
@@ -89,7 +89,7 @@ public static class DatabaseAgentClientsFabric
     // ReSharper disable once MemberCanBePrivate.Global
     public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         var databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
@@ -102,7 +102,7 @@ public static class DatabaseAgentClientsFabric
     // ReSharper disable once MemberCanBePrivate.Global
     public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken)
+        string? userName, CancellationToken cancellationToken = default)
     {
         if (databaseServerConnection is null)
             throw new ArgumentOutOfRangeException(nameof(databaseServerConnection));
@@ -120,7 +120,7 @@ public static class DatabaseAgentClientsFabric
     public static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, ApiClientSettings? apiClientSettings,
         IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         if (apiClientSettings is null || string.IsNullOrWhiteSpace(apiClientSettings.Server))
         {

@@ -30,7 +30,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
     }
 
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
@@ -50,7 +50,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
     }
 
     public async Task<Option<Err[]>> StopService(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
@@ -63,7 +63,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
     }
 
     public async Task<Option<Err[]>> StartService(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
@@ -77,7 +77,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
     }
 
     public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,

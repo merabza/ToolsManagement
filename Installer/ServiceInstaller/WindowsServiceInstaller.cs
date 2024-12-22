@@ -82,7 +82,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken)
+    protected override async Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
@@ -117,7 +117,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     }
 
     protected override async Task<Option<Err[]>> StartService(string serviceEnvName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
@@ -151,7 +151,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     }
 
     protected override async Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
-        string? filesUsersGroupName, CancellationToken cancellationToken)
+        string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
@@ -180,7 +180,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
     }
 
     protected override async Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
-        string filesUsersGroupName, CancellationToken cancellationToken)
+        string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
@@ -210,7 +210,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
     protected override async Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken)
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         var mustBeDescription =
@@ -234,7 +234,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
     protected override async Task<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken)
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         // create empty pipeline
         // ReSharper disable once using

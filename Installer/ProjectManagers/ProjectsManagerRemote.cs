@@ -17,20 +17,20 @@ public sealed class ProjectsManagerRemote : IProjectsManager
     }
 
     public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService,
             cancellationToken);
     }
 
     public async Task<Option<Err[]>> StopService(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.StopService(projectName, environmentName, cancellationToken);
     }
 
     public async Task<Option<Err[]>> StartService(string projectName, string environmentName,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         return await _projectsApiClient.StartService(projectName, environmentName, cancellationToken);
     }

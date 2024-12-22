@@ -11,8 +11,8 @@ public interface IProjectsManager
     //თუ მომავალში გადავაკეთებთ, ისე, რომ არასერვისული პროგრამებისათვის სერვერის მითითება შესაძლებელი იქნება და მოშორებულ სერვერზე ასეთი პროგრამის დაყენება შესაძლებელი იქნება, მაშინ RemoveProject უნდა აღდგეს
     //Task<bool> RemoveProject(string projectName);
     Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
-    Task<Option<Err[]>> StopService(string projectName, string environmentName, CancellationToken cancellationToken);
-    Task<Option<Err[]>> StartService(string projectName, string environmentName, CancellationToken cancellationToken);
+    Task<Option<Err[]>> StopService(string projectName, string environmentName, CancellationToken cancellationToken = default);
+    Task<Option<Err[]>> StartService(string projectName, string environmentName, CancellationToken cancellationToken = default);
 }
