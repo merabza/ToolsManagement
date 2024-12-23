@@ -27,7 +27,7 @@ public sealed class ToolActionsQueuedRunner : BackgroundService
 
     public bool IsBusy { get; private set; }
 
-    protected override async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Queued Hosted Service is starting.");
 
