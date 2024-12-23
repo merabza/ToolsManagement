@@ -14,7 +14,7 @@ public interface IDatabaseManager
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
+    ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
         string backupBaseName, CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან

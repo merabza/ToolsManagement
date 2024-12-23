@@ -51,7 +51,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async Task<OneOf<BackupFileParameters, Err[]>> CreateBackup(
+    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(
         DatabaseBackupParametersDomain dbBackupParameters,
         string backupBaseName, CancellationToken cancellationToken = default)
     {
