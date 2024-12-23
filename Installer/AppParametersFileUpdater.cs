@@ -25,7 +25,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         _serviceInstaller = serviceInstaller;
     }
 
-    public static async Task<AppParametersFileUpdater?> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<AppParametersFileUpdater?> Create(ILogger logger, bool useConsole,
         string parametersFileDateMask, string parametersFileExtension, FileStorageData fileStorageForUpload,
         string? filesUserName, string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)

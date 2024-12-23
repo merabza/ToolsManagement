@@ -33,10 +33,10 @@ public interface IDatabaseManager
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    Task<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default);
+    ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default);
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    Task<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+    ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
@@ -50,12 +50,12 @@ public interface IDatabaseManager
     Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    Task<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken = default);
+    ValueTask<Option<Err[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken = default);
 
     Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    Task<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default);
+    ValueTask<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default);
 
     Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
         CancellationToken cancellationToken = default);

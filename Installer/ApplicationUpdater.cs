@@ -30,7 +30,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async Task<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,

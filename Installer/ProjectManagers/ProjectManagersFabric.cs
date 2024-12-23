@@ -10,7 +10,7 @@ namespace Installer.ProjectManagers;
 
 public static class ProjectManagersFabric
 {
-    public static async Task<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
+    public static async ValueTask<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
         InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
@@ -34,9 +34,9 @@ public static class ProjectManagersFabric
     }
 
 
-    public static async Task<IProjectsManager?> CreateAgentClient(ILogger logger, bool useConsole,
-        string? installFolder,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+    public static async ValueTask<IProjectsManager?> CreateAgentClient(ILogger logger, bool useConsole,
+        string? installFolder, IMessagesDataManager? messagesDataManager, string? userName,
+        CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "Creating local Agent", cancellationToken);

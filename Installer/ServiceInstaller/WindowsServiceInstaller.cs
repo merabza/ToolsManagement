@@ -82,7 +82,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
@@ -116,7 +116,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<Option<Err[]>> StartService(string serviceEnvName,
+    protected override async ValueTask<Option<Err[]>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -150,7 +150,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected override async ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -179,7 +179,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected override async ValueTask<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -208,7 +208,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
+    protected override async ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -232,7 +232,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return await Task.FromResult(toReturn);
     }
 
-    protected override async Task<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
+    protected override async ValueTask<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {

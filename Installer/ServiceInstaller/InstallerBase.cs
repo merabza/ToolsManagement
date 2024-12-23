@@ -32,26 +32,27 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         _logger = logger;
     }
 
-    protected abstract Task<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName, string serviceEnvName,
-        string userName, string installFolderPath, string? serviceDescriptionSignature, string? projectDescription,
-        CancellationToken cancellationToken = default);
+    protected abstract ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
+        string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken = default);
 
-    protected abstract Task<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected abstract ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract Task<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected abstract ValueTask<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default);
 
     protected abstract Option<Err[]> RemoveService(string serviceEnvName);
 
-    protected abstract Task<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default);
-
-    protected abstract Task<Option<Err[]>> StartService(string serviceEnvName, CancellationToken cancellationToken = default);
-
-    protected abstract Task<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
-        string serviceUserName,
-        string installFolderPath, string? serviceDescriptionSignature, string? projectDescription,
+    protected abstract ValueTask<Option<Err[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default);
+
+    protected abstract ValueTask<Option<Err[]>> StartService(string serviceEnvName,
+        CancellationToken cancellationToken = default);
+
+    protected abstract ValueTask<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
+        string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken = default);
 
     protected abstract bool IsServiceExists(string serviceEnvName);
 
@@ -75,7 +76,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return Process.GetProcessesByName(processName).Length > 1;
     }
 
-    public async Task<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName,
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
         string installFolder, CancellationToken cancellationToken = default)
     {
@@ -196,7 +197,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    private async Task<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
+    private async ValueTask<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
         string environmentName, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(installFolder))
@@ -215,7 +216,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return projectInstallFullPath;
     }
 
-    public async Task<OneOf<string?, Err[]>> RunUpdateService(string archiveFileName, string projectName,
+    public async ValueTask<OneOf<string?, Err[]>> RunUpdateService(string archiveFileName, string projectName,
         string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
         string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
@@ -424,7 +425,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async Task<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
+    public async ValueTask<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
         string environmentName, string filesUserName, string filesUsersGroupName, string installWorkFolder,
         string installFolder, CancellationToken cancellationToken = default)
     {
@@ -531,13 +532,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
     }
 
-    public async Task<Option<Err[]>> Stop(string projectName, string environmentName,
+    public ValueTask<Option<Err[]>> Stop(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
-        return await Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
+        return Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async Task<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
+    private async ValueTask<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
@@ -564,13 +565,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async Task<Option<Err[]>> Start(string projectName, string environmentName,
+    public ValueTask<Option<Err[]>> Start(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
-        return await Start(GetServiceEnvName(projectName, environmentName), cancellationToken);
+        return Start(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async Task<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
+    private async ValueTask<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
@@ -589,7 +590,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
+    public async ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName,
+        bool isService,
         string installFolder, CancellationToken cancellationToken = default)
     {
         if (!isService)
@@ -630,7 +632,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName, string installFolder,
+    public async ValueTask<Option<Err[]>> RemoveProject(string projectName, string environmentName,
+        string installFolder,
         CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);

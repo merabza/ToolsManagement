@@ -29,7 +29,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         _userName = userName;
     }
 
-    public async Task<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
+    public async ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
@@ -49,7 +49,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         return new[] { ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName) };
     }
 
-    public async Task<Option<Err[]>> StopService(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
@@ -62,7 +62,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             : new[] { ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName) };
     }
 
-    public async Task<Option<Err[]>> StartService(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
@@ -76,7 +76,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
     }
 
-    public async Task<Option<Err[]>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> RemoveProject(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი

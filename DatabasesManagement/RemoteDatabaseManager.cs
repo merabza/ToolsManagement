@@ -44,37 +44,34 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(
-        CancellationToken cancellationToken = default)
+    public Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.GetDatabaseNames(cancellationToken);
+        return _databaseApiClient.GetDatabaseNames(cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
-        CancellationToken cancellationToken = default)
+    public Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.IsDatabaseExists(databaseName, cancellationToken);
+        return _databaseApiClient.IsDatabaseExists(databaseName, cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+    public Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix,
-            backupFileParameters.Suffix, backupFileParameters.Name, backupFileParameters.DateMask,
-            destinationDbServerSideDataFolderPath, destinationDbServerSideLogFolderPath, databaseName,
-            cancellationToken);
+        return _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
+            backupFileParameters.Name, backupFileParameters.DateMask, destinationDbServerSideDataFolderPath,
+            destinationDbServerSideLogFolderPath, databaseName, cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public async Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
+    public ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.CheckRepairDatabase(databaseName, cancellationToken);
+        return _databaseApiClient.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
     public Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
@@ -88,22 +85,21 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async Task<Option<Err[]>> RecompileProcedures(string databaseName,
+    public ValueTask<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.RecompileProcedures(databaseName, cancellationToken);
+        return _databaseApiClient.RecompileProcedures(databaseName, cancellationToken);
     }
 
-    public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
+    public Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.TestConnection(databaseName, cancellationToken);
+        return _databaseApiClient.TestConnection(databaseName, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async Task<Option<Err[]>> UpdateStatistics(string databaseName,
-        CancellationToken cancellationToken = default)
+    public ValueTask<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.UpdateStatistics(databaseName, cancellationToken);
+        return _databaseApiClient.UpdateStatistics(databaseName, cancellationToken);
     }
 
     public Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
@@ -113,9 +109,9 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async Task<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+    public ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
     {
-        return await _databaseApiClient.ExecuteCommand(executeQueryCommand, databaseName, cancellationToken);
+        return _databaseApiClient.ExecuteCommand(executeQueryCommand, databaseName, cancellationToken);
     }
 }

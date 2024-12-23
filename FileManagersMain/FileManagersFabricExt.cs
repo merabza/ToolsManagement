@@ -14,7 +14,7 @@ public static class FileManagersFabricExt
         return FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
     }
 
-    public static async Task<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole,
+    public static async ValueTask<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole,
         ILogger logger, string localPatch, string? fileStorageName, FileStorages fileStorages,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {

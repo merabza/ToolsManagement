@@ -46,7 +46,8 @@ public /*open*/ class ProcessesToolAction : ToolAction
 
     //protected საჭიროა ApAgent-ისათვის
     // ReSharper disable once MemberCanBePrivate.Global
-    protected async ValueTask RunNextAction(ProcessesToolAction? nextToolAction, CancellationToken cancellationToken = default)
+    protected async ValueTask RunNextAction(ProcessesToolAction? nextToolAction,
+        CancellationToken cancellationToken = default)
     {
         while (true)
         {

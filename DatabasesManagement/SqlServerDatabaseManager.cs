@@ -37,10 +37,10 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public async Task<Option<Err[]>> CheckRepairDatabase(string databaseName,
+    public async ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -56,7 +56,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         string backupBaseName, CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -111,10 +111,10 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async Task<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+    public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken, databaseName);
+        var getDatabaseClientResult = await GetDatabaseClient(databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -127,7 +127,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     public async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -143,7 +143,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -154,10 +154,10 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async Task<Option<Err[]>> RecompileProcedures(string databaseName,
+    public async ValueTask<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -168,7 +168,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken, databaseName);
+        var getDatabaseClientResult = await GetDatabaseClient(databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -178,10 +178,10 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async Task<Option<Err[]>> UpdateStatistics(string databaseName,
+    public async ValueTask<Option<Err[]>> UpdateStatistics(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -193,7 +193,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     public async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -205,7 +205,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -218,7 +218,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -233,7 +233,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(cancellationToken);
+        var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -282,7 +282,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             cancellationToken);
     }
 
-    public static async Task<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
         DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken = default)
     {
@@ -341,8 +341,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             messagesDataManager, userName);
     }
 
-    private async Task<OneOf<DbClient, Err[]>> GetDatabaseClient(CancellationToken cancellationToken,
-        string? databaseName = null)
+    private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(string? databaseName = null,
+        CancellationToken cancellationToken = default)
     {
         var dc = DbClientFabric.GetDbClient(_logger, _useConsole, _databaseServerConnectionDataDomain.DataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,

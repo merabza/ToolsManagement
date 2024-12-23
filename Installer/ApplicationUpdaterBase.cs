@@ -33,8 +33,6 @@ public /*open*/ class ApplicationUpdaterBase : MessageLogger
             parametersFileExtension, _messagesDataManager, _userName);
         var result = await getLatestParametersFileBodyAction.Run(cancellationToken);
         var appSettingsFileBody = getLatestParametersFileBodyAction.LatestParametersFileContent;
-        if (!result || string.IsNullOrWhiteSpace(appSettingsFileBody))
-            return null;
-        return appSettingsFileBody;
+        return !result || string.IsNullOrWhiteSpace(appSettingsFileBody) ? null : appSettingsFileBody;
     }
 }

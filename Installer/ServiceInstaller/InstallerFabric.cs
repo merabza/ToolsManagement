@@ -8,7 +8,7 @@ namespace Installer.ServiceInstaller;
 
 public static class InstallerFabric
 {
-    public static async Task<InstallerBase?> CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
+    public static async ValueTask<InstallerBase?> CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
@@ -34,7 +34,7 @@ public static class InstallerFabric
         return null;
     }
 
-    public static async Task<InstallerBase> CreateInstaller(ILogger logger, bool useConsole,
+    public static async ValueTask<InstallerBase> CreateInstaller(ILogger logger, bool useConsole,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
