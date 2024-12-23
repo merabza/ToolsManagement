@@ -14,7 +14,7 @@ namespace DatabasesManagement;
 
 public static class DatabaseAgentClientsFabric
 {
-    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
+    public static async ValueTask<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         IHttpClientFactory httpClientFactory, string? apiClientName, ApiClients apiClients,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
@@ -50,7 +50,7 @@ public static class DatabaseAgentClientsFabric
         return null;
     }
 
-    private static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
+    private static async ValueTask<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
         CancellationToken cancellationToken = default)
@@ -87,20 +87,20 @@ public static class DatabaseAgentClientsFabric
 
     //public იყენებს ApAgent
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
+    public static ValueTask<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         string databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         var databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
-        return await CreateDatabaseManager(useConsole, logger, databaseServerConnection, messagesDataManager,
-            userName, cancellationToken);
+        return CreateDatabaseManager(useConsole, logger, databaseServerConnection, messagesDataManager, userName,
+            cancellationToken);
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
+    public static async ValueTask<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
         DatabaseServerConnectionData? databaseServerConnection, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken = default)
     {
@@ -117,7 +117,7 @@ public static class DatabaseAgentClientsFabric
         };
     }
 
-    public static async Task<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
+    public static async ValueTask<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, ApiClientSettings? apiClientSettings,
         IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
         CancellationToken cancellationToken = default)
