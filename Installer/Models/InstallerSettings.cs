@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Installer.Models;
 
-public sealed class InstallerSettings : IParameters
+public sealed class InstallerSettings : ParametersWithStatus
 {
     public const string DefaultDownloadFileTempExtension = ".down!";
 
@@ -22,11 +22,6 @@ public sealed class InstallerSettings : IParameters
     public string? DownloadTempExtension { get; set; }
     public string? FilesUserName { get; set; }
     public string? FilesUsersGroupName { get; set; }
-
-    public bool CheckBeforeSave()
-    {
-        return true;
-    }
 
     public string GetDownloadTempExtension()
     {
