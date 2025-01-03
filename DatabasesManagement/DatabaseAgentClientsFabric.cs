@@ -112,6 +112,7 @@ public static class DatabaseAgentClientsFabric
             EDataProvider.None => null,
             EDataProvider.Sql => await SqlServerDatabaseManager.Create(logger, useConsole, databaseServerConnection,
                 messagesDataManager, userName, cancellationToken),
+            EDataProvider.OleDb => null,
             EDataProvider.SqLite => null,
             _ => throw new ArgumentOutOfRangeException()
         };
