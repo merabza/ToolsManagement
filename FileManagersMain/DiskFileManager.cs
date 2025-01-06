@@ -24,8 +24,7 @@ public sealed class DiskFileManager : FileManager
     public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
         var destDir = GetDirectoryInfo(afterRootPath);
-        return GetFiles(searchPattern, destDir)
-            .Select(c => new MyFileInfo(c.Name, c.Length)).ToList();
+        return GetFiles(searchPattern, destDir).Select(c => new MyFileInfo(c.Name, c.Length)).ToList();
     }
 
     private static FileInfo[] GetFiles(string? searchPattern, DirectoryInfo destDir)
@@ -159,9 +158,7 @@ public sealed class DiskFileManager : FileManager
 
     public override bool RenameFile(string? afterRootPath, string fileName, string newFileName)
     {
-        var folderPath = afterRootPath == null
-            ? _storageFolderName
-            : Path.Combine(_storageFolderName, afterRootPath);
+        var folderPath = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
 
         return RenameFile(Path.Combine(folderPath, fileName), Path.Combine(folderPath, newFileName), UseConsole,
             Logger);
@@ -169,9 +166,7 @@ public sealed class DiskFileManager : FileManager
 
     public override bool RenameFolder(string? afterRootPath, string folderName, string newFolderName)
     {
-        var folderPath = afterRootPath == null
-            ? _storageFolderName
-            : Path.Combine(_storageFolderName, afterRootPath);
+        var folderPath = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
 
         return RenameFolder(Path.Combine(folderPath, folderName), Path.Combine(folderPath, newFolderName), UseConsole,
             Logger);
@@ -223,9 +218,7 @@ public sealed class DiskFileManager : FileManager
 
     public override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
-        var inDirName = afterRootPath == null
-            ? _storageFolderName
-            : Path.Combine(_storageFolderName, afterRootPath);
+        var inDirName = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
         var dirFullName = Path.Combine(inDirName, directoryName);
         Directory.CreateDirectory(dirFullName);
         return DirectoryExists(dirFullName);
@@ -242,9 +235,7 @@ public sealed class DiskFileManager : FileManager
 
     public override bool DeleteDirectory(string? afterRootPath, string directoryName, bool recursive = false)
     {
-        var inDirName = afterRootPath != null
-            ? Path.Combine(_storageFolderName, afterRootPath)
-            : _storageFolderName;
+        var inDirName = afterRootPath != null ? Path.Combine(_storageFolderName, afterRootPath) : _storageFolderName;
         var dirFullName = Path.Combine(inDirName, directoryName);
         Directory.Delete(dirFullName, recursive);
         return !DirectoryExists(dirFullName);
