@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
-using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared.Errors;
@@ -28,16 +27,11 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(
-        DatabaseBackupParametersDomain databaseBackupParametersModel, string backupBaseName,
+    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
         CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
-            return await _databaseApiClient.CreateBackup(databaseBackupParametersModel.BackupNamePrefix,
-                databaseBackupParametersModel.DateMask, databaseBackupParametersModel.BackupFileExtension,
-                databaseBackupParametersModel.BackupNameMiddlePart, databaseBackupParametersModel.Compress,
-                databaseBackupParametersModel.Verify, databaseBackupParametersModel.BackupType,
-                databaseBackupParametersModel.DbServerSideBackupPath, backupBaseName, cancellationToken);
+            return await _databaseApiClient.CreateBackup(backupBaseName, cancellationToken);
 
         _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
@@ -59,12 +53,14 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
+        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         return _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
-            backupFileParameters.Name, backupFileParameters.DateMask, destinationDbServerSideDataFolderPath,
-            destinationDbServerSideLogFolderPath, databaseName, cancellationToken);
+            backupFileParameters.Name, backupFileParameters.DateMask, 
+            //destinationDbServerSideDataFolderPath,
+            //destinationDbServerSideLogFolderPath, 
+            databaseName, cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა

@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using LanguageExt;
-using LibDatabaseParameters;
 using OneOf;
 using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts.V1.Responses;
@@ -14,8 +13,8 @@ public interface IDatabaseManager
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParametersModel,
-        string backupBaseName, CancellationToken cancellationToken = default);
+    ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
+        CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken = default);
@@ -29,7 +28,7 @@ public interface IDatabaseManager
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
     Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
+        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა

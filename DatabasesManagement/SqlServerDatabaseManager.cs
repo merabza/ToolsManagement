@@ -19,6 +19,7 @@ namespace DatabasesManagement;
 
 public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
+    private readonly DatabaseBackupParametersDomain _databaseBackupParameters;
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly ILogger _logger;
     private readonly IMessagesDataManager? _messagesDataManager;
@@ -27,11 +28,13 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     private SqlServerDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        IMessagesDataManager? messagesDataManager, string? userName)
+        DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
+        string? userName)
     {
         _logger = logger;
         _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
+        _databaseBackupParameters = databaseBackupParameters;
         _messagesDataManager = messagesDataManager;
         _userName = userName;
     }
@@ -51,9 +54,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(
-        DatabaseBackupParametersDomain dbBackupParameters,
-        string backupBaseName, CancellationToken cancellationToken = default)
+    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
+        CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
@@ -73,31 +75,31 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         //string backupFileNamePrefix = databaseBackupParametersModel.BackupNamePrefix + databaseName +
         //                              databaseBackupParametersModel.BackupNameMiddlePart;
         var databaseName = backupBaseName; //dbBackupParameters.BackupBaseName;
-        var backupFileNamePrefix = dbBackupParameters.GetPrefix(databaseName);
+        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(databaseName);
         //string backupFileNameSuffix = databaseBackupParametersModel.BackupFileExtension.AddNeedLeadPart(".");
-        var backupFileNameSuffix = dbBackupParameters.GetSuffix();
-        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(dbBackupParameters.DateMask) +
+        var backupFileNameSuffix = _databaseBackupParameters.GetSuffix();
+        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(_databaseBackupParameters.DateMask) +
                              backupFileNameSuffix;
 
-        var backupFolder = dbBackupParameters.DbServerSideBackupPath ??
+        var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
                            _databaseServerConnectionDataDomain.BackupFolderName;
 
         var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
 
         //ბექაპის ლოგიკური ფაილის სახელის მომზადება
         var backupName = databaseName;
-        if (dbBackupParameters.BackupType == EBackupType.Full)
+        if (_databaseBackupParameters.BackupType == EBackupType.Full)
             backupName += "-full";
 
         //ბექაპის პროცესის გაშვება
         var backupDatabaseResult = await dc.BackupDatabase(databaseName, backupFileFullName, backupName,
-            EBackupType.Full, dbBackupParameters.Compress, cancellationToken);
+            EBackupType.Full, _databaseBackupParameters.Compress, cancellationToken);
 
         if (backupDatabaseResult.IsSome)
             //return await Task.FromResult<BackupFileParameters?>(null);
             return (Err[])backupDatabaseResult;
 
-        if (dbBackupParameters.Verify)
+        if (_databaseBackupParameters.Verify)
         {
             var verifyBackupResult = await dc.VerifyBackup(databaseName, backupFileFullName, cancellationToken);
             if (verifyBackupResult.IsSome)
@@ -105,7 +107,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         }
 
         BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
-            dbBackupParameters.DateMask);
+            _databaseBackupParameters.DateMask);
 
         return backupFileParameters;
     }
@@ -229,7 +231,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
+        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
@@ -244,8 +246,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (hostPlatformResult.IsT1)
         {
             if (_messagesDataManager is not null)
-                await _messagesDataManager.SendMessage(_userName, "Host platform does not detected",
-                    cancellationToken);
+                await _messagesDataManager.SendMessage(_userName, "Host platform does not detected", cancellationToken);
             _logger.LogError("Host platform does not detected");
             return Err.RecreateErrors(hostPlatformResult.AsT1,
                 SqlServerDatabaseManagerErrors.HostPlatformDoesNotDetected);
@@ -267,8 +268,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (getRestoreFilesResult.IsT1)
         {
             if (_messagesDataManager is not null)
-                await _messagesDataManager.SendMessage(_userName, "Restore Files does not detected",
-                    cancellationToken);
+                await _messagesDataManager.SendMessage(_userName, "Restore Files does not detected", cancellationToken);
             _logger.LogError("Restore Files does not detected");
             return Err.RecreateErrors(getRestoreFilesResult.AsT1,
                 SqlServerDatabaseManagerErrors.RestoreFilesDoesNotDetected);
@@ -277,9 +277,9 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         var files = getRestoreFilesResult.AsT0;
 
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
-            destinationDbServerSideDataFolderPath ?? _databaseServerConnectionDataDomain.DataFolderName,
-            destinationDbServerSideLogFolderPath ?? _databaseServerConnectionDataDomain.DataLogFolderName, dirSeparator,
-            cancellationToken);
+            /*destinationDbServerSideDataFolderPath ??*/ _databaseServerConnectionDataDomain.DataFolderName,
+            /*destinationDbServerSideLogFolderPath ?? */_databaseServerConnectionDataDomain.DataLogFolderName,
+            dirSeparator, cancellationToken);
     }
 
     public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
@@ -299,8 +299,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         {
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName,
-                    "BackupFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
+                    "BackupFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
             logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -309,8 +308,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         {
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName,
-                    "DataFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
+                    "DataFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
             logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
@@ -319,18 +317,33 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         {
             if (messagesDataManager is not null)
                 await messagesDataManager.SendMessage(userName,
-                    "DataLogFolderName is empty, Cannot create SqlServerManagementClient",
-                    cancellationToken);
+                    "DataLogFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
             logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
             return null;
         }
 
-        var dbAuthSettings = DbAuthSettingsCreator.Create(
-            databaseServerConnectionData.WindowsNtIntegratedSecurity,
+        var dbAuthSettings = DbAuthSettingsCreator.Create(databaseServerConnectionData.WindowsNtIntegratedSecurity,
             databaseServerConnectionData.ServerUser, databaseServerConnectionData.ServerPass);
 
         if (dbAuthSettings is null)
             return null;
+
+
+        //// databaseServerConnectionData.ProductionDbServerSideBackupPath
+        var destinationDbBackupParameters =
+            DatabaseBackupParametersDomain.Create(databaseServerConnectionData.FullDbBackupParameters);
+
+
+        if (destinationDbBackupParameters is null)
+        {
+            if (messagesDataManager is not null)
+                await messagesDataManager.SendMessage(userName,
+                    "destinationDbBackupParameters is null, Cannot create SqlServerManagementClient",
+                    cancellationToken);
+            logger.LogError("destinationDbBackupParameters is null, Cannot create SqlServerManagementClient");
+            return null;
+        }
+
 
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
             databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress, dbAuthSettings,
@@ -338,7 +351,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             databaseServerConnectionData.DataFolderName, databaseServerConnectionData.DataLogFolderName);
 
         return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
-            messagesDataManager, userName);
+            destinationDbBackupParameters, messagesDataManager, userName);
     }
 
     private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(string? databaseName = null,
