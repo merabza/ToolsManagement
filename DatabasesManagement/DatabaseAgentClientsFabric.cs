@@ -45,8 +45,8 @@ public static class DatabaseAgentClientsFabric
             return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
                 messagesDataManager, userName, useConsole, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
-            return await CreateDatabaseManager(useConsole, logger, databaseConnectionName,
-                databaseServerConnections, messagesDataManager, userName, cancellationToken);
+            return await CreateDatabaseManager(useConsole, logger, databaseConnectionName, databaseServerConnections,
+                messagesDataManager, userName, cancellationToken);
         return null;
     }
 
@@ -107,11 +107,16 @@ public static class DatabaseAgentClientsFabric
         if (databaseServerConnection is null)
             throw new ArgumentOutOfRangeException(nameof(databaseServerConnection));
 
+
+        //// databaseServerConnectionData.ProductionDbServerSideBackupPath
+        var destinationDbBackupParameters =
+            DatabaseBackupParametersDomain.Create(databaseServerConnection.FullDbBackupParameters);
+
         return databaseServerConnection.DataProvider switch
         {
             EDataProvider.None => null,
             EDataProvider.Sql => await SqlServerDatabaseManager.Create(logger, useConsole, databaseServerConnection,
-                messagesDataManager, userName, cancellationToken),
+                destinationDbBackupParameters, messagesDataManager, userName, cancellationToken),
             EDataProvider.OleDb => null,
             EDataProvider.SqLite => null,
             _ => throw new ArgumentOutOfRangeException()

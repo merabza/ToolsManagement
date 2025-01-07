@@ -35,8 +35,8 @@ public sealed class LocalInstallerSettingsDomain
 
 
     public static async ValueTask<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
-        InstallerSettings? lis,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+        InstallerSettings? lis, IMessagesDataManager? messagesDataManager, string? userName,
+        CancellationToken cancellationToken = default)
     {
         if (lis is not null)
             return await Create(logger, useConsole, lis.InstallerWorkFolder, lis.FilesUserName, lis.FilesUsersGroupName,

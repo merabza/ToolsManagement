@@ -23,8 +23,7 @@ public static class ProjectManagersFabric
 
         if (localInstallerSettingsDomain is not null)
             return new ProjectsManagerLocalWithFileStorage(logger, useConsole, fileStorageForUpload,
-                localInstallerSettingsDomain,
-                messagesDataManager, userName);
+                localInstallerSettingsDomain, messagesDataManager, userName);
 
         if (messagesDataManager is not null)
             await messagesDataManager.SendMessage(userName, "localInstallerSettingsDomain does not created",

@@ -82,7 +82,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
                              backupFileNameSuffix;
 
         var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
-                           _databaseServerConnectionDataDomain.BackupFolderName;
+            _databaseServerConnectionDataDomain.BackupFolderName;
 
         var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
 
@@ -283,7 +283,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
-        DatabaseServerConnectionData databaseServerConnectionData, IMessagesDataManager? messagesDataManager,
+        DatabaseServerConnectionData databaseServerConnectionData,
+        DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
@@ -329,29 +330,13 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             return null;
 
 
-        //// databaseServerConnectionData.ProductionDbServerSideBackupPath
-        var destinationDbBackupParameters =
-            DatabaseBackupParametersDomain.Create(databaseServerConnectionData.FullDbBackupParameters);
-
-
-        if (destinationDbBackupParameters is null)
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "destinationDbBackupParameters is null, Cannot create SqlServerManagementClient",
-                    cancellationToken);
-            logger.LogError("destinationDbBackupParameters is null, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
             databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress, dbAuthSettings,
             databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.BackupFolderName,
             databaseServerConnectionData.DataFolderName, databaseServerConnectionData.DataLogFolderName);
 
         return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
-            destinationDbBackupParameters, messagesDataManager, userName);
+            databaseBackupParameters, messagesDataManager, userName);
     }
 
     private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(string? databaseName = null,
