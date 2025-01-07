@@ -57,7 +57,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         return _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
-            backupFileParameters.Name, backupFileParameters.DateMask, 
+            backupFileParameters.Name, backupFileParameters.DateMask,
             //destinationDbServerSideDataFolderPath,
             //destinationDbServerSideLogFolderPath, 
             databaseName, cancellationToken);

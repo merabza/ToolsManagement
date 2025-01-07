@@ -45,8 +45,8 @@ public static class DatabaseAgentClientsFabric
             return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
                 messagesDataManager, userName, useConsole, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
-            return await CreateDatabaseManager(useConsole, logger, databaseConnectionName,
-                databaseServerConnections, messagesDataManager, userName, cancellationToken);
+            return await CreateDatabaseManager(useConsole, logger, databaseConnectionName, databaseServerConnections,
+                messagesDataManager, userName, cancellationToken);
         return null;
     }
 

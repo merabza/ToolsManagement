@@ -82,7 +82,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
                              backupFileNameSuffix;
 
         var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
-                           _databaseServerConnectionDataDomain.BackupFolderName;
+            _databaseServerConnectionDataDomain.BackupFolderName;
 
         var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
 
