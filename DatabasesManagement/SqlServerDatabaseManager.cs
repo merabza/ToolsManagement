@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DatabasesManagement.Errors;
 using DbTools;
+using DbTools.Errors;
 using DbTools.Models;
 using DbToolsFabric;
 using LanguageExt;
@@ -74,25 +75,27 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         //string backupFileNamePrefix = databaseBackupParametersModel.BackupNamePrefix + databaseName +
         //                              databaseBackupParametersModel.BackupNameMiddlePart;
-        var databaseName = backupBaseName; //dbBackupParameters.BackupBaseName;
-        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(databaseName);
+        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(backupBaseName);
         //string backupFileNameSuffix = databaseBackupParametersModel.BackupFileExtension.AddNeedLeadPart(".");
         var backupFileNameSuffix = _databaseBackupParameters.GetSuffix();
         var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(_databaseBackupParameters.DateMask) +
                              backupFileNameSuffix;
 
         var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
-            _databaseServerConnectionDataDomain.BackupFolderName;
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Backup;
+
+        if (string.IsNullOrWhiteSpace(backupFolder))
+            return new[] { DbClientErrors.NoBackupFolder };
 
         var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
 
         //ბექაპის ლოგიკური ფაილის სახელის მომზადება
-        var backupName = databaseName;
+        var backupName = backupBaseName;
         if (_databaseBackupParameters.BackupType == EBackupType.Full)
             backupName += "-full";
 
         //ბექაპის პროცესის გაშვება
-        var backupDatabaseResult = await dc.BackupDatabase(databaseName, backupFileFullName, backupName,
+        var backupDatabaseResult = await dc.BackupDatabase(backupBaseName, backupFileFullName, backupName,
             EBackupType.Full, _databaseBackupParameters.Compress, cancellationToken);
 
         if (backupDatabaseResult.IsSome)
@@ -101,7 +104,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         if (_databaseBackupParameters.Verify)
         {
-            var verifyBackupResult = await dc.VerifyBackup(databaseName, backupFileFullName, cancellationToken);
+            var verifyBackupResult = await dc.VerifyBackup(backupBaseName, backupFileFullName, cancellationToken);
             if (verifyBackupResult.IsSome)
                 return (Err[])verifyBackupResult;
         }
@@ -258,10 +261,15 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (hostPlatformName == "Linux")
             dirSeparator = "/";
 
+        var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Backup;
+
+        if (string.IsNullOrWhiteSpace(backupFolder))
+            return new[] { DbClientErrors.NoRestoreFrom };
 
         var backupFileFullName =
             (string.IsNullOrWhiteSpace(restoreFromFolderPath) || !Directory.Exists(restoreFromFolderPath)
-                ? _databaseServerConnectionDataDomain.BackupFolderName
+                ? backupFolder
                 : restoreFromFolderPath).AddNeedLastPart(dirSeparator) + backupFileParameters.Name;
 
         var getRestoreFilesResult = await dc.GetRestoreFiles(backupFileFullName, cancellationToken);
@@ -276,10 +284,22 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         var files = getRestoreFilesResult.AsT0;
 
+        var dataFolder = //_databaseBackupParameters.destinationDbServerSideDataFolderPath ??
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Data;
+
+        if (string.IsNullOrWhiteSpace(dataFolder))
+            return new[] { DbClientErrors.NoDataFolder };
+
+        var dataLogFolder = //_databaseBackupParameters.destinationDbServerSideLogFolderPath ??
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].DataLog;
+
+        if (string.IsNullOrWhiteSpace(dataLogFolder))
+            return new[] { DbClientErrors.NoDataLogFolder };
+
+
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
-            /*destinationDbServerSideDataFolderPath ??*/ _databaseServerConnectionDataDomain.DataFolderName,
-            /*destinationDbServerSideLogFolderPath ?? */_databaseServerConnectionDataDomain.DataLogFolderName,
-            dirSeparator, cancellationToken);
+            /*destinationDbServerSideDataFolderPath ??*/ dataFolder,
+            /*destinationDbServerSideLogFolderPath ?? */dataLogFolder, dirSeparator, cancellationToken);
     }
 
     public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
@@ -296,32 +316,32 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             return null;
         }
 
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "BackupFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-            logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
+        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
+        //{
+        //    if (messagesDataManager is not null)
+        //        await messagesDataManager.SendMessage(userName,
+        //            "BackupFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
+        //    logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
+        //    return null;
+        //}
 
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "DataFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-            logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
+        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
+        //{
+        //    if (messagesDataManager is not null)
+        //        await messagesDataManager.SendMessage(userName,
+        //            "DataFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
+        //    logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
+        //    return null;
+        //}
 
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "DataLogFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-            logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
+        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
+        //{
+        //    if (messagesDataManager is not null)
+        //        await messagesDataManager.SendMessage(userName,
+        //            "DataLogFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
+        //    logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
+        //    return null;
+        //}
 
         var dbAuthSettings = DbAuthSettingsCreator.Create(databaseServerConnectionData.WindowsNtIntegratedSecurity,
             databaseServerConnectionData.ServerUser, databaseServerConnectionData.ServerPass);
@@ -329,11 +349,9 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (dbAuthSettings is null)
             return null;
 
-
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
             databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress, dbAuthSettings,
-            databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.BackupFolderName,
-            databaseServerConnectionData.DataFolderName, databaseServerConnectionData.DataLogFolderName);
+            databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.DatabaseFoldersSets);
 
         return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
             databaseBackupParameters, messagesDataManager, userName);
