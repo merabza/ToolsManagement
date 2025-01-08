@@ -24,8 +24,8 @@
         <ProjectReference Include="..\..\DatabaseTools\DbToolsFabric\DbToolsFabric.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
-        <ProjectReference
-            Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentShared\LibWebAgentData\LibWebAgentData.csproj" />
         <ProjectReference Include="..\ApiClientsManagement\ApiClientsManagement.csproj" />
     </ItemGroup>
 
