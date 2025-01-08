@@ -10,8 +10,6 @@ using DbTools.Models;
 using DbToolsFabric;
 using LanguageExt;
 using LibDatabaseParameters;
-using LibWebAgentData;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared;
@@ -20,9 +18,8 @@ using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public sealed class LocalDatabaseManager : IDatabaseManager
+public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
-    private readonly IConfiguration _config;
     private readonly DatabaseBackupParametersDomain _databaseBackupParameters;
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly ILogger _logger;
@@ -30,12 +27,11 @@ public sealed class LocalDatabaseManager : IDatabaseManager
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    private LocalDatabaseManager(IConfiguration config, ILogger logger, bool useConsole,
+    private SqlServerDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
         DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
         string? userName)
     {
-        _config = config;
         _logger = logger;
         _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
@@ -214,12 +210,12 @@ public sealed class LocalDatabaseManager : IDatabaseManager
     public async Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
         CancellationToken cancellationToken)
     {
-        var appSettings = AppSettings.Create(_config);
+        //var appSettings = AppSettings.Create(_config);
 
-        if (appSettings is null)
-            return new Dictionary<string, DatabaseFoldersSet>();
+        //if (appSettings is null)
+        //    return new Dictionary<string, DatabaseFoldersSet>();
 
-        var databaseServerConnections = new DatabaseServerConnections(appSettings.DatabaseServerConnections);
+        //var databaseServerConnections = new DatabaseServerConnections(appSettings.DatabaseServerConnections);
         //var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
 
         //if (getDatabaseClientResult.IsT1)
@@ -324,7 +320,7 @@ public sealed class LocalDatabaseManager : IDatabaseManager
             /*destinationDbServerSideLogFolderPath ?? */dataLogFolder, dirSeparator, cancellationToken);
     }
 
-    public static async ValueTask<LocalDatabaseManager?> Create(IConfiguration config, ILogger logger, bool useConsole,
+    public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
         DatabaseServerConnectionData databaseServerConnectionData,
         DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken = default)
@@ -375,7 +371,7 @@ public sealed class LocalDatabaseManager : IDatabaseManager
             databaseServerConnectionData.DataProvider, databaseServerConnectionData.ServerAddress, dbAuthSettings,
             databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.DatabaseFoldersSets);
 
-        return new LocalDatabaseManager(config, logger, useConsole, databaseServerConnectionDataDomain,
+        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
             databaseBackupParameters, messagesDataManager, userName);
     }
 
