@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
+using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared.Errors;
@@ -102,6 +103,12 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
+    }
+
+    public Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
+        CancellationToken cancellationToken)
+    {
+        return _databaseApiClient.GetDatabaseFoldersSets(cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება

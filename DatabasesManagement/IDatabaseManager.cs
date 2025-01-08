@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using LanguageExt;
+using LibDatabaseParameters;
 using OneOf;
 using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts.V1.Responses;
@@ -58,4 +59,7 @@ public interface IDatabaseManager
 
     Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
         CancellationToken cancellationToken = default);
+
+    Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
+        CancellationToken cancellationToken);
 }

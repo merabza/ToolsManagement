@@ -207,6 +207,18 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.SetDefaultFolders(defBackupFolder, defDataFolder, defLogFolder, cancellationToken);
     }
 
+    public async Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
+        CancellationToken cancellationToken)
+    {
+        //var getDatabaseClientResult = await GetDatabaseClient(null, cancellationToken);
+
+        //if (getDatabaseClientResult.IsT1)
+        //    return getDatabaseClientResult.AsT1;
+        //var dc = getDatabaseClientResult.AsT0;
+
+        return new Dictionary<string, DatabaseFoldersSet>();
+    }
+
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
     {
