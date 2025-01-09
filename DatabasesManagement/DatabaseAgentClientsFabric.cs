@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using ApiClientsManagement;
-using DbTools;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
@@ -112,13 +111,11 @@ public static class DatabaseAgentClientsFabric
         var destinationDbBackupParameters =
             DatabaseBackupParametersDomain.Create(databaseServerConnection.FullDbBackupParameters);
 
-        return databaseServerConnection.DataProvider switch
+        return databaseServerConnection.DatabaseServerProvider switch
         {
-            EDataProvider.None => null,
-            EDataProvider.Sql => await SqlServerDatabaseManager.Create(logger, useConsole, databaseServerConnection,
-                destinationDbBackupParameters, messagesDataManager, userName, cancellationToken),
-            EDataProvider.OleDb => null,
-            EDataProvider.SqLite => null,
+            EDatabaseServerProvider.SqlServer => await SqlServerDatabaseManager.Create(logger, useConsole,
+                databaseServerConnection, destinationDbBackupParameters, messagesDataManager, userName,
+                cancellationToken),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
