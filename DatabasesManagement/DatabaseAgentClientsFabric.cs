@@ -13,76 +13,97 @@ namespace DatabasesManagement;
 
 public static class DatabaseAgentClientsFabric
 {
+    //, string? apiClientName
     public static async ValueTask<IDatabaseManager?> CreateDatabaseManager(bool useConsole, ILogger logger,
-        IHttpClientFactory httpClientFactory, string? apiClientName, ApiClients apiClients,
-        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+        IHttpClientFactory httpClientFactory, ApiClients apiClients, string? databaseConnectionName,
+        DatabaseServerConnections databaseServerConnections, IMessagesDataManager? messagesDataManager,
+        string? userName, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(apiClientName) && string.IsNullOrWhiteSpace(databaseConnectionName))
+        if (string.IsNullOrWhiteSpace(databaseConnectionName))
         {
             if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient",
+                await messagesDataManager.SendMessage(userName, "databaseConnectionName is not specified",
                     cancellationToken);
-            logger.LogError(
-                "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient");
+            logger.LogError("databaseConnectionName is not specified");
             return null;
         }
 
-        if (!string.IsNullOrWhiteSpace(apiClientName) && !string.IsNullOrWhiteSpace(databaseConnectionName))
+        var databaseServerConnection =
+            databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
+
+        if (databaseServerConnection is null)
         {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient",
-                    cancellationToken);
-            logger.LogError(
-                "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient");
+            StShared.WriteErrorLine($"Database server connection with name {databaseConnectionName} does not exists",
+                true, logger);
             return null;
         }
 
-        if (!string.IsNullOrWhiteSpace(apiClientName))
-            return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
-                messagesDataManager, userName, useConsole, cancellationToken);
+
+        //if (string.IsNullOrWhiteSpace(apiClientName) && string.IsNullOrWhiteSpace(databaseConnectionName))
+        //{
+        //    if (messagesDataManager is not null)
+        //        await messagesDataManager.SendMessage(userName,
+        //            "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient",
+        //            cancellationToken);
+        //    logger.LogError(
+        //        "Both apiClientName and databaseConnectionName are null, cannot create DatabaseAgentClient");
+        //    return null;
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(apiClientName) && !string.IsNullOrWhiteSpace(databaseConnectionName))
+        //{
+        //    if (messagesDataManager is not null)
+        //        await messagesDataManager.SendMessage(userName,
+        //            "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient",
+        //            cancellationToken);
+        //    logger.LogError(
+        //        "Both apiClientName and databaseConnectionName are specified. must be only one of them, cannot create DatabaseAgentClient");
+        //    return null;
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(apiClientName))
+        //    return await CreateDatabaseManager(logger, httpClientFactory, apiClientName, apiClients,
+        //        messagesDataManager, userName, useConsole, cancellationToken);
         if (!string.IsNullOrWhiteSpace(databaseConnectionName))
             return await CreateDatabaseManager(useConsole, logger, databaseConnectionName, databaseServerConnections,
                 messagesDataManager, userName, cancellationToken);
         return null;
     }
 
-    private static async ValueTask<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
-        IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
-        IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
-        CancellationToken cancellationToken = default)
-    {
-        var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
+    //private static async ValueTask<IDatabaseManager?> CreateDatabaseManager(ILogger logger,
+    //    IHttpClientFactory httpClientFactory, string apiClientName, ApiClients apiClients,
+    //    IMessagesDataManager? messagesDataManager, string? userName, bool useConsole,
+    //    CancellationToken cancellationToken = default)
+    //{
+    //    var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
 
-        if (apiClientSettings is null)
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "DatabaseApiClient settings is null",
-                    cancellationToken);
-            logger.LogError("cannot create DatabaseApiClient");
-            return null;
-        }
+    //    if (apiClientSettings is null)
+    //    {
+    //        if (messagesDataManager is not null)
+    //            await messagesDataManager.SendMessage(userName, "DatabaseApiClient settings is null",
+    //                cancellationToken);
+    //        logger.LogError("cannot create DatabaseApiClient");
+    //        return null;
+    //    }
 
-        if (string.IsNullOrWhiteSpace(apiClientSettings.Server))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName, "Server name is empty, cannot create DatabaseApiClient",
-                    cancellationToken);
-            logger.LogError("cannot create DatabaseApiClient");
-            return null;
-        }
+    //    if (string.IsNullOrWhiteSpace(apiClientSettings.Server))
+    //    {
+    //        if (messagesDataManager is not null)
+    //            await messagesDataManager.SendMessage(userName, "Server name is empty, cannot create DatabaseApiClient",
+    //                cancellationToken);
+    //        logger.LogError("cannot create DatabaseApiClient");
+    //        return null;
+    //    }
 
 
-        var databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server,
-            apiClientSettings.ApiKey, useConsole);
+    //    var databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettings.Server,
+    //        apiClientSettings.ApiKey, useConsole);
 
-        return new RemoteDatabaseManager(logger, databaseApiClient);
+    //    return new RemoteDatabaseManager(logger, databaseApiClient);
 
-        //return await DatabaseApiClient.Create(logger, httpClientFactory, apiClientSettings, messagesDataManager,
-        //    userName, cancellationToken);
-    }
+    //    //return await DatabaseApiClient.Create(logger, httpClientFactory, apiClientSettings, messagesDataManager,
+    //    //    userName, cancellationToken);
+    //}
 
     //public იყენებს ApAgent
     // ReSharper disable once MemberCanBePrivate.Global
@@ -113,7 +134,7 @@ public static class DatabaseAgentClientsFabric
 
         return databaseServerConnection.DatabaseServerProvider switch
         {
-            EDatabaseServerProvider.SqlServer => await SqlServerDatabaseManager.Create(logger, useConsole,
+            EDatabaseProvider.SqlServer => await SqlServerDatabaseManager.Create(logger, useConsole,
                 databaseServerConnection, destinationDbBackupParameters, messagesDataManager, userName,
                 cancellationToken),
             _ => throw new ArgumentOutOfRangeException()

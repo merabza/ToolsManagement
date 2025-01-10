@@ -104,6 +104,11 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         throw new NotImplementedException();
     }
 
+    public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
+    {
+        return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
+    }
+
     public Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
         CancellationToken cancellationToken)
     {
