@@ -27,7 +27,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    private SqlServerDatabaseManager(ILogger logger, bool useConsole,
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public SqlServerDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
         DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
         string? userName)
@@ -119,7 +120,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
+        var getDatabaseClientResult =
+            await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -173,7 +175,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
-        var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
+        var getDatabaseClientResult =
+            await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
             return getDatabaseClientResult.AsT1;
@@ -227,7 +230,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         //    return getDatabaseClientResult.AsT1;
         //var dc = getDatabaseClientResult.AsT0;
 
-        return await Task.FromResult( _databaseServerConnectionDataDomain.DatabaseFoldersSets);
+        return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets);
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
@@ -323,62 +326,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
             /*destinationDbServerSideDataFolderPath ??*/ dataFolder,
             /*destinationDbServerSideLogFolderPath ?? */dataLogFolder, dirSeparator, cancellationToken);
-    }
-
-    public static async ValueTask<SqlServerDatabaseManager?> Create(ILogger logger, bool useConsole,
-        DatabaseServerConnectionData databaseServerConnectionData,
-        DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
-        {
-            if (messagesDataManager is not null)
-                await messagesDataManager.SendMessage(userName,
-                    "ServerAddress is empty, Cannot create SqlServerManagementClient", cancellationToken);
-            logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
-            return null;
-        }
-
-        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.BackupFolderName))
-        //{
-        //    if (messagesDataManager is not null)
-        //        await messagesDataManager.SendMessage(userName,
-        //            "BackupFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-        //    logger.LogError("BackupFolderName is empty, Cannot create SqlServerManagementClient");
-        //    return null;
-        //}
-
-        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataFolderName))
-        //{
-        //    if (messagesDataManager is not null)
-        //        await messagesDataManager.SendMessage(userName,
-        //            "DataFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-        //    logger.LogError("DataFolderName is empty, Cannot create SqlServerManagementClient");
-        //    return null;
-        //}
-
-        //if (string.IsNullOrWhiteSpace(databaseServerConnectionData.DataLogFolderName))
-        //{
-        //    if (messagesDataManager is not null)
-        //        await messagesDataManager.SendMessage(userName,
-        //            "DataLogFolderName is empty, Cannot create SqlServerManagementClient", cancellationToken);
-        //    logger.LogError("DataLogFolderName is empty, Cannot create SqlServerManagementClient");
-        //    return null;
-        //}
-
-        var dbAuthSettings = DbAuthSettingsCreator.Create(databaseServerConnectionData.WindowsNtIntegratedSecurity,
-            databaseServerConnectionData.User, databaseServerConnectionData.Password);
-
-        if (dbAuthSettings is null)
-            return null;
-
-        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
-            databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,
-            dbAuthSettings, databaseServerConnectionData.TrustServerCertificate,
-            databaseServerConnectionData.DatabaseFoldersSets);
-
-        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
-            databaseBackupParameters, messagesDataManager, userName);
     }
 
     private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(EDatabaseProvider dataProvider,
