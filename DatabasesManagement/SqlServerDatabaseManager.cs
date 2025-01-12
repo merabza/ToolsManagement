@@ -233,6 +233,28 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets);
     }
 
+    //public Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
+    //{
+
+    //    var dc = DbClientFabric.GetDbClient(_logger, true, EDatabaseProvider.SqlServer,
+    //        _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
+    //        _databaseServerConnectionDataDomain.TrustServerCertificate, ProgramAttributes.Instance.AppName);
+
+    //    if (dc is null)
+    //    {
+    //        StShared.WriteErrorLine("Database Client is not created", true);
+    //        return false;
+    //    }
+
+    //    //var testConnectionResult = dc.TestConnection(false, CancellationToken.None).Result;
+    //    //if (testConnectionResult.IsSome)
+    //    //{
+    //    //    Err.PrintErrorsOnConsole((Err[])testConnectionResult);
+    //    //    return false;
+    //    //}
+
+    //}
+
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
     {
