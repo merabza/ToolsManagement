@@ -54,68 +54,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
-    //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
-    //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
-        CancellationToken cancellationToken = default)
-    {
-        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
-        var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
-
-        if (getDatabaseClientResult.IsT1)
-            return getDatabaseClientResult.AsT1;
-        var dc = getDatabaseClientResult.AsT0;
-
-        var hostPlatformResult = await dc.HostPlatform(cancellationToken);
-        if (hostPlatformResult.IsT1)
-            return hostPlatformResult.AsT1;
-        var hostPlatformName = hostPlatformResult.AsT0;
-        var dirSeparator = "\\";
-        if (hostPlatformName == "Linux")
-            dirSeparator = "/";
-
-        //string backupFileNamePrefix = databaseBackupParametersModel.BackupNamePrefix + databaseName +
-        //                              databaseBackupParametersModel.BackupNameMiddlePart;
-        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(backupBaseName);
-        //string backupFileNameSuffix = databaseBackupParametersModel.BackupFileExtension.AddNeedLeadPart(".");
-        var backupFileNameSuffix = _databaseBackupParameters.GetSuffix();
-        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(_databaseBackupParameters.DateMask) +
-                             backupFileNameSuffix;
-
-        var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
-            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Backup;
-
-        if (string.IsNullOrWhiteSpace(backupFolder))
-            return new[] { DbClientErrors.NoBackupFolder };
-
-        var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
-
-        //ბექაპის ლოგიკური ფაილის სახელის მომზადება
-        var backupName = backupBaseName;
-        if (_databaseBackupParameters.BackupType == EBackupType.Full)
-            backupName += "-full";
-
-        //ბექაპის პროცესის გაშვება
-        var backupDatabaseResult = await dc.BackupDatabase(backupBaseName, backupFileFullName, backupName,
-            EBackupType.Full, _databaseBackupParameters.Compress, cancellationToken);
-
-        if (backupDatabaseResult.IsSome)
-            //return await Task.FromResult<BackupFileParameters?>(null);
-            return (Err[])backupDatabaseResult;
-
-        if (_databaseBackupParameters.Verify)
-        {
-            var verifyBackupResult = await dc.VerifyBackup(backupBaseName, backupFileFullName, cancellationToken);
-            if (verifyBackupResult.IsSome)
-                return (Err[])verifyBackupResult;
-        }
-
-        BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
-            _databaseBackupParameters.DateMask);
-
-        return backupFileParameters;
-    }
-
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
     public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
@@ -282,8 +220,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
-        string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
+        string databaseName, string dbServerFoldersSetName, string? restoreFromFolderPath = null,
+        CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
@@ -309,8 +247,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (hostPlatformName == "Linux")
             dirSeparator = "/";
 
-        var backupFolder = //_databaseBackupParameters.DbServerSideBackupPath ??
-            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Backup;
+        var backupFolder = _databaseServerConnectionDataDomain.DatabaseFoldersSets[dbServerFoldersSetName].Backup;
 
         if (string.IsNullOrWhiteSpace(backupFolder))
             return new[] { DbClientErrors.NoRestoreFrom };
@@ -348,6 +285,64 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
             /*destinationDbServerSideDataFolderPath ??*/ dataFolder,
             /*destinationDbServerSideLogFolderPath ?? */dataLogFolder, dirSeparator, cancellationToken);
+    }
+
+    //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
+    //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
+    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
+        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
+    {
+        //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
+        var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        var hostPlatformResult = await dc.HostPlatform(cancellationToken);
+        if (hostPlatformResult.IsT1)
+            return hostPlatformResult.AsT1;
+        var hostPlatformName = hostPlatformResult.AsT0;
+        var dirSeparator = "\\";
+        if (hostPlatformName == "Linux")
+            dirSeparator = "/";
+
+        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(backupBaseName);
+        var backupFileNameSuffix = _databaseBackupParameters.GetSuffix();
+        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(_databaseBackupParameters.DateMask) +
+                             backupFileNameSuffix;
+
+        var backupFolder = _databaseServerConnectionDataDomain.DatabaseFoldersSets[dbServerFoldersSetName].Backup;
+
+        if (string.IsNullOrWhiteSpace(backupFolder))
+            return new[] { DbClientErrors.NoBackupFolder };
+
+        var backupFileFullName = backupFolder.AddNeedLastPart(dirSeparator) + backupFileName;
+
+        //ბექაპის ლოგიკური ფაილის სახელის მომზადება
+        var backupName = backupBaseName;
+        if (_databaseBackupParameters.BackupType == EBackupType.Full)
+            backupName += "-full";
+
+        //ბექაპის პროცესის გაშვება
+        var backupDatabaseResult = await dc.BackupDatabase(backupBaseName, backupFileFullName, backupName,
+            EBackupType.Full, _databaseBackupParameters.Compress, cancellationToken);
+
+        if (backupDatabaseResult.IsSome)
+            //return await Task.FromResult<BackupFileParameters?>(null);
+            return (Err[])backupDatabaseResult;
+
+        if (_databaseBackupParameters.Verify)
+        {
+            var verifyBackupResult = await dc.VerifyBackup(backupBaseName, backupFileFullName, cancellationToken);
+            if (verifyBackupResult.IsSome)
+                return (Err[])verifyBackupResult;
+        }
+
+        BackupFileParameters backupFileParameters = new(backupFileName, backupFileNamePrefix, backupFileNameSuffix,
+            _databaseBackupParameters.DateMask);
+
+        return backupFileParameters;
     }
 
     private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(EDatabaseProvider dataProvider,

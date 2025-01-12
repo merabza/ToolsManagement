@@ -13,7 +13,7 @@ public interface IDatabaseManager
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
+    ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
@@ -27,9 +27,9 @@ public interface IDatabaseManager
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
-    Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
-        string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default);
+    Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
+        string dbServerFoldersSetName, string? restoreFromFolderPath = null,
+        CancellationToken cancellationToken = default);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
     ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default);

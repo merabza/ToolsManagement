@@ -28,7 +28,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
     public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
-        CancellationToken cancellationToken = default)
+        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
             return await _databaseApiClient.CreateBackup(backupBaseName, cancellationToken);
@@ -52,15 +52,13 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        //string? destinationDbServerSideDataFolderPath, string? destinationDbServerSideLogFolderPath,
-        string databaseName, string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
+    public Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
+        string dbServerFoldersSetName, string? restoreFromFolderPath = null,
+        CancellationToken cancellationToken = default)
     {
         return _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
-            backupFileParameters.Name, backupFileParameters.DateMask,
-            //destinationDbServerSideDataFolderPath,
-            //destinationDbServerSideLogFolderPath, 
-            databaseName, cancellationToken);
+            backupFileParameters.Name, backupFileParameters.DateMask, databaseName, dbServerFoldersSetName,
+            cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
