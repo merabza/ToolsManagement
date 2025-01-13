@@ -41,7 +41,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     public string? AppSettingsVersion { get; private set; }
 
-    protected override async ValueTask<bool> RunAction(CancellationToken cancellationToken = default)
+    protected override async Task<bool> RunAction(CancellationToken cancellationToken = default)
     {
         LatestParametersFileContent = await GetParametersFileBody(cancellationToken);
         if (string.IsNullOrWhiteSpace(LatestParametersFileContent))
@@ -64,8 +64,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         await LogInfoAndSendMessage("Check files on exchange storage for Prefix {0}, Date Mask {1} and extension {2}",
             prefix, _dateMask, _parametersFileExtension, cancellationToken);
 
-        var lastParametersFileInfo =
-            exchangeFileManager?.GetLastFileInfo(prefix, _dateMask, _parametersFileExtension);
+        var lastParametersFileInfo = exchangeFileManager?.GetLastFileInfo(prefix, _dateMask, _parametersFileExtension);
         if (lastParametersFileInfo != null)
             //მოვქაჩოთ არჩეული პარამეტრების ფაილის შიგთავსი
             return exchangeFileManager?.GetTextFileContent(lastParametersFileInfo.FileName);
