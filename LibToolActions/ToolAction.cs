@@ -43,7 +43,7 @@ public /*open*/ class ToolAction : MessageLogger
             await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", UseConsole,
                 cancellationToken);
 
-            //StShared.Pause();
+            StShared.Pause();
 
             return success;
         }

@@ -270,13 +270,13 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         var files = getRestoreFilesResult.AsT0;
 
         var dataFolder = //_databaseBackupParameters.destinationDbServerSideDataFolderPath ??
-            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].Data;
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[dbServerFoldersSetName].Data;
 
         if (string.IsNullOrWhiteSpace(dataFolder))
             return new[] { DbClientErrors.NoDataFolder };
 
         var dataLogFolder = //_databaseBackupParameters.destinationDbServerSideLogFolderPath ??
-            _databaseServerConnectionDataDomain.DatabaseFoldersSets[DatabaseServerConnectionData.DefaultName].DataLog;
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets[dbServerFoldersSetName].DataLog;
 
         if (string.IsNullOrWhiteSpace(dataLogFolder))
             return new[] { DbClientErrors.NoDataLogFolder };
