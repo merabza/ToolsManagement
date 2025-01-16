@@ -148,10 +148,10 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.SetDefaultFolders(defBackupFolder, defDataFolder, defLogFolder, cancellationToken);
     }
 
-    public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    //public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
+    //{
+    //    throw new NotImplementedException();
+    //}
 
     public async Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
         CancellationToken cancellationToken)

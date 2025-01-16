@@ -15,14 +15,14 @@ namespace DatabasesManagement;
 
 public sealed class RemoteDatabaseManager : IDatabaseManager
 {
-    private readonly DatabaseApiClient _databaseApiClient;
+    public DatabaseApiClient ApiClient { get; }
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public RemoteDatabaseManager(ILogger logger, DatabaseApiClient databaseApiClient)
     {
         _logger = logger;
-        _databaseApiClient = databaseApiClient;
+        ApiClient = databaseApiClient;
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
@@ -31,7 +31,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
-            return await _databaseApiClient.CreateBackup(backupBaseName, cancellationToken);
+            return await ApiClient.CreateBackup(backupBaseName, cancellationToken);
 
         _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
@@ -40,7 +40,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     public Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.GetDatabaseNames(cancellationToken);
+        return ApiClient.GetDatabaseNames(cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
@@ -48,7 +48,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //რომ არსებულის გადანახვა არ მოხდეს.
     public Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.IsDatabaseExists(databaseName, cancellationToken);
+        return ApiClient.IsDatabaseExists(databaseName, cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
@@ -56,7 +56,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         string dbServerFoldersSetName, string? restoreFromFolderPath = null,
         CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
+        return ApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
             backupFileParameters.Name, backupFileParameters.DateMask, databaseName, dbServerFoldersSetName,
             cancellationToken);
     }
@@ -65,7 +65,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     public ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.CheckRepairDatabase(databaseName, cancellationToken);
+        return ApiClient.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
     public Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
@@ -82,18 +82,18 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     public ValueTask<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.RecompileProcedures(databaseName, cancellationToken);
+        return ApiClient.RecompileProcedures(databaseName, cancellationToken);
     }
 
     public Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.TestConnection(databaseName, cancellationToken);
+        return ApiClient.TestConnection(databaseName, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
     public ValueTask<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.UpdateStatistics(databaseName, cancellationToken);
+        return ApiClient.UpdateStatistics(databaseName, cancellationToken);
     }
 
     public Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
@@ -102,21 +102,21 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         throw new NotImplementedException();
     }
 
-    public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
-    {
-        return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
-    }
+    //public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
+    //{
+    //    return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
+    //}
 
     public Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
         CancellationToken cancellationToken)
     {
-        return _databaseApiClient.GetDatabaseFoldersSets(cancellationToken);
+        return ApiClient.GetDatabaseFoldersSets(cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
     public ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
     {
-        return _databaseApiClient.ExecuteCommand(executeQueryCommand, databaseName, cancellationToken);
+        return ApiClient.ExecuteCommand(executeQueryCommand, databaseName, cancellationToken);
     }
 }
