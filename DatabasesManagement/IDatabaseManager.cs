@@ -63,4 +63,5 @@ public interface IDatabaseManager
 
     Task<OneOf<Dictionary<string, DatabaseFoldersSet>, Err[]>> GetDatabaseFoldersSets(
         CancellationToken cancellationToken);
+
 }
