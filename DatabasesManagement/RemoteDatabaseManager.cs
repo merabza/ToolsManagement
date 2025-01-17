@@ -15,7 +15,6 @@ namespace DatabasesManagement;
 
 public sealed class RemoteDatabaseManager : IDatabaseManager
 {
-    public DatabaseApiClient ApiClient { get; }
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
@@ -24,6 +23,8 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         _logger = logger;
         ApiClient = databaseApiClient;
     }
+
+    public DatabaseApiClient ApiClient { get; }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა

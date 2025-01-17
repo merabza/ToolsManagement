@@ -178,19 +178,17 @@ public /*open*/ class FileManager
         return sb.ToString();
     }
 
-    public BuFileInfo[] GetFilesByMask(int fileManagerId, MaskManager maskManager, string extension,
-        bool isOriginal)
+    public BuFileInfo[] GetFilesByMask(int fileManagerId, MaskManager maskManager, string extension, bool isOriginal)
     {
-        return GetFileNames(null, maskManager.GetFullMask(extension))
-            .Select(c => new BuFileInfo(c, isOriginal, maskManager.GetDateTimeByMask(c), fileManagerId)).ToArray();
+        return GetFileNames(null, maskManager.GetFullMask(extension)).Select(c =>
+            new BuFileInfo(c, isOriginal, maskManager.GetDateTimeByMask(c), fileManagerId)).ToArray();
     }
 
     public List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
     {
         var f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
 
-        var files = f
-            .Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
+        var files = f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
             .Where(w => w.FileDateTime != DateTime.MinValue).ToList();
 
         return files;
