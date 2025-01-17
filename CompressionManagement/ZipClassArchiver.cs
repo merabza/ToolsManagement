@@ -72,8 +72,7 @@ public sealed class ZipClassArchiver : Archiver
     {
         // ReSharper disable once using
         using var archive = ZipFile.OpenRead(archiveFileName);
-        var result =
-            archive.Entries.Where(currentEntry => !string.IsNullOrWhiteSpace(currentEntry.FullName));
+        var result = archive.Entries.Where(currentEntry => !string.IsNullOrWhiteSpace(currentEntry.FullName));
 
         foreach (var entry in result)
         {
