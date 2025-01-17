@@ -73,7 +73,8 @@ public static class DatabaseManagersFabric
         return new[] { DbToolsErrors.CreateOleDatabaseManagerIsNotImplemented };
     }
 
-    private static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(
+    //public იყენებს supportTools
+    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(
         ILogger logger, IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName,
         ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)

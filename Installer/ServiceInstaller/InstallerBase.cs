@@ -114,6 +114,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         var serviceEnvName = GetServiceEnvName(projectName, environmentName);
 
+        var stopResult = await Stop(serviceEnvName, cancellationToken);
         if (!string.IsNullOrWhiteSpace(serviceEnvName))
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
@@ -128,7 +129,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
             await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
-            var stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
                 return (Err[])stopResult;
         }
@@ -174,7 +174,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         if (!appSettingsFileDeletedSuccess)
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileCanNotBeDeleted(appSettingsFileFullPath),
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
 
         //შეიქმნას პარამეტრების ფაილი არსებულ ინფორმაციაზე დაყრდნობით
@@ -193,7 +193,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(projectName),
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     private async ValueTask<OneOf<string, IEnumerable<Err>>> CheckBeforeStartUpdate(string projectName,
