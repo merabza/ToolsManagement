@@ -1,9 +1,4 @@
-﻿using Installer.Errors;
-using LanguageExt;
-using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
-using OneOf;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -12,6 +7,11 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+using Installer.Errors;
+using LanguageExt;
+using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
+using OneOf;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 

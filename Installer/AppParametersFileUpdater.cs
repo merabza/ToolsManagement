@@ -1,12 +1,12 @@
-﻿using Installer.Domain;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Installer.Domain;
 using Installer.Errors;
 using Installer.ServiceInstaller;
 using LanguageExt;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 

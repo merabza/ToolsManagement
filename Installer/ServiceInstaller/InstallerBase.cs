@@ -1,10 +1,4 @@
-﻿using Installer.Domain;
-using Installer.Errors;
-using LanguageExt;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using OneOf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +6,12 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Installer.Domain;
+using Installer.Errors;
+using LanguageExt;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using OneOf;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 
@@ -133,10 +133,10 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 return (Err[])stopResult;
         }
         else if (IsProcessRunning(projectName))
-        //თუ სერვისი არ არის და პროგრამა მაინც გაშვებულია,
-        //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
-        //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
-        //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
+            //თუ სერვისი არ არის და პროგრამა მაინც გაშვებულია,
+            //ასეთ შემთხვევაში პარამეტრების ფაილს ვერ გავაახლებთ,
+            //რადგან გაშვებული პროგრამა ვერ მიხვდება, რომ ახალი პარამეტრები უნდა გამოიყენოს.
+            //ასეთ შემთხვევაში ჯერ უნდა გაჩერდეს პროგრამა და მერე უნდა განახლდეს პარამეტრები.
         {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.ProcessIsRunningAndCannotBeUpdated(projectName), cancellationToken);
