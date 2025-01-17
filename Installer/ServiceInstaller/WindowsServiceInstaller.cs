@@ -82,7 +82,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName,
+        CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
 
@@ -90,8 +91,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         // ReSharper disable once DisposableConstructor
         using var sc = new ServiceController(serviceEnvName);
 
-        if (sc.Status.Equals(ServiceControllerStatus.Stopped) ||
-            sc.Status.Equals(ServiceControllerStatus.StopPending))
+        if (sc.Status.Equals(ServiceControllerStatus.Stopped) || sc.Status.Equals(ServiceControllerStatus.StopPending))
             return null;
 
         await LogInfoAndSendMessage("Stopping the {0} service...", serviceEnvName, cancellationToken);
