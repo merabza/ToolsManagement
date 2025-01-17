@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Installer.Errors;
 using Installer.ServiceInstaller;
@@ -29,8 +30,8 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         _userName = userName;
     }
 
-    public async ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        CancellationToken cancellationToken = default)
+    public async ValueTask<Option<IEnumerable<Err>>> RemoveProjectAndService(string projectName, string environmentName,
+        bool isService, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
@@ -49,7 +50,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         return new[] { ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> StopService(string projectName, string environmentName,
+    public async ValueTask<Option<IEnumerable<Err>>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
@@ -62,7 +63,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             : new[] { ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> StartService(string projectName, string environmentName,
+    public async ValueTask<Option<IEnumerable<Err>>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
@@ -76,7 +77,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
             : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Option<IEnumerable<Err>>> RemoveProject(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი

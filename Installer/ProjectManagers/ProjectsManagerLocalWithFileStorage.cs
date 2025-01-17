@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
 using Installer.Errors;
@@ -34,7 +35,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         _useConsole = useConsole;
     }
 
-    public async ValueTask<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
+    public async ValueTask<Option<IEnumerable<Err>>> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
@@ -49,7 +50,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
+    public async ValueTask<OneOf<string, IEnumerable<Err>>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
@@ -60,14 +61,14 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
         if (applicationUpdaterCreateResult.IsT1)
-            return applicationUpdaterCreateResult.AsT1;
+            return (Err[])applicationUpdaterCreateResult.AsT1;
         var applicationUpdater = applicationUpdaterCreateResult.AsT0;
         if (applicationUpdater is null)
             return new[] { ProjectManagersErrors.ApplicationUpdaterDoesNotCreated(projectName, environmentName) };
         return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
+    public async ValueTask<OneOf<string, IEnumerable<Err>>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
@@ -79,7 +80,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
         if (applicationUpdaterCreateResult.IsT1)
-            return applicationUpdaterCreateResult.AsT1;
+            return (Err[])applicationUpdaterCreateResult.AsT1;
         var applicationUpdater = applicationUpdaterCreateResult.AsT0;
         var updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(projectName,
             environmentName, serviceUserName, appSettingsFileName, serviceDescriptionSignature, projectDescription,

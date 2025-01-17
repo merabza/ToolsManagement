@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
 using Installer.Errors;
@@ -69,16 +70,15 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         }
 
 
-        var applicationUpdaterParameters =
-            new AppParametersFileUpdaterParameters(fileStorageForUpload, parametersFileDateMask,
-                parametersFileExtension, filesUserName, filesUsersGroupName, installFolder);
+        var applicationUpdaterParameters = new AppParametersFileUpdaterParameters(fileStorageForUpload,
+            parametersFileDateMask, parametersFileExtension, filesUserName, filesUsersGroupName, installFolder);
 
         return new AppParametersFileUpdater(logger, useConsole, applicationUpdaterParameters, serviceInstaller,
             messagesDataManager, userName);
     }
 
 
-    public async Task<Option<Err[]>> UpdateParameters(string projectName, string environmentName,
+    public async Task<Option<IEnumerable<Err>>> UpdateParameters(string projectName, string environmentName,
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == ProgramAttributes.Instance.AppName)

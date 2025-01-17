@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Installer.Errors;
@@ -50,7 +51,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             $"--no-ask-password --no-block --quiet is-active {serviceEnvName}").IsNone;
     }
 
-    protected override Option<Err[]> RemoveService(string serviceEnvName)
+    protected override Option<IEnumerable<Err>> RemoveService(string serviceEnvName)
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
@@ -65,7 +66,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName,
+    protected override async ValueTask<Option<IEnumerable<Err>>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
         var stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
@@ -77,7 +78,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             : null;
     }
 
-    protected override async ValueTask<Option<Err[]>> StartService(string serviceEnvName,
+    protected override async ValueTask<Option<IEnumerable<Err>>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
         var startProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
@@ -89,7 +90,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             : null;
     }
 
-    protected override async ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
+    protected override async ValueTask<OneOf<bool, IEnumerable<Err>>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -100,7 +101,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             cancellationToken);
 
         if (generateServiceFileTextResult.IsT1)
-            return generateServiceFileTextResult.AsT1;
+            return (Err[])generateServiceFileTextResult.AsT1;
 
         var serviceFileText = generateServiceFileTextResult.AsT0;
 
@@ -109,9 +110,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return serviceFileText == existingServiceFileText;
     }
 
-    private async ValueTask<OneOf<string, Err[]>> GenerateServiceFileText(string projectName, string serviceDescription,
-        string installFolderPath, string serviceUserName, string dotnetRunner, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken = default)
+    private async ValueTask<OneOf<string, IEnumerable<Err>>> GenerateServiceFileText(string projectName,
+        string serviceDescription, string installFolderPath, string serviceUserName, string dotnetRunner,
+        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
         var checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsT1)
@@ -146,8 +147,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
     }
 
 
-    protected override async ValueTask<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
-        string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
+    protected override async ValueTask<Option<IEnumerable<Err>>> RegisterService(string projectName,
+        string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
         var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
@@ -156,12 +157,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
             installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature, projectDescription,
             cancellationToken);
         if (generateServiceFileTextResult.IsT1)
-            return generateServiceFileTextResult.AsT1;
+            return (Err[])generateServiceFileTextResult.AsT1;
         var serviceFileText = generateServiceFileTextResult.AsT0;
 
-        await LogInfoAndSendMessage("Create service file {0}", serviceConfigFileName,
-            cancellationToken);
-        await File.WriteAllTextAsync(serviceConfigFileName, (string?)serviceFileText, cancellationToken);
+        await LogInfoAndSendMessage("Create service file {0}", serviceConfigFileName, cancellationToken);
+        await File.WriteAllTextAsync(serviceConfigFileName, serviceFileText, cancellationToken);
 
         await LogInfoAndSendMessage("Enable service {0}", serviceEnvName, cancellationToken);
         var processResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
@@ -176,7 +176,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             cancellationToken);
     }
 
-    private OneOf<string, Err[]> CheckDotnetRunner(string? dotnetRunner)
+    private OneOf<string, IEnumerable<Err>> CheckDotnetRunner(string? dotnetRunner)
     {
         if (!string.IsNullOrWhiteSpace(dotnetRunner) && File.Exists(dotnetRunner))
             return dotnetRunner;
@@ -189,12 +189,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return new[] { LinuxServiceInstallerErrors.DotnetDetectError };
     }
 
-    protected override async ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
-        string? filesUsersGroupName, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Option<IEnumerable<Err>>> ChangeOneFileOwner(string filePath,
+        string? filesUserName, string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty,
-                cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
@@ -209,8 +208,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
 
-    protected override async ValueTask<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
-        string filesUsersGroupName, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Option<IEnumerable<Err>>> ChangeFolderOwner(string folderPath,
+        string filesUserName, string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LanguageExt;
 using SystemToolsShared.Errors;
@@ -16,20 +17,19 @@ public sealed class ProjectsManagerRemote : IProjectsManager
         _projectsApiClient = projectsApiClient;
     }
 
-    public ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
-        CancellationToken cancellationToken = default)
+    public ValueTask<Option<IEnumerable<Err>>> RemoveProjectAndService(string projectName, string environmentName,
+        bool isService, CancellationToken cancellationToken = default)
     {
-        return _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService,
-            cancellationToken);
+        return _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService, cancellationToken);
     }
 
-    public ValueTask<Option<Err[]>> StopService(string projectName, string environmentName,
+    public ValueTask<Option<IEnumerable<Err>>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.StopService(projectName, environmentName, cancellationToken);
     }
 
-    public ValueTask<Option<Err[]>> StartService(string projectName, string environmentName,
+    public ValueTask<Option<IEnumerable<Err>>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.StartService(projectName, environmentName, cancellationToken);
