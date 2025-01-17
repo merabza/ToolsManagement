@@ -40,7 +40,7 @@ public static class ProjectManagersErrors
     public static Err ProjectCanNotBeRemoved(string projectName)
     {
         return new Err
-            { ErrorCode = nameof(ProjectCanNotBeRemoved), ErrorMessage = $"Project {projectName} can not be removed" };
+        { ErrorCode = nameof(ProjectCanNotBeRemoved), ErrorMessage = $"Project {projectName} can not be removed" };
     }
 
     public static Err ApplicationUpdaterDoesNotCreated(string projectName, string environmentName)

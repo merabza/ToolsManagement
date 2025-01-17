@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using ApiClientsManagement;
+﻿using ApiClientsManagement;
 using DbTools;
 using DbTools.Errors;
 using LibApiClientParameters;
 using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts;
@@ -74,6 +74,7 @@ public static class DatabaseManagersFabric
     }
 
     //public იყენებს supportTools
+    // ReSharper disable once MemberCanBePrivate.Global
     public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(
         ILogger logger, IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName,
         ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName,

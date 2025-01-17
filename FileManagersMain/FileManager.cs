@@ -1,4 +1,9 @@
-﻿using System;
+﻿using ConnectTools;
+using LibFileParameters.Models;
+using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,11 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ConnectTools;
-using LibFileParameters.Models;
-using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Retry;
 using SystemToolsShared;
 
 namespace FileManagersMain;

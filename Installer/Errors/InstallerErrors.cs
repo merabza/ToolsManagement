@@ -11,13 +11,13 @@ public static class InstallerErrors
     };
 
     public static readonly Err TheServiceWasNotRemoved = new()
-        { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
+    { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
 
     public static readonly Err TheServiceWasNotStopped = new()
-        { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
+    { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
 
     public static readonly Err TheServiceWasNotStarted = new()
-        { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
+    { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
 
     public static Err ProjectArchiveFileWasNotDownloaded => new()
     {

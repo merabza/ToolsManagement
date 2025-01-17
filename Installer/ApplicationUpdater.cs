@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using FileManagersMain;
+﻿using FileManagersMain;
 using Installer.Domain;
 using Installer.Errors;
 using Installer.ServiceInstaller;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
 

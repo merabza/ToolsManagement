@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Installer.ToolActions;
+﻿using Installer.ToolActions;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using SystemToolsShared;
 
 namespace Installer;
