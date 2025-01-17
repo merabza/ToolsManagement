@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DatabasesManagement.Errors;
@@ -154,7 +155,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //    throw new NotImplementedException();
     //}
 
-    public async Task<OneOf<Dictionary<string, DatabaseFoldersSet>, IEnumerable<Err>>> GetDatabaseFoldersSets(
+    public async Task<OneOf<List<string>, IEnumerable<Err>>> GetDatabaseFoldersSetNames(
         CancellationToken cancellationToken)
     {
         //var appSettings = AppSettings.Create(_config);
@@ -169,7 +170,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         //    return getDatabaseClientResult.AsT1;
         //var dc = getDatabaseClientResult.AsT0;
 
-        return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets);
+        return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets.Keys.ToList());
     }
 
     //public Task<OneOf<DbServerInfo, IEnumerable<Err>>> GetDbServerInfo(CancellationToken cancellationToken = default)

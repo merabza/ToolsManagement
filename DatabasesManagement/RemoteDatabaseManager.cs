@@ -113,10 +113,9 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //    return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
     //}
 
-    public Task<OneOf<Dictionary<string, DatabaseFoldersSet>, IEnumerable<Err>>> GetDatabaseFoldersSets(
-        CancellationToken cancellationToken)
+    public Task<OneOf<List<string>, IEnumerable<Err>>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
     {
-        return ApiClient.GetDatabaseFoldersSets(cancellationToken);
+        return ApiClient.GetDatabaseFoldersSetNames(cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
