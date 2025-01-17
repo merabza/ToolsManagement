@@ -36,8 +36,7 @@ public sealed class RarArchiver : Archiver
             //თუ გამორიცხვების რაოდენობა ცოტაა 3-მდე, მაშინ გამოვიყენოთ -X<file> გადამრთველი
             //if (Excludes.Length <= 10)
             //{
-            programArguments =
-                excludes.Aggregate(programArguments, (current, exclude) => current + " -X" + exclude);
+            programArguments = excludes.Aggregate(programArguments, (current, exclude) => current + " -X" + exclude);
         //}
         //else
         //{
@@ -48,8 +47,7 @@ public sealed class RarArchiver : Archiver
 
         programArguments += " \"" + archiveFileName + "\"";
 
-        programArguments =
-            sources.Aggregate(programArguments, (current, source) => current + " \"" + source + "\"");
+        programArguments = sources.Aggregate(programArguments, (current, source) => current + " \"" + source + "\"");
 
         return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments).IsNone;
 

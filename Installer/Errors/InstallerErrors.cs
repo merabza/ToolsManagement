@@ -11,56 +11,55 @@ public static class InstallerErrors
     };
 
     public static readonly Err TheServiceWasNotRemoved = new()
-        { ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed" };
+    {
+        ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed"
+    };
 
     public static readonly Err TheServiceWasNotStopped = new()
-        { ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped" };
+    {
+        ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped"
+    };
 
     public static readonly Err TheServiceWasNotStarted = new()
-        { ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started" };
-
-    public static Err ProjectArchiveFileWasNotDownloaded => new()
     {
-        ErrorCode = nameof(ProjectArchiveFileWasNotDownloaded),
-        ErrorMessage = "Project archive file not downloaded"
+        ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started"
     };
 
-    public static Err ProjectArchiveFilesNotFoundOnExchangeStorage => new()
-    {
-        ErrorCode = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
-        ErrorMessage = "Project archive files not found on exchange storage"
-    };
+    public static Err ProjectArchiveFileWasNotDownloaded =>
+        new()
+        {
+            ErrorCode = nameof(ProjectArchiveFileWasNotDownloaded),
+            ErrorMessage = "Project archive file not downloaded"
+        };
 
-    public static Err CannotUpdateSelf => new()
-    {
-        ErrorCode = nameof(CannotUpdateSelf),
-        ErrorMessage = "Cannot update self"
-    };
+    public static Err ProjectArchiveFilesNotFoundOnExchangeStorage =>
+        new()
+        {
+            ErrorCode = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
+            ErrorMessage = "Project archive files not found on exchange storage"
+        };
 
-    public static Err ExchangeFileManagerIsNull => new()
-    {
-        ErrorCode = nameof(ExchangeFileManagerIsNull),
-        ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
-    };
+    public static Err CannotUpdateSelf =>
+        new() { ErrorCode = nameof(CannotUpdateSelf), ErrorMessage = "Cannot update self" };
 
-    public static Err FileNameIsEmpty => new()
-    {
-        ErrorCode = nameof(FileNameIsEmpty),
-        ErrorMessage = "File name is empty"
-    };
+    public static Err ExchangeFileManagerIsNull =>
+        new()
+        {
+            ErrorCode = nameof(ExchangeFileManagerIsNull),
+            ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
+        };
 
-    public static Err FolderNameIsEmpty => new()
-    {
-        ErrorCode = nameof(FolderNameIsEmpty),
-        ErrorMessage = "Folder name is empty"
-    };
+    public static Err FileNameIsEmpty =>
+        new() { ErrorCode = nameof(FileNameIsEmpty), ErrorMessage = "File name is empty" };
+
+    public static Err FolderNameIsEmpty =>
+        new() { ErrorCode = nameof(FolderNameIsEmpty), ErrorMessage = "Folder name is empty" };
 
     public static Err CannotUpdateProject(string projectName, string environmentName)
     {
         return new Err
         {
-            ErrorCode = nameof(CannotUpdateProject),
-            ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
+            ErrorCode = nameof(CannotUpdateProject), ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
         };
     }
 
@@ -75,28 +74,19 @@ public static class InstallerErrors
 
     public static Err FileCanNotBeDeleted(string fileName)
     {
-        return new Err
-        {
-            ErrorCode = nameof(FileCanNotBeDeleted),
-            ErrorMessage = $"File {fileName} can not Deleted"
-        };
+        return new Err { ErrorCode = nameof(FileCanNotBeDeleted), ErrorMessage = $"File {fileName} can not Deleted" };
     }
 
     public static Err FileIsNotExists(string fileName)
     {
-        return new Err
-        {
-            ErrorCode = nameof(FileIsNotExists),
-            ErrorMessage = $"File {fileName} is not exists"
-        };
+        return new Err { ErrorCode = nameof(FileIsNotExists), ErrorMessage = $"File {fileName} is not exists" };
     }
 
     public static Err FileOwnerCanNotBeChanged(string fileName)
     {
         return new Err
         {
-            ErrorCode = nameof(FileOwnerCanNotBeChanged),
-            ErrorMessage = $"File {fileName} owner can not be changed"
+            ErrorCode = nameof(FileOwnerCanNotBeChanged), ErrorMessage = $"File {fileName} owner can not be changed"
         };
     }
 
@@ -104,18 +94,13 @@ public static class InstallerErrors
     {
         return new Err
         {
-            ErrorCode = nameof(FileCanNotBeDeleted),
-            ErrorMessage = $"Folder {folderName} can not be Deleted"
+            ErrorCode = nameof(FileCanNotBeDeleted), ErrorMessage = $"Folder {folderName} can not be Deleted"
         };
     }
 
     public static Err FolderIsNotExists(string folderName)
     {
-        return new Err
-        {
-            ErrorCode = nameof(FolderIsNotExists),
-            ErrorMessage = $"File {folderName} is not exists"
-        };
+        return new Err { ErrorCode = nameof(FolderIsNotExists), ErrorMessage = $"File {folderName} is not exists" };
     }
 
     public static Err FolderOwnerCanNotBeChanged(string folderName)

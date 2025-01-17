@@ -60,8 +60,8 @@ public /*open*/ class FolderProcessor
             var reloadFolders = true;
             while (reloadFolders)
             {
-                var folderNames = FileManager.GetFolderNames(afterRootPath, null)
-                    .Where(x => !x.StartsWith("#")).OrderBy(o => o).ToList();
+                var folderNames = FileManager.GetFolderNames(afterRootPath, null).Where(x => !x.StartsWith("#"))
+                    .OrderBy(o => o).ToList();
                 reloadFolders = false;
                 foreach (var folderName in folderNames)
                 {
@@ -120,8 +120,7 @@ public /*open*/ class FolderProcessor
     {
         return FileManager.GetFilesWithInfo(afterRootPath, _fileSearchPattern).OrderBy(o => o.FileName)
             .Where(file =>
-                ExcludeSet == null ||
-                !ExcludeSet.NeedExclude(FileManager.PathCombine(afterRootPath, file.FileName)))
+                ExcludeSet == null || !ExcludeSet.NeedExclude(FileManager.PathCombine(afterRootPath, file.FileName)))
             .All(file => ProcessOneFile(afterRootPath, file));
     }
 

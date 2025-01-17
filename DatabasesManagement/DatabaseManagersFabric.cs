@@ -74,10 +74,9 @@ public static class DatabaseManagersFabric
     }
 
     //public იყენებს supportTools
-    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(
-        ILogger logger, IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName,
-        ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName,
-        CancellationToken cancellationToken = default)
+    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(ILogger logger,
+        IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName, ApiClients apiClients,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(apiClientName))
         {

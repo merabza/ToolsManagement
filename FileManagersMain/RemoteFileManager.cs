@@ -40,8 +40,7 @@ public sealed class RemoteFileManager : FileManager
             return null;
         }
 
-        var connectionTools =
-            ConnectToolsFabric.CreateConnectToolsByAddress(connectToolParameters, logger, useConsole);
+        var connectionTools = ConnectToolsFabric.CreateConnectToolsByAddress(connectToolParameters, logger, useConsole);
 
         if (connectionTools == null)
         {
