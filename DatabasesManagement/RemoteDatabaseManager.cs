@@ -1,12 +1,12 @@
-﻿using DbTools.Errors;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts;
 using WebAgentDatabasesApiContracts.V1.Responses;
@@ -113,10 +113,9 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //    return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
     //}
 
-    public Task<OneOf<Dictionary<string, DatabaseFoldersSet>, IEnumerable<Err>>> GetDatabaseFoldersSets(
-        CancellationToken cancellationToken)
+    public Task<OneOf<List<string>, IEnumerable<Err>>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
     {
-        return ApiClient.GetDatabaseFoldersSets(cancellationToken);
+        return ApiClient.GetDatabaseFoldersSetNames(cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
