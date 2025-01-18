@@ -7,24 +7,38 @@ namespace FileManagersMain;
 
 public static class FileManagersFabric
 {
-    public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string localPatch)
+    public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string storagePatch, string? localPatch = null)
     {
         //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
-        if (string.IsNullOrWhiteSpace(localPatch))
+        if (string.IsNullOrWhiteSpace(storagePatch))
         {
             logger.LogError("local path not Specified");
             return null;
         }
 
-        var localPatchChecked = FileStat.CreateFolderIfNotExists(localPatch, useConsole);
+        var storagePatchChecked = FileStat.CreateFolderIfNotExists(storagePatch, useConsole);
         //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
-        if (localPatchChecked == null)
+        if (storagePatchChecked == null)
         {
-            logger.LogError("local path {localPatch} can not created", localPatch);
+            logger.LogError("local path {localPatch} can not created", storagePatch);
             return null;
         }
 
-        DiskFileManager dfm = new(localPatchChecked, useConsole, logger, localPatchChecked);
+        var localPatchChecked = storagePatchChecked;
+        if (!string.IsNullOrWhiteSpace(localPatch) && storagePatch != localPatch)
+        {
+            localPatchChecked = FileStat.CreateFolderIfNotExists(localPatch, useConsole);
+            //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
+            if (localPatchChecked == null)
+            {
+                logger.LogError("local path {localPatch} can not created", storagePatch);
+                return null;
+            }
+
+        }
+
+
+        DiskFileManager dfm = new(storagePatchChecked, useConsole, logger, localPatchChecked);
 
         return dfm;
     }

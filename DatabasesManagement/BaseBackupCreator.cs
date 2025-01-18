@@ -1,0 +1,132 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+using DatabasesManagement.Models;
+using FileManagersMain;
+using LibFileParameters.Models;
+using Microsoft.Extensions.Logging;
+using WebAgentDatabasesApiContracts.V1.Responses;
+
+namespace DatabasesManagement;
+
+public class BaseBackupCreator
+{
+    private readonly BaseBackupParameters _baseBackupParameters;
+    private readonly ILogger _logger;
+
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public BaseBackupCreator(ILogger logger, BaseBackupParameters baseBackupParameters)
+    {
+        _logger = logger;
+        _baseBackupParameters = baseBackupParameters;
+    }
+
+    public async Task<BackupFileParameters?> RunAction(CancellationToken cancellationToken = default)
+    {
+        var backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
+        var databaseManagerForSource = backupRestoreParameters.DatabaseManager;
+
+
+        var databaseName = backupRestoreParameters.DatabaseName;
+        _logger.LogInformation("Check if Destination base {destinationDatabaseName} exists", databaseName);
+
+        //შევამოწმოთ მიზნის ბაზის არსებობა
+        var isDatabaseExistsResult =
+            await databaseManagerForSource.IsDatabaseExists(databaseName, CancellationToken.None);
+
+        if (isDatabaseExistsResult.IsT1)
+        {
+            _logger.LogInformation("The existence of the base could not be determined");
+            return null;
+        }
+
+        var isDatabaseExists = isDatabaseExistsResult.AsT0;
+
+        if ( !isDatabaseExists)
+        {
+            _logger.LogError("database {databaseName} does not exist", databaseName);
+            return null;
+        }
+
+
+        //ბექაპის დამზადება წყაროს მხარეს
+        var createBackupResult = await databaseManagerForSource.CreateBackup(databaseName,
+            backupRestoreParameters.DbServerFoldersSetName, CancellationToken.None);
+
+        //თუ ბექაპის დამზადებისას რაიმე პრობლემა დაფიქსირდა, ვჩერდებით.
+        if (createBackupResult.IsT1)
+        {
+            _logger.LogError("Backup not created");
+            return null;
+        }
+
+        var backupFileParametersForSource = createBackupResult.AsT0;
+        var backupCreateFolderName = backupFileParametersForSource.FolderName;
+        var fileName = backupFileParametersForSource.Name;
+        var prefix = backupFileParametersForSource.Prefix;
+        var suffix = backupFileParametersForSource.Suffix;
+        var dateMask = backupFileParametersForSource.DateMask;
+
+        if (!string.IsNullOrWhiteSpace(backupCreateFolderName) &&
+            !FileStorageData.IsSameToLocal(backupRestoreParameters.FileStorage, backupCreateFolderName))
+        {
+            var backupFolderFileManager = FileManagersFabric.CreateFileManager(true, _logger, backupCreateFolderName,
+                _baseBackupParameters.LocalPath);
+
+            if (backupFolderFileManager == null)
+            {
+                _logger.LogError("backupFolderFileManager does Not Created");
+                return null;
+            }
+
+            _logger.LogInformation("Download File {fileName}", fileName);
+
+            //წყაროდან ლოკალურ ფოლდერში მოქაჩვა
+            if (!backupFolderFileManager.DownloadFile(fileName, _baseBackupParameters.DownloadTempExtension))
+            {
+                _logger.LogError("Can not Download File {fileName}", fileName);
+                return null;
+            }
+
+            _logger.LogInformation("Remove Redundant Files for source");
+            backupFolderFileManager.RemoveRedundantFiles(prefix, dateMask, suffix,
+                backupRestoreParameters.SmartSchema);
+        }
+
+        //თუ წყაროს ფაილსაცავი ლოკალურია და მისი ფოლდერი ემთხვევა პარამეტრების ლოკალურ ფოლდერს.
+        //   მაშინ მოქაჩვა საჭირო აღარ არის
+        else if (_baseBackupParameters.NeedDownloadFromSource)
+        {
+            _logger.LogInformation("Download File {fileName}", fileName);
+
+            //წყაროდან ლოკალურ ფოლდერში მოქაჩვა
+            if (!backupRestoreParameters.FileManager.DownloadFile(fileName,
+                    _baseBackupParameters.DownloadTempExtension))
+            {
+                _logger.LogError("Can not Download File {fileName}", fileName);
+                return null;
+            }
+
+            _logger.LogInformation("Remove Redundant Files for source");
+            backupRestoreParameters.FileManager.RemoveRedundantFiles(prefix, dateMask, suffix,
+                backupRestoreParameters.SmartSchema);
+        }
+
+        if (_baseBackupParameters is not { NeedUploadToExchange: true, ExchangeFileManager: not null }) 
+            return null;
+
+        _logger.LogInformation("Upload File {fileName} to Exchange", fileName);
+
+        if (!_baseBackupParameters.ExchangeFileManager.UploadFile(fileName,
+                _baseBackupParameters.UploadTempExtension))
+        {
+            _logger.LogError("Can not Upload File {destinationFileName}", fileName);
+            return null;
+        }
+
+        _logger.LogInformation("Remove Redundant Files for local");
+        _baseBackupParameters.LocalFileManager.RemoveRedundantFiles(prefix, dateMask, suffix,
+            _baseBackupParameters.LocalSmartSchema);
+
+        return backupFileParametersForSource;
+    }
+}

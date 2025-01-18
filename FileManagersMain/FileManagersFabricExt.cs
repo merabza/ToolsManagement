@@ -14,6 +14,16 @@ public static class FileManagersFabricExt
         return FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
     }
 
+    //public static (FileStorageData?, FileManager?) CreateLocalFileStorageAndFileManager(bool useConsole,
+    //    ILogger logger, string localPatch, string fileStoragePath)
+    //{
+    //    var fileStorageData = new FileStorageData {FileStoragePath =fileStoragePath };
+
+    //    var fmg = FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
+
+    //    return fmg == null ? (null, null) : (fileStorageData, fmg);
+    //}
+
     public static async ValueTask<(FileStorageData?, FileManager?)> CreateFileStorageAndFileManager(bool useConsole,
         ILogger logger, string localPatch, string? fileStorageName, FileStorages fileStorages,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
