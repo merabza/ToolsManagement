@@ -32,7 +32,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
-            return await ApiClient.CreateBackup(backupBaseName, cancellationToken);
+            return await ApiClient.CreateBackup(backupBaseName, dbServerFoldersSetName, cancellationToken);
 
         _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
