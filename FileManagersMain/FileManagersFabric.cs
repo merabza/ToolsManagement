@@ -7,7 +7,8 @@ namespace FileManagersMain;
 
 public static class FileManagersFabric
 {
-    public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string storagePatch, string? localPatch = null)
+    public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string storagePatch,
+        string? localPatch = null)
     {
         //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
         if (string.IsNullOrWhiteSpace(storagePatch))
@@ -34,7 +35,6 @@ public static class FileManagersFabric
                 logger.LogError("local path {localPatch} can not created", storagePatch);
                 return null;
             }
-
         }
 
 

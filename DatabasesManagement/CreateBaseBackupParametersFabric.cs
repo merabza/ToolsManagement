@@ -10,9 +10,9 @@ using LibApiClientParameters;
 using LibDatabaseParameters;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
-using OneOf;
 
 namespace DatabasesManagement;
 
@@ -27,11 +27,11 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         _logger = logger;
     }
 
-    public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(IHttpClientFactory httpClientFactory,
-        DatabasesParameters fromDatabaseParameters, DatabaseServerConnections databaseServerConnections,
-        ApiClients apiClients, FileStorages fileStorages, SmartSchemas smartSchemas, string? localPath,
-        string? downloadTempExtension, string? localSmartSchemaName, string? exchangeFileStorageName,
-        string? uploadTempExtension, CancellationToken cancellationToken = default)
+    public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(
+        IHttpClientFactory httpClientFactory, DatabasesParameters fromDatabaseParameters,
+        DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
+        SmartSchemas smartSchemas, string? localPath, string? downloadTempExtension, string? localSmartSchemaName,
+        string? exchangeFileStorageName, string? uploadTempExtension, CancellationToken cancellationToken = default)
     {
         var sourceDbConnectionName = fromDatabaseParameters.DbConnectionName;
         var sourceFileStorageName = fromDatabaseParameters.FileStorageName;
@@ -80,10 +80,8 @@ public class CreateBaseBackupParametersFabric : MessageLogger
             _logger, localPath!, sourceFileStorageName, fileStorages, null, null, CancellationToken.None);
 
         if (sourceFileManager == null || sourceFileStorage == null)
-        {
             return await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.SourceFileStorageAndSourceFileManagerIsNotCreated, cancellationToken);
-        }
 
         var sourceBackupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResultForSource.AsT0,
             sourceFileManager, sourceSmartSchema, sourceDatabaseName!, fromDatabaseParameters.DbServerFoldersSetName!,
@@ -94,10 +92,8 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         var localFileManager = FileManagersFabric.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
-        {
-            return await LogErrorAndSendMessageFromError(
-                DatabaseManagerErrors.LocalFileManagerIsNotCreated, cancellationToken);
-        }
+            return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
+                cancellationToken);
 
         var localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)
             ? null
@@ -117,6 +113,7 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         return new BaseBackupParameters(sourceBackupRestoreParameters, needDownloadFromSource,
             string.IsNullOrWhiteSpace(downloadTempExtension) ? "down!" : downloadTempExtension, localFileManager,
             localSmartSchema, needUploadToExchange, exchangeFileManager,
-            string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath!, skipBackupBeforeRestore);
+            string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath!,
+            skipBackupBeforeRestore);
     }
 }
