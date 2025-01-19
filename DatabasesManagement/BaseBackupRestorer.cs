@@ -145,6 +145,7 @@ public class BaseBackupRestorer
         _baseBackupParameters.LocalFileManager.RemoveRedundantFiles(prefix, dateMask, suffix,
             _baseBackupParameters.LocalSmartSchema);
 
+        backupFileParametersForSource.FolderName = null;
         return backupFileParametersForSource;
     }
 }
