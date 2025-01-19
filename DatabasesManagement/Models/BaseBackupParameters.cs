@@ -8,7 +8,8 @@ public class BaseBackupParameters
     // ReSharper disable once ConvertToPrimaryConstructor
     public BaseBackupParameters(BackupRestoreParameters sourceBackupRestoreParameters, bool needDownloadFromSource,
         string downloadTempExtension, FileManager localFileManager, SmartSchema? localSmartSchema,
-        bool needUploadToExchange, FileManager? exchangeFileManager, string uploadTempExtension, string localPath)
+        bool needUploadToExchange, FileManager? exchangeFileManager, string uploadTempExtension, string localPath,
+        bool skipBackupBeforeRestore)
     {
         BackupRestoreParameters = sourceBackupRestoreParameters;
         NeedDownloadFromSource = needDownloadFromSource;
@@ -19,6 +20,7 @@ public class BaseBackupParameters
         ExchangeFileManager = exchangeFileManager;
         UploadTempExtension = uploadTempExtension;
         LocalPath = localPath;
+        SkipBackupBeforeRestore = skipBackupBeforeRestore;
     }
 
     public BackupRestoreParameters BackupRestoreParameters { get; }
@@ -30,4 +32,5 @@ public class BaseBackupParameters
     public FileManager? ExchangeFileManager { get; }
     public string UploadTempExtension { get; }
     public string LocalPath { get; }
+    public bool SkipBackupBeforeRestore { get; }
 }
