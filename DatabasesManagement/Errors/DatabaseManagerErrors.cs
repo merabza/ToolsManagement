@@ -38,22 +38,4 @@ public static class DatabaseManagerErrors
     {
         ErrorCode = nameof(LocalFileManagerIsNotCreated), ErrorMessage = "localFileManager is not created"
     };
-
-
-    //localFileManager is not created
-
-
-    //public static readonly Err RestoreFilesDoesNotDetected = new()
-    //{
-    //    ErrorCode = nameof(RestoreFilesDoesNotDetected), ErrorMessage = "Restore Files does not detected"
-    //};
-
-    //public static Err CannotCreateDbClient(string? databaseName)
-    //{
-    //    return new Err
-    //    {
-    //        ErrorCode = nameof(CannotCreateDbClient),
-    //        ErrorMessage = $"Cannot create DbClient for database {databaseName}"
-    //    };
-    //}
 }
