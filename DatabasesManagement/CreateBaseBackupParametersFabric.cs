@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using DatabasesManagement.Errors;
 using DatabasesManagement.Models;
 using FileManagersMain;
 using LibApiClientParameters;
@@ -10,39 +12,47 @@ using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared;
 using SystemToolsShared.Errors;
+using OneOf;
 
 namespace DatabasesManagement;
 
-public static class CreateBaseBackupParametersFabric
+public class CreateBaseBackupParametersFabric : MessageLogger
 {
-    public static async Task<BaseBackupParameters?> CreateBaseBackupParameters(ILogger logger,
-        IHttpClientFactory httpClientFactory, DatabasesParameters fromDatabaseParameters,
-        DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
-        SmartSchemas smartSchemas, string? localPath, string? downloadTempExtension, string? localSmartSchemaName,
-        string? exchangeFileStorageName, string? uploadTempExtension)
+    private readonly ILogger _logger;
+
+    // ReSharper disable once ConvertToPrimaryConstructor
+    public CreateBaseBackupParametersFabric(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
+        bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
+    {
+        _logger = logger;
+    }
+
+    public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(IHttpClientFactory httpClientFactory,
+        DatabasesParameters fromDatabaseParameters, DatabaseServerConnections databaseServerConnections,
+        ApiClients apiClients, FileStorages fileStorages, SmartSchemas smartSchemas, string? localPath,
+        string? downloadTempExtension, string? localSmartSchemaName, string? exchangeFileStorageName,
+        string? uploadTempExtension, CancellationToken cancellationToken = default)
     {
         var sourceDbConnectionName = fromDatabaseParameters.DbConnectionName;
         var sourceFileStorageName = fromDatabaseParameters.FileStorageName;
         var sourceSmartSchemaName = fromDatabaseParameters.SmartSchemaName;
         var sourceDatabaseName = fromDatabaseParameters.DatabaseName;
 
+
+        var errors = new List<Err>();
         if (string.IsNullOrWhiteSpace(localPath))
-        {
-            StShared.WriteErrorLine("localPath does not specified in databasesBackupFilesExchangeParameters", true);
-            return null;
-        }
+            errors.AddRange(
+                await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalPathIsNotSpecifiedInParameters,
+                    cancellationToken));
 
         if (string.IsNullOrWhiteSpace(sourceDatabaseName))
-        {
-            logger.LogError("sourceDatabaseName does not specified");
-            return null;
-        }
+            errors.AddRange(
+                await LogErrorAndSendMessageFromError(DatabaseManagerErrors.SourceDatabaseNameDoesNotSpecified,
+                    cancellationToken));
 
         if (string.IsNullOrWhiteSpace(fromDatabaseParameters.DbServerFoldersSetName))
-        {
-            logger.LogError("fromDatabaseParameters.DbServerFoldersSetName is not specified");
-            return null;
-        }
+            errors.AddRange(await LogErrorAndSendMessageFromError(
+                DatabaseManagerErrors.FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified, cancellationToken));
 
         var sourceSmartSchema = string.IsNullOrWhiteSpace(sourceSmartSchemaName)
             ? null
@@ -51,44 +61,41 @@ public static class CreateBaseBackupParametersFabric
         //sourceDbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResultForSource = await DatabaseManagersFabric.CreateDatabaseManager(logger,
+        var createDatabaseManagerResultForSource = await DatabaseManagersFabric.CreateDatabaseManager(_logger,
             httpClientFactory, true, sourceDbConnectionName, databaseServerConnections, apiClients, null, null,
             CancellationToken.None);
 
         if (createDatabaseManagerResultForSource.IsT1)
         {
-            Err.PrintErrorsOnConsole(createDatabaseManagerResultForSource.AsT1);
-            logger.LogError("Can not create client for source Database server");
-            return null;
+            errors.AddRange(createDatabaseManagerResultForSource.AsT1);
+            errors.AddRange(await LogErrorAndSendMessageFromError(
+                DatabaseManagerErrors.CanNotCreateDatabaseServerClient, cancellationToken));
         }
+
+        if (errors.Count > 0)
+            return errors;
 
         var (sourceFileStorage, sourceFileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(true,
-            logger, localPath, sourceFileStorageName, fileStorages, null, null, CancellationToken.None);
+            _logger, localPath!, sourceFileStorageName, fileStorages, null, null, CancellationToken.None);
 
-        if (sourceFileManager == null)
+        if (sourceFileManager == null || sourceFileStorage == null)
         {
-            logger.LogError("sourceFileManager does Not Created");
-            return null;
-        }
-
-        if (sourceFileStorage == null)
-        {
-            logger.LogError("sourceFileStorage does Not Created");
-            return null;
+            return await LogErrorAndSendMessageFromError(
+                DatabaseManagerErrors.SourceFileStorageAndSourceFileManagerIsNotCreated, cancellationToken);
         }
 
         var sourceBackupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResultForSource.AsT0,
-            sourceFileManager, sourceSmartSchema, sourceDatabaseName, fromDatabaseParameters.DbServerFoldersSetName,
+            sourceFileManager, sourceSmartSchema, sourceDatabaseName!, fromDatabaseParameters.DbServerFoldersSetName!,
             sourceFileStorage);
 
-        var needDownloadFromSource = !FileStorageData.IsSameToLocal(sourceFileStorage, localPath);
+        var needDownloadFromSource = !FileStorageData.IsSameToLocal(sourceFileStorage, localPath!);
 
-        var localFileManager = FileManagersFabric.CreateFileManager(true, logger, localPath);
+        var localFileManager = FileManagersFabric.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
         {
-            logger.LogError("localFileManager does not created");
-            return null;
+            return await LogErrorAndSendMessageFromError(
+                DatabaseManagerErrors.LocalFileManagerIsNotCreated, cancellationToken);
         }
 
         var localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)
@@ -100,15 +107,15 @@ public static class CreateBaseBackupParametersFabric
         //შევქმნათ შესაბამისი ფაილმენეჯერი
         Console.Write($" exchangeFileStorage - {exchangeFileStorageName}");
         var (exchangeFileStorage, exchangeFileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(
-            true, logger, localPath, exchangeFileStorageName, fileStorages, null, null, CancellationToken.None);
+            true, _logger, localPath!, exchangeFileStorageName, fileStorages, null, null, CancellationToken.None);
 
         var needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
-                                   !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath);
+                                   !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath!);
 
 
         return new BaseBackupParameters(sourceBackupRestoreParameters, needDownloadFromSource,
             string.IsNullOrWhiteSpace(downloadTempExtension) ? "down!" : downloadTempExtension, localFileManager,
             localSmartSchema, needUploadToExchange, exchangeFileManager,
-            string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath);
+            string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath!);
     }
 }
