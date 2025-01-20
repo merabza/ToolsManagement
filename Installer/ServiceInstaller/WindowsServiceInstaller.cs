@@ -22,17 +22,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
     private readonly string? _projectDescription;
     private readonly string? _serviceDescriptionSignature;
 
-    //public WindowsServiceInstaller(bool useConsole, ILogger logger, string? serviceDescriptionSignature,
-    //    string? projectDescription, IMessagesDataManager? messagesDataManager, string? userName) : base(useConsole,
-    //    logger, "win10-x64", messagesDataManager, userName)
-    //{
-    //    _serviceDescriptionSignature = serviceDescriptionSignature;
-    //    _projectDescription = projectDescription;
-    //}
-
     // ReSharper disable once ConvertToPrimaryConstructor
     public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
-        string? userName) : base(useConsole, logger, "win10-x64", messagesDataManager, userName)
+        string? userName) : base(useConsole, logger, "win-x64", messagesDataManager, userName)
     {
         _serviceDescriptionSignature = null;
         _projectDescription = null;
