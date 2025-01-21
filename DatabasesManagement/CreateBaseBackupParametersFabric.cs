@@ -28,7 +28,7 @@ public class CreateBaseBackupParametersFabric : MessageLogger
     }
 
     public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(
-        IHttpClientFactory httpClientFactory, DatabasesParameters fromDatabaseParameters,
+        IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
         SmartSchemas smartSchemas, string? localPath, string? downloadTempExtension, string? localSmartSchemaName,
         string? exchangeFileStorageName, string? uploadTempExtension, CancellationToken cancellationToken = default)
