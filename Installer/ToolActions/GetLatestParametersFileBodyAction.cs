@@ -41,7 +41,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     public string? AppSettingsVersion { get; private set; }
 
-    protected override async Task<bool> RunAction(CancellationToken cancellationToken = default)
+    protected override async ValueTask<bool> RunAction(CancellationToken cancellationToken = default)
     {
         LatestParametersFileContent = await GetParametersFileBody(cancellationToken);
         if (string.IsNullOrWhiteSpace(LatestParametersFileContent))
