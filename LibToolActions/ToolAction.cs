@@ -65,8 +65,8 @@ public /*open*/ class ToolAction : MessageLogger
         return true;
     }
 
-    protected virtual Task<bool> RunAction(CancellationToken cancellationToken = default)
+    protected virtual ValueTask<bool> RunAction(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(true);
+        return ValueTask.FromResult(true);
     }
 }
