@@ -21,7 +21,6 @@ namespace DatabasesManagement;
 
 public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
-    private readonly DatabaseBackupParametersDomain _databaseBackupParameters;
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly ILogger _logger;
     private readonly IMessagesDataManager? _messagesDataManager;
@@ -31,13 +30,11 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     // ReSharper disable once ConvertToPrimaryConstructor
     public SqlServerDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
-        string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
         _logger = logger;
         _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
-        _databaseBackupParameters = databaseBackupParameters;
         _messagesDataManager = messagesDataManager;
         _userName = userName;
     }
@@ -67,6 +64,12 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.ExecuteCommand(executeQueryCommand, true, true, cancellationToken);
+    }
+
+    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
+        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
@@ -292,8 +295,9 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
-        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
+    public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
+        DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
+        CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
@@ -310,9 +314,9 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (hostPlatformName == "Linux")
             dirSeparator = "/";
 
-        var backupFileNamePrefix = _databaseBackupParameters.GetPrefix(backupBaseName);
-        var backupFileNameSuffix = _databaseBackupParameters.GetSuffix();
-        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(_databaseBackupParameters.DateMask) +
+        var backupFileNamePrefix = databaseBackupParameters.GetPrefix(backupBaseName);
+        var backupFileNameSuffix = databaseBackupParameters.GetSuffix();
+        var backupFileName = backupFileNamePrefix + DateTime.Now.ToString(databaseBackupParameters.DateMask) +
                              backupFileNameSuffix;
 
         var backupFolder = _databaseServerConnectionDataDomain.DatabaseFoldersSets[dbServerFoldersSetName].Backup;
@@ -324,18 +328,18 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         //ბექაპის ლოგიკური ფაილის სახელის მომზადება
         var backupName = backupBaseName;
-        if (_databaseBackupParameters.BackupType == EBackupType.Full)
+        if (databaseBackupParameters.BackupType == EBackupType.Full)
             backupName += "-full";
 
         //ბექაპის პროცესის გაშვება
         var backupDatabaseResult = await dc.BackupDatabase(backupBaseName, backupFileFullName, backupName,
-            EBackupType.Full, _databaseBackupParameters.Compress, cancellationToken);
+            EBackupType.Full, databaseBackupParameters.Compress, cancellationToken);
 
         if (backupDatabaseResult.IsSome)
             //return await Task.FromResult<BackupFileParameters?>(null);
             return (Err[])backupDatabaseResult;
 
-        if (_databaseBackupParameters.Verify)
+        if (databaseBackupParameters.Verify)
         {
             var verifyBackupResult = await dc.VerifyBackup(backupBaseName, backupFileFullName, cancellationToken);
             if (verifyBackupResult.IsSome)
@@ -343,7 +347,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         }
 
         BackupFileParameters backupFileParameters = new(backupFolder, backupFileName, backupFileNamePrefix,
-            backupFileNameSuffix, _databaseBackupParameters.DateMask);
+            backupFileNameSuffix, databaseBackupParameters.DateMask);
 
         return backupFileParameters;
     }

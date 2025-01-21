@@ -62,8 +62,8 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         //sourceDbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResultForSource = await DatabaseManagersFabric.CreateDatabaseManager(_logger,
-            httpClientFactory, true, sourceDbConnectionName, databaseServerConnections, apiClients, null, null,
+        var createDatabaseManagerResultForSource = await DatabaseManagersFabric.CreateDatabaseManager(_logger, true,
+            sourceDbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null,
             CancellationToken.None);
 
         if (createDatabaseManagerResultForSource.IsT1)

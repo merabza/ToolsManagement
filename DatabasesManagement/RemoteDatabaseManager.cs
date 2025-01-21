@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
+using LibDatabaseParameters;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using SystemToolsShared.Errors;
@@ -28,6 +29,13 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
+    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
+        DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
         string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {

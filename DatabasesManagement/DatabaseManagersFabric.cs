@@ -18,10 +18,18 @@ namespace DatabasesManagement;
 
 public static class DatabaseManagersFabric
 {
+    public static ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
+        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+        CancellationToken cancellationToken = default)
+    {
+        return CreateDatabaseManager(logger, useConsole, databaseConnectionName, databaseServerConnections, null, null,
+            null, null, cancellationToken);
+    }
+
     public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
-        IHttpClientFactory httpClientFactory, bool useConsole, string? databaseConnectionName,
-        DatabaseServerConnections databaseServerConnections, ApiClients apiClients,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+        ApiClients? apiClients, IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager,
+        string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseConnectionName))
         {
@@ -35,32 +43,41 @@ public static class DatabaseManagersFabric
         var databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
-        return await CreateDatabaseManager(logger, httpClientFactory, useConsole, databaseServerConnection, apiClients,
+        return await CreateDatabaseManager(logger, useConsole, databaseServerConnection, apiClients, httpClientFactory,
             messagesDataManager, userName, cancellationToken);
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
     public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
-        IHttpClientFactory httpClientFactory, bool useConsole, DatabaseServerConnectionData? databaseServerConnection,
-        ApiClients apiClients, IMessagesDataManager? messagesDataManager, string? userName,
+        bool useConsole, DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
+        IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(databaseServerConnection);
 
-        var dbBackupParameters = DatabaseBackupParametersDomain.Create(databaseServerConnection.FullDbBackupParameters);
+        //var dbBackupParameters = DatabaseBackupParametersDomain.Create(databaseServerConnection.FullDbBackupParameters);
 
-        return databaseServerConnection.DatabaseServerProvider switch
+        switch (databaseServerConnection.DatabaseServerProvider)
         {
-            EDatabaseProvider.SqlServer => await CreateSqlServerDatabaseManager(logger, useConsole,
-                databaseServerConnection, dbBackupParameters, messagesDataManager, userName, cancellationToken),
-            EDatabaseProvider.None => new[] { DbToolsErrors.DatabaseProviderIsNone },
-            EDatabaseProvider.SqLite => CreateSqLiteDatabaseManager(),
-            EDatabaseProvider.OleDb => CreateOleDatabaseManager(),
-            EDatabaseProvider.WebAgent => await CreateRemoteDatabaseManager(logger, httpClientFactory, useConsole,
-                databaseServerConnection.DbWebAgentName, apiClients, messagesDataManager, userName, cancellationToken),
-            _ => throw new ArgumentOutOfRangeException(nameof(databaseServerConnection.DatabaseServerProvider))
-        };
+            case EDatabaseProvider.SqlServer:
+                return await CreateSqlServerDatabaseManager(logger, useConsole, databaseServerConnection,
+                    messagesDataManager, userName, cancellationToken);
+            case EDatabaseProvider.None:
+                return new[] { DbToolsErrors.DatabaseProviderIsNone };
+            case EDatabaseProvider.SqLite:
+                return CreateSqLiteDatabaseManager();
+            case EDatabaseProvider.OleDb:
+                return CreateOleDatabaseManager();
+            case EDatabaseProvider.WebAgent:
+                if (apiClients is not null && httpClientFactory is not null)
+                    return await CreateRemoteDatabaseManager(logger, httpClientFactory, useConsole,
+                        databaseServerConnection.DbWebAgentName, apiClients, messagesDataManager, userName,
+                        cancellationToken);
+                throw new ArgumentOutOfRangeException();
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static OneOf<IDatabaseManager, IEnumerable<Err>> CreateSqLiteDatabaseManager()
@@ -119,8 +136,7 @@ public static class DatabaseManagersFabric
 
     private static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateSqlServerDatabaseManager(
         ILogger logger, bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
-        DatabaseBackupParametersDomain databaseBackupParameters, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken = default)
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
         {
@@ -139,12 +155,12 @@ public static class DatabaseManagersFabric
             return (Err[])dbAuthSettingsCreatorCreateResult.AsT1;
 
 
-        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain = new(
+        var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(
             databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,
             dbAuthSettingsCreatorCreateResult.AsT0, databaseServerConnectionData.TrustServerCertificate,
             databaseServerConnectionData.DatabaseFoldersSets);
 
-        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain,
-            databaseBackupParameters, messagesDataManager, userName);
+        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain, messagesDataManager,
+            userName);
     }
 }

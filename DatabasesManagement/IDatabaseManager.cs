@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DbTools.Models;
 using LanguageExt;
+using LibDatabaseParameters;
 using OneOf;
 using SystemToolsShared.Errors;
 using WebAgentDatabasesApiContracts.V1.Responses;
@@ -13,6 +14,10 @@ public interface IDatabaseManager
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
+    ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
+        DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
+        CancellationToken cancellationToken = default);
+
     ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
         string dbServerFoldersSetName, CancellationToken cancellationToken = default);
 
