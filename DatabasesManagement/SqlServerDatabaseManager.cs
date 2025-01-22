@@ -66,12 +66,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.ExecuteCommand(executeQueryCommand, true, true, cancellationToken);
     }
 
-    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
-        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
     public async Task<OneOf<List<DatabaseInfoModel>, IEnumerable<Err>>> GetDatabaseNames(
         CancellationToken cancellationToken = default)
@@ -350,6 +344,12 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             backupFileNameSuffix, databaseBackupParameters.DateMask);
 
         return backupFileParameters;
+    }
+
+    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
+        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     private async ValueTask<OneOf<DbClient, IEnumerable<Err>>> GetDatabaseClient(EDatabaseProvider dataProvider,
