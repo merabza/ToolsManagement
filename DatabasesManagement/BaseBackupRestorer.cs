@@ -67,10 +67,9 @@ public class BaseBackupRestorer
             return null;
         }
 
-
         //ბექაპის დამზადება წყაროს მხარეს
-        var createBackupResult = await databaseManager.CreateBackup(databaseName,
-            backupRestoreParameters.DbServerFoldersSetName, CancellationToken.None);
+        var createBackupResult = await databaseManager.CreateBackup(_baseBackupParameters.DatabaseBackupParameters,
+            databaseName, backupRestoreParameters.DbServerFoldersSetName, CancellationToken.None);
 
         //თუ ბექაპის დამზადებისას რაიმე პრობლემა დაფიქსირდა, ვჩერდებით.
         if (createBackupResult.IsT1)

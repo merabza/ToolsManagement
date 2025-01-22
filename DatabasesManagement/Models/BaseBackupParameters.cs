@@ -1,4 +1,5 @@
 ﻿using FileManagersMain;
+using LibDatabaseParameters;
 using LibFileParameters.Models;
 
 namespace DatabasesManagement.Models;
@@ -9,7 +10,7 @@ public class BaseBackupParameters
     public BaseBackupParameters(BackupRestoreParameters sourceBackupRestoreParameters, bool needDownloadFromSource,
         string downloadTempExtension, FileManager localFileManager, SmartSchema? localSmartSchema,
         bool needUploadToExchange, FileManager? exchangeFileManager, string uploadTempExtension, string localPath,
-        bool skipBackupBeforeRestore)
+        bool skipBackupBeforeRestore, DatabaseBackupParametersDomain databaseBackupParameters)
     {
         BackupRestoreParameters = sourceBackupRestoreParameters;
         NeedDownloadFromSource = needDownloadFromSource;
@@ -21,6 +22,7 @@ public class BaseBackupParameters
         UploadTempExtension = uploadTempExtension;
         LocalPath = localPath;
         SkipBackupBeforeRestore = skipBackupBeforeRestore;
+        DatabaseBackupParameters = databaseBackupParameters;
     }
 
     public BackupRestoreParameters BackupRestoreParameters { get; }
@@ -33,4 +35,5 @@ public class BaseBackupParameters
     public string UploadTempExtension { get; }
     public string LocalPath { get; }
     public bool SkipBackupBeforeRestore { get; }
+    public DatabaseBackupParametersDomain DatabaseBackupParameters { get; }
 }

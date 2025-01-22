@@ -38,7 +38,8 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         var sourceSmartSchemaName = fromDatabaseParameters.SmartSchemaName;
         var sourceDatabaseName = fromDatabaseParameters.DatabaseName;
         var skipBackupBeforeRestore = fromDatabaseParameters.SkipBackupBeforeRestore;
-
+        var databaseBackupParameters =
+            DatabaseBackupParametersDomain.Create(fromDatabaseParameters.DatabaseBackupParameters);
 
         var errors = new List<Err>();
         if (string.IsNullOrWhiteSpace(localPath))
@@ -114,6 +115,6 @@ public class CreateBaseBackupParametersFabric : MessageLogger
             string.IsNullOrWhiteSpace(downloadTempExtension) ? "down!" : downloadTempExtension, localFileManager,
             localSmartSchema, needUploadToExchange, exchangeFileManager,
             string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath!,
-            skipBackupBeforeRestore);
+            skipBackupBeforeRestore, databaseBackupParameters);
     }
 }

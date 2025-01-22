@@ -29,18 +29,12 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
+    public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
-
-    public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
-        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
-    {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
-            return await ApiClient.CreateBackup(backupBaseName, dbServerFoldersSetName, cancellationToken);
+            return await ApiClient.CreateBackup(databaseBackupParameters, backupBaseName, dbServerFoldersSetName, cancellationToken);
 
         _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
