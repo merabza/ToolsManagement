@@ -81,7 +81,7 @@ public class CreateBaseBackupParametersFabric : MessageLogger
             _logger, localPath!, sourceFileStorageName, fileStorages, null, null, CancellationToken.None);
 
         if (sourceFileManager == null || sourceFileStorage == null)
-            return await LogErrorAndSendMessageFromError(
+            return (Err[])await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.SourceFileStorageAndSourceFileManagerIsNotCreated, cancellationToken);
 
         var sourceBackupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResultForSource.AsT0,
@@ -93,7 +93,7 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         var localFileManager = FileManagersFabric.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
-            return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
+            return (Err[])await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
                 cancellationToken);
 
         var localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)

@@ -82,7 +82,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == ProgramAttributes.Instance.AppName)
-            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
         var appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
@@ -90,7 +90,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
             _applicationUpdaterParameters.ParametersFileDateMask, _applicationUpdaterParameters.ParametersFileExtension,
             cancellationToken);
         if (appSettingsFileBody == null)
-            return await LogErrorAndSendMessageFromError(
+            return (Err[])await LogErrorAndSendMessageFromError(
                 InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
 
         return await _serviceInstaller.RunUpdateSettings(projectName, environmentName, appSettingsFileName,

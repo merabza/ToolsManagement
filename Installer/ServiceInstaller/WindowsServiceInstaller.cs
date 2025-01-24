@@ -103,7 +103,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             cancellationToken);
 
         if (status != ServiceControllerStatus.Stopped)
-            return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
                 cancellationToken);
 
         return null;
@@ -137,7 +137,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             cancellationToken);
 
         if (status != ServiceControllerStatus.Running)
-            return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
                 cancellationToken);
 
         return null;
@@ -147,10 +147,11 @@ public sealed class WindowsServiceInstaller : InstallerBase
         string? filesUserName, string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
 
         if (!File.Exists(filePath))
-            return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath),
+                cancellationToken);
 
         var userName = "NT AUTHORITY\\LOCAL SERVICE";
         if (!string.IsNullOrWhiteSpace(filesUserName))
@@ -176,10 +177,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
         string filesUserName, string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
-            return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
 
         if (!Directory.Exists(folderPath))
-            return await LogErrorAndSendMessageFromError(InstallerErrors.FolderIsNotExists(folderPath),
+            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FolderIsNotExists(folderPath),
                 cancellationToken);
 
         var userName = "NT AUTHORITY\\LOCAL SERVICE";
@@ -245,7 +246,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         if (IsServiceExists(serviceEnvName))
             return null;
 
-        return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
+        return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
             cancellationToken);
     }
 }
