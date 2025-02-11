@@ -40,6 +40,10 @@ public static class DatabaseManagersFabric
             return new[] { DbToolsErrors.DatabaseConnectionNameIsNotSpecified };
         }
 
+        if (messagesDataManager is not null)
+            await messagesDataManager.SendMessage(userName,
+                $"CreateDatabaseManager databaseConnectionName={databaseConnectionName}", cancellationToken);
+
         var databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
@@ -147,13 +151,24 @@ public static class DatabaseManagersFabric
             return new[] { DbToolsErrors.ServerAddressIsEmptyCannotCreateSqlServerManagementClient };
         }
 
+        //if (messagesDataManager is not null)
+        //{
+        //    await messagesDataManager.SendMessage(userName,
+        //        $"DbAuthSettingsCreator.Create databaseServerConnectionData.WindowsNtIntegratedSecurity={databaseServerConnectionData.WindowsNtIntegratedSecurity}",
+        //        cancellationToken);
+        //    await messagesDataManager.SendMessage(userName,
+        //        $"databaseServerConnectionData.User={databaseServerConnectionData.User}", cancellationToken);
+        //    await messagesDataManager.SendMessage(userName,
+        //        $"databaseServerConnectionData.Password={databaseServerConnectionData.Password}", cancellationToken);
+        //}
+
         var dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
-            databaseServerConnectionData.WindowsNtIntegratedSecurity, databaseServerConnectionData.User,
-            databaseServerConnectionData.Password, useConsole);
+            databaseServerConnectionData.WindowsNtIntegratedSecurity, databaseServerConnectionData.ServerUser,
+            databaseServerConnectionData.ServerPass, useConsole);
 
         if (dbAuthSettingsCreatorCreateResult.IsT1)
-            return (Err[])dbAuthSettingsCreatorCreateResult.AsT1;
 
+            return (Err[])dbAuthSettingsCreatorCreateResult.AsT1;
 
         var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(
             databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,
