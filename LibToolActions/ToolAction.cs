@@ -24,7 +24,7 @@ public /*open*/ class ToolAction : MessageLogger
         UseConsole = useConsole;
     }
 
-    public async ValueTask<bool> Run(CancellationToken cancellationToken = default)
+    public async Task<bool> Run(CancellationToken cancellationToken = default)
     {
         try
         {

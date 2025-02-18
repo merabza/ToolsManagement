@@ -5,7 +5,7 @@ namespace LibToolActions.BackgroundTasks;
 public interface IProcesses
 {
     bool IsBusy();
-    ValueTask WaitForFinishAll();
+    Task WaitForFinishAll();
     void CancelProcesses();
     ProcessManager GetNewProcessManager();
 }
