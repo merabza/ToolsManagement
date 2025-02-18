@@ -18,15 +18,15 @@ namespace DatabasesManagement;
 
 public static class DatabaseManagersFabric
 {
-    public static ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
-        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+    public static Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger, bool useConsole,
+        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         CancellationToken cancellationToken = default)
     {
         return CreateDatabaseManager(logger, useConsole, databaseConnectionName, databaseServerConnections, null, null,
             null, null, cancellationToken);
     }
 
-    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
+    public static async Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
         bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         ApiClients? apiClients, IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager,
         string? userName, CancellationToken cancellationToken = default)
@@ -96,7 +96,7 @@ public static class DatabaseManagersFabric
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(ILogger logger,
+    public static async Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
