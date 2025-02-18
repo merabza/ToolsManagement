@@ -21,7 +21,7 @@ public sealed class Processes : IProcesses
         return _processManager != null && _processManager.IsBusy();
     }
 
-    public async ValueTask WaitForFinishAll()
+    public async Task WaitForFinishAll()
     {
         if (_processManager != null)
             await _processManager.WaitForFinishAll();
