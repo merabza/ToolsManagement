@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using DatabasesManagement.Models;
+using DbTools;
 using FileManagersMain;
+using LibDatabaseParameters;
 using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using SystemToolsShared.Errors;
@@ -22,7 +24,7 @@ public class BaseBackupRestorer
     }
 
     public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        CancellationToken cancellationToken = default)
+        EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken = default)
     {
         var backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
         var databaseManager = backupRestoreParameters.DatabaseManager;
@@ -32,8 +34,8 @@ public class BaseBackupRestorer
         _logger.LogInformation("Restoring database {destinationDatabaseName}", databaseName);
 
         var restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(backupFileParameters,
-            databaseName, backupRestoreParameters.DbServerFoldersSetName, _baseBackupParameters.LocalPath,
-            CancellationToken.None);
+            databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
+            _baseBackupParameters.LocalPath, cancellationToken);
 
         if (restoreDatabaseFromBackupResult.IsNone)
             return true;
@@ -51,7 +53,7 @@ public class BaseBackupRestorer
         _logger.LogInformation("Check if Destination base {destinationDatabaseName} exists", databaseName);
 
         //შევამოწმოთ მიზნის ბაზის არსებობა
-        var isDatabaseExistsResult = await databaseManager.IsDatabaseExists(databaseName, CancellationToken.None);
+        var isDatabaseExistsResult = await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
 
         if (isDatabaseExistsResult.IsT1)
         {
@@ -68,8 +70,11 @@ public class BaseBackupRestorer
         }
 
         //ბექაპის დამზადება წყაროს მხარეს
-        var createBackupResult = await databaseManager.CreateBackup(_baseBackupParameters.DatabaseBackupParameters,
-            databaseName, backupRestoreParameters.DbServerFoldersSetName, CancellationToken.None);
+        var createBackupResult = await databaseManager.CreateBackup(
+            new DatabaseBackupParametersDomain(_baseBackupParameters.BackupNamePrefix, _baseBackupParameters.DateMask,
+                _baseBackupParameters.BackupFileExtension, _baseBackupParameters.BackupNameMiddlePart,
+                _baseBackupParameters.Compress, _baseBackupParameters.Verify, _baseBackupParameters.BackupType),
+            databaseName, backupRestoreParameters.DbServerFoldersSetName, cancellationToken);
 
         //თუ ბექაპის დამზადებისას რაიმე პრობლემა დაფიქსირდა, ვჩერდებით.
         if (createBackupResult.IsT1)
@@ -112,7 +117,7 @@ public class BaseBackupRestorer
 
         //თუ წყაროს ფაილსაცავი ლოკალურია და მისი ფოლდერი ემთხვევა პარამეტრების ლოკალურ ფოლდერს.
         //   მაშინ მოქაჩვა საჭირო აღარ არის
-        else if (_baseBackupParameters.NeedDownloadFromSource)
+        else if (_baseBackupParameters.NeedDownload)
         {
             _logger.LogInformation("Download File {fileName}", fileName);
 

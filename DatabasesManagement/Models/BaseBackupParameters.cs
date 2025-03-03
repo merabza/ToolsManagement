@@ -1,5 +1,5 @@
-﻿using FileManagersMain;
-using LibDatabaseParameters;
+﻿using DbTools;
+using FileManagersMain;
 using LibFileParameters.Models;
 
 namespace DatabasesManagement.Models;
@@ -7,13 +7,16 @@ namespace DatabasesManagement.Models;
 public class BaseBackupParameters
 {
     // ReSharper disable once ConvertToPrimaryConstructor
-    public BaseBackupParameters(BackupRestoreParameters sourceBackupRestoreParameters, bool needDownloadFromSource,
-        string downloadTempExtension, FileManager localFileManager, SmartSchema? localSmartSchema,
-        bool needUploadToExchange, FileManager? exchangeFileManager, string uploadTempExtension, string localPath,
-        bool skipBackupBeforeRestore, DatabaseBackupParametersDomain databaseBackupParameters)
+    public BaseBackupParameters(BackupRestoreParameters backupRestoreParameters,
+        EDatabaseRecoveryModel databaseRecoveryModel, bool needDownload, string downloadTempExtension,
+        FileManager localFileManager, SmartSchema? localSmartSchema, bool needUploadToExchange,
+        FileManager? exchangeFileManager, string uploadTempExtension, string localPath, bool skipBackupBeforeRestore,
+        string backupNamePrefix, string dateMask, string backupFileExtension, string backupNameMiddlePart,
+        bool compress, bool verify, EBackupType backupType)
     {
-        BackupRestoreParameters = sourceBackupRestoreParameters;
-        NeedDownloadFromSource = needDownloadFromSource;
+        BackupRestoreParameters = backupRestoreParameters;
+        DatabaseRecoveryModel = databaseRecoveryModel;
+        NeedDownload = needDownload;
         DownloadTempExtension = downloadTempExtension;
         LocalFileManager = localFileManager;
         LocalSmartSchema = localSmartSchema;
@@ -22,11 +25,18 @@ public class BaseBackupParameters
         UploadTempExtension = uploadTempExtension;
         LocalPath = localPath;
         SkipBackupBeforeRestore = skipBackupBeforeRestore;
-        DatabaseBackupParameters = databaseBackupParameters;
+        BackupNamePrefix = backupNamePrefix;
+        DateMask = dateMask;
+        BackupFileExtension = backupFileExtension;
+        BackupNameMiddlePart = backupNameMiddlePart;
+        Compress = compress;
+        Verify = verify;
+        BackupType = backupType;
     }
 
     public BackupRestoreParameters BackupRestoreParameters { get; }
-    public bool NeedDownloadFromSource { get; }
+    public EDatabaseRecoveryModel DatabaseRecoveryModel { get; }
+    public bool NeedDownload { get; }
     public string DownloadTempExtension { get; }
     public FileManager LocalFileManager { get; }
     public SmartSchema? LocalSmartSchema { get; }
@@ -35,5 +45,12 @@ public class BaseBackupParameters
     public string UploadTempExtension { get; }
     public string LocalPath { get; }
     public bool SkipBackupBeforeRestore { get; }
-    public DatabaseBackupParametersDomain DatabaseBackupParameters { get; }
+
+    public string BackupNamePrefix { get; }
+    public string DateMask { get; }
+    public string BackupFileExtension { get; }
+    public string BackupNameMiddlePart { get; }
+    public bool Compress { get; }
+    public bool Verify { get; }
+    public EBackupType BackupType { get; }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DbTools;
 using DbTools.Models;
 using LanguageExt;
 using LibDatabaseParameters;
@@ -35,8 +36,8 @@ public interface IDatabaseManager
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
     Task<Option<IEnumerable<Err>>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string databaseName, string dbServerFoldersSetName, string? restoreFromFolderPath = null,
-        CancellationToken cancellationToken = default);
+        string databaseName, string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
+        string? restoreFromFolderPath = null, CancellationToken cancellationToken = default);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
     ValueTask<Option<IEnumerable<Err>>> CheckRepairDatabase(string databaseName,

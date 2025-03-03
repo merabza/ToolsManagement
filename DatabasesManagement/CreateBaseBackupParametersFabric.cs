@@ -30,16 +30,38 @@ public class CreateBaseBackupParametersFabric : MessageLogger
     public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(
         IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
-        SmartSchemas smartSchemas, string? localPath, string? downloadTempExtension, string? localSmartSchemaName,
-        string? exchangeFileStorageName, string? uploadTempExtension, CancellationToken cancellationToken = default)
+        SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
+        CancellationToken cancellationToken = default)
     {
-        var sourceDbConnectionName = fromDatabaseParameters.DbConnectionName;
-        var sourceFileStorageName = fromDatabaseParameters.FileStorageName;
-        var sourceSmartSchemaName = fromDatabaseParameters.SmartSchemaName;
-        var sourceDatabaseName = fromDatabaseParameters.DatabaseName;
+        var localPath = databasesBackupFilesExchangeParameters?.LocalPath;
+        var localSmartSchemaName = databasesBackupFilesExchangeParameters?.LocalSmartSchemaName;
+        var exchangeFileStorageName = databasesBackupFilesExchangeParameters?.ExchangeFileStorageName;
+
+        var uploadTempExtension = string.IsNullOrWhiteSpace(databasesBackupFilesExchangeParameters?.UploadTempExtension)
+            ? DatabasesBackupFilesExchangeParameters.DefaultUploadTempExtension
+            : databasesBackupFilesExchangeParameters.UploadTempExtension;
+
+        var downloadTempExtension =
+            string.IsNullOrWhiteSpace(databasesBackupFilesExchangeParameters?.DownloadTempExtension)
+                ? DatabasesBackupFilesExchangeParameters.DefaultDownloadTempExtension
+                : databasesBackupFilesExchangeParameters.DownloadTempExtension;
+
+        var dbConnectionName = fromDatabaseParameters.DbConnectionName;
+        var fileStorageName = fromDatabaseParameters.FileStorageName;
+        var smartSchemaName = fromDatabaseParameters.SmartSchemaName;
+        var databaseName = fromDatabaseParameters.DatabaseName;
         var skipBackupBeforeRestore = fromDatabaseParameters.SkipBackupBeforeRestore;
-        var databaseBackupParameters =
-            DatabaseBackupParametersDomain.Create(fromDatabaseParameters.DatabaseBackupParameters);
+        var backupNamePrefix = fromDatabaseParameters.BackupNamePrefix ?? $"{Environment.MachineName}_";
+        var dateMask = fromDatabaseParameters.DateMask ?? DatabaseParameters.DefaultDateMask;
+        var backupFileExtension =
+            fromDatabaseParameters.BackupFileExtension ?? DatabaseParameters.DefaultBackupFileExtension;
+        var backupNameMiddlePart = fromDatabaseParameters.BackupNameMiddlePart ??
+                                   DatabaseParameters.DefaultBackupNameMiddlePart;
+        var databaseRecoveryModel = fromDatabaseParameters.DatabaseRecoveryModel ??
+                                    DatabaseParameters.DefaultDatabaseRecoveryModel;
+        var compress = fromDatabaseParameters.Compress ?? DatabaseParameters.DefaultCompress;
+        var verify = fromDatabaseParameters.Verify ?? DatabaseParameters.DefaultVerify;
+        var backupType = fromDatabaseParameters.BackupType ?? DatabaseParameters.DefaultBackupType;
 
         var errors = new List<Err>();
         if (string.IsNullOrWhiteSpace(localPath))
@@ -47,29 +69,27 @@ public class CreateBaseBackupParametersFabric : MessageLogger
                 await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalPathIsNotSpecifiedInParameters,
                     cancellationToken));
 
-        if (string.IsNullOrWhiteSpace(sourceDatabaseName))
-            errors.AddRange(
-                await LogErrorAndSendMessageFromError(DatabaseManagerErrors.SourceDatabaseNameDoesNotSpecified,
-                    cancellationToken));
+        if (string.IsNullOrWhiteSpace(databaseName))
+            errors.AddRange(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.DatabaseNameDoesNotSpecified,
+                cancellationToken));
 
         if (string.IsNullOrWhiteSpace(fromDatabaseParameters.DbServerFoldersSetName))
             errors.AddRange(await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified, cancellationToken));
 
-        var sourceSmartSchema = string.IsNullOrWhiteSpace(sourceSmartSchemaName)
+        var smartSchema = string.IsNullOrWhiteSpace(smartSchemaName)
             ? null
-            : smartSchemas.GetSmartSchemaByKey(sourceSmartSchemaName);
+            : smartSchemas.GetSmartSchemaByKey(smartSchemaName);
 
-        //sourceDbWebAgentName
+        //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResultForSource = await DatabaseManagersFabric.CreateDatabaseManager(_logger, true,
-            sourceDbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null,
-            CancellationToken.None);
+        var createDatabaseManagerResult = await DatabaseManagersFabric.CreateDatabaseManager(_logger, true,
+            dbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
-        if (createDatabaseManagerResultForSource.IsT1)
+        if (createDatabaseManagerResult.IsT1)
         {
-            errors.AddRange(createDatabaseManagerResultForSource.AsT1);
+            errors.AddRange(createDatabaseManagerResult.AsT1);
             errors.AddRange(await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.CanNotCreateDatabaseServerClient, cancellationToken));
         }
@@ -77,18 +97,17 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         if (errors.Count > 0)
             return errors;
 
-        var (sourceFileStorage, sourceFileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(true,
-            _logger, localPath!, sourceFileStorageName, fileStorages, null, null, CancellationToken.None);
+        var (fileStorage, fileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(true, _logger,
+            localPath!, fileStorageName, fileStorages, null, null, cancellationToken);
 
-        if (sourceFileManager == null || sourceFileStorage == null)
+        if (fileManager == null || fileStorage == null)
             return (Err[])await LogErrorAndSendMessageFromError(
-                DatabaseManagerErrors.SourceFileStorageAndSourceFileManagerIsNotCreated, cancellationToken);
+                DatabaseManagerErrors.FileStorageAndFileManagerIsNotCreated, cancellationToken);
 
-        var sourceBackupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResultForSource.AsT0,
-            sourceFileManager, sourceSmartSchema, sourceDatabaseName!, fromDatabaseParameters.DbServerFoldersSetName!,
-            sourceFileStorage);
+        var backupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResult.AsT0, fileManager,
+            smartSchema, databaseName!, fromDatabaseParameters.DbServerFoldersSetName!, fileStorage);
 
-        var needDownloadFromSource = !FileStorageData.IsSameToLocal(sourceFileStorage, localPath!);
+        var needDownload = !FileStorageData.IsSameToLocal(fileStorage, localPath!);
 
         var localFileManager = FileManagersFabric.CreateFileManager(true, _logger, localPath!);
 
@@ -105,16 +124,15 @@ public class CreateBaseBackupParametersFabric : MessageLogger
         //შევქმნათ შესაბამისი ფაილმენეჯერი
         Console.Write($" exchangeFileStorage - {exchangeFileStorageName}");
         var (exchangeFileStorage, exchangeFileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(
-            true, _logger, localPath!, exchangeFileStorageName, fileStorages, null, null, CancellationToken.None);
+            true, _logger, localPath!, exchangeFileStorageName, fileStorages, null, null, cancellationToken);
 
         var needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
                                    !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath!);
 
 
-        return new BaseBackupParameters(sourceBackupRestoreParameters, needDownloadFromSource,
-            string.IsNullOrWhiteSpace(downloadTempExtension) ? "down!" : downloadTempExtension, localFileManager,
-            localSmartSchema, needUploadToExchange, exchangeFileManager,
-            string.IsNullOrWhiteSpace(uploadTempExtension) ? "up!" : uploadTempExtension, localPath!,
-            skipBackupBeforeRestore, databaseBackupParameters);
+        return new BaseBackupParameters(backupRestoreParameters, databaseRecoveryModel, needDownload,
+            downloadTempExtension, localFileManager, localSmartSchema, needUploadToExchange, exchangeFileManager,
+            uploadTempExtension, localPath!, skipBackupBeforeRestore, backupNamePrefix, dateMask, backupFileExtension,
+            backupNameMiddlePart, compress, verify, backupType);
     }
 }

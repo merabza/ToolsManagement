@@ -39,7 +39,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         _userName = userName;
     }
 
-    //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
     public async ValueTask<Option<IEnumerable<Err>>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
@@ -218,10 +217,11 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.IsServerLocal(cancellationToken);
     }
 
+
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<IEnumerable<Err>>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string databaseName, string dbServerFoldersSetName, string? restoreFromFolderPath = null,
-        CancellationToken cancellationToken = default)
+        string databaseName, string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
+        string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
@@ -281,10 +281,22 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         if (string.IsNullOrWhiteSpace(dataLogFolder))
             return new[] { DbClientErrors.NoDataLogFolder };
 
+        var restoreDatabaseResult = await dc.RestoreDatabase(databaseName, backupFileFullName, files, dataFolder,
+            dataLogFolder, dirSeparator, cancellationToken);
 
-        return await dc.RestoreDatabase(databaseName, backupFileFullName, files,
-            /*destinationDbServerSideDataFolderPath ??*/ dataFolder,
-            /*destinationDbServerSideLogFolderPath ?? */dataLogFolder, dirSeparator, cancellationToken);
+        if (restoreDatabaseResult.IsSome)
+            return (Err[])restoreDatabaseResult;
+
+        if (databaseRecoveryModel == EDatabaseRecoveryModel.Full)
+            return null;
+
+        var changeDatabaseRecoveryModelResult =
+            await dc.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
+
+        if (changeDatabaseRecoveryModelResult.IsSome)
+            return (Err[])changeDatabaseRecoveryModelResult;
+
+        return null;
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.

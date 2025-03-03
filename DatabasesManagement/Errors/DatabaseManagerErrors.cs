@@ -10,10 +10,9 @@ public static class DatabaseManagerErrors
         ErrorMessage = "localPath is not specified in databasesBackupFilesExchangeParameter"
     };
 
-    public static readonly Err SourceDatabaseNameDoesNotSpecified = new()
+    public static readonly Err DatabaseNameDoesNotSpecified = new()
     {
-        ErrorCode = nameof(SourceDatabaseNameDoesNotSpecified),
-        ErrorMessage = "sourceDatabaseName does not specified"
+        ErrorCode = nameof(DatabaseNameDoesNotSpecified), ErrorMessage = "DatabaseName does not specified"
     };
 
     public static readonly Err FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified = new()
@@ -28,10 +27,10 @@ public static class DatabaseManagerErrors
         ErrorMessage = "Can not create client for source Database server"
     };
 
-    public static readonly Err SourceFileStorageAndSourceFileManagerIsNotCreated = new()
+    public static readonly Err FileStorageAndFileManagerIsNotCreated = new()
     {
-        ErrorCode = nameof(SourceFileStorageAndSourceFileManagerIsNotCreated),
-        ErrorMessage = "sourceFileStorage and sourceFileManager is Not Created"
+        ErrorCode = nameof(FileStorageAndFileManagerIsNotCreated),
+        ErrorMessage = "FileStorage and sourceFileManager is Not Created"
     };
 
     public static readonly Err LocalFileManagerIsNotCreated = new()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DbTools;
 using DbTools.Errors;
 using DbTools.Models;
 using LanguageExt;
@@ -59,12 +60,12 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public Task<Option<IEnumerable<Err>>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
-        string databaseName, string dbServerFoldersSetName, string? restoreFromFolderPath = null,
-        CancellationToken cancellationToken = default)
+        string databaseName, string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
+        string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         return ApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
             backupFileParameters.Name, backupFileParameters.DateMask, databaseName, dbServerFoldersSetName,
-            cancellationToken);
+            databaseRecoveryModel, cancellationToken);
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
