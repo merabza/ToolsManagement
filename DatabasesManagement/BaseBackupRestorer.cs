@@ -50,7 +50,7 @@ public class BaseBackupRestorer
         var backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
         var databaseManager = backupRestoreParameters.DatabaseManager;
         var databaseName = backupRestoreParameters.DatabaseName;
-        _logger.LogInformation("Check if Destination base {destinationDatabaseName} exists", databaseName);
+        _logger.LogInformation("Check if Destination base {databaseName} exists", databaseName);
 
         //შევამოწმოთ მიზნის ბაზის არსებობა
         var isDatabaseExistsResult = await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
@@ -68,6 +68,8 @@ public class BaseBackupRestorer
             _logger.LogError("database {databaseName} does not exist", databaseName);
             return null;
         }
+
+        _logger.LogInformation("Create backup of existing database {databaseName}", databaseName);
 
         //ბექაპის დამზადება წყაროს მხარეს
         var createBackupResult = await databaseManager.CreateBackup(
