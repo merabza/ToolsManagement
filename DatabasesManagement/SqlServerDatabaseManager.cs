@@ -169,6 +169,18 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets.Keys.ToList());
     }
 
+    public async ValueTask<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName, EDatabaseRecoveryModel databaseRecoveryModel,
+        CancellationToken cancellationToken)
+    {
+        var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
+
+        if (getDatabaseClientResult.IsT1)
+            return (Err[])getDatabaseClientResult.AsT1;
+        var dc = getDatabaseClientResult.AsT0;
+
+        return await dc.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
+    }
+
     //public Task<OneOf<DbServerInfo, IEnumerable<Err>>> GetDbServerInfo(CancellationToken cancellationToken = default)
     //{
 

@@ -122,6 +122,12 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         return ApiClient.GetDatabaseFoldersSetNames(cancellationToken);
     }
 
+    public ValueTask<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName, EDatabaseRecoveryModel databaseRecoveryModel,
+        CancellationToken cancellationToken)
+    {
+        return ApiClient.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
+    }
+
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
     public ValueTask<Option<IEnumerable<Err>>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
