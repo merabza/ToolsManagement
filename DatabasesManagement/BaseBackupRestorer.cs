@@ -65,7 +65,7 @@ public class BaseBackupRestorer
 
         if (!isDatabaseExists)
         {
-            _logger.LogError("database {databaseName} does not exist", databaseName);
+            _logger.LogWarning("database {databaseName} does not exist", databaseName);
             return null;
         }
 
