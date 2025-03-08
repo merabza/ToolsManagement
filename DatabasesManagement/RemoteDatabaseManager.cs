@@ -122,8 +122,8 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         return ApiClient.GetDatabaseFoldersSetNames(cancellationToken);
     }
 
-    public ValueTask<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName, EDatabaseRecoveryModel databaseRecoveryModel,
-        CancellationToken cancellationToken)
+    public ValueTask<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName,
+        EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
     {
         return ApiClient.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
     }
