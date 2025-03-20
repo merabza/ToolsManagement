@@ -176,7 +176,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             return (Err[])await LogErrorAndSendMessageFromError(
                 InstallerErrors.FileCanNotBeDeleted(appSettingsFileFullPath), cancellationToken).ConfigureAwait(false);
 
-
         //შეიქმნას პარამეტრების ფაილი არსებულ ინფორმაციაზე დაყრდნობით
         await File.WriteAllTextAsync(appSettingsFileFullPath, appSettingsFileBody, cancellationToken);
         //შეიცვალოს პარამეტრების ფაილზე უფლებები საჭიროების მიხედვით.
@@ -222,7 +221,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
-
 
         var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
@@ -274,7 +272,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
 
         var assemblyVersion = Assembly.LoadFile(projectMainExeFileName).GetName().Version?.ToString();
-
 
         var serviceEnvName = GetServiceEnvName(projectName, environmentName);
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}

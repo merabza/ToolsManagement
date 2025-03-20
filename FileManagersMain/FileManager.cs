@@ -360,7 +360,6 @@ public /*open*/ class FileManager
         return true;
     }
 
-
     public virtual bool CreateDirectory(string directoryName)
     {
         return false;

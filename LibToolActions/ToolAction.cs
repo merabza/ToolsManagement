@@ -15,7 +15,6 @@ public /*open*/ class ToolAction : MessageLogger
     protected readonly string ToolActionName;
     protected readonly bool UseConsole;
 
-
     protected ToolAction(ILogger? logger, string actionName, IMessagesDataManager? messagesDataManager,
         string? userName, bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {

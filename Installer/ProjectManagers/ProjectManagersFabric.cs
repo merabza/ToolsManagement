@@ -32,7 +32,6 @@ public static class ProjectManagersFabric
         return null;
     }
 
-
     public static async ValueTask<IProjectsManager?> CreateAgentClient(ILogger logger, bool useConsole,
         string? installFolder, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)

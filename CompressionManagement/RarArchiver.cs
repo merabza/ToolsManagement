@@ -51,7 +51,6 @@ public sealed class RarArchiver : Archiver
 
         return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments).IsNone;
 
-
         //ProgRunner runProg = new ProgRunner(progPath, programArguments);
         //runProg.Execute();
         //return runProg.ExitCode == 0;

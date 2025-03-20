@@ -24,7 +24,6 @@ public sealed class ZipClassArchiver : Archiver
         if (processManager is not null && processManager.CheckCancellation())
             return false;
 
-
         //დავადგინოთ გვაქვს თუ არა გამორიცხვები გამოყენებული.
         //დავადგინოთ ყველა ფაილების ჯამური სიგრძე (რომელიც უნდა შევიდეს არქივში)
         if (UseConsole)

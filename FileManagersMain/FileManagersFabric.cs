@@ -37,7 +37,6 @@ public static class FileManagersFabric
             }
         }
 
-
         DiskFileManager dfm = new(storagePatchChecked, useConsole, logger, localPatchChecked);
 
         return dfm;

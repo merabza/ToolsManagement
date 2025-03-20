@@ -70,7 +70,6 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
             _userName, cancellationToken);
 
-
         var stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
         return stopResult.IsNone
             ? null

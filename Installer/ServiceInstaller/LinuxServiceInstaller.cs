@@ -146,7 +146,6 @@ public sealed class LinuxServiceInstaller : InstallerBase
                 """;
     }
 
-
     protected override async ValueTask<Option<IEnumerable<Err>>> RegisterService(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
