@@ -241,7 +241,6 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             appSettingsFile = new FileNameAndTextContent(appSettingsFileName, appSettingsFileBody);
         }
 
-
         var resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
         var runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName, projectName,

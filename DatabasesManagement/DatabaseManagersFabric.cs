@@ -137,7 +137,6 @@ public static class DatabaseManagersFabric
         return new RemoteDatabaseManager(logger, databaseApiClient);
     }
 
-
     private static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateSqlServerDatabaseManager(
         ILogger logger, bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)

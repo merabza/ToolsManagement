@@ -56,7 +56,6 @@ public static class ArchiverFabric
             return null;
         }
 
-
         if (archiveType != EArchiveType.Zip)
             return archiveType switch
             {

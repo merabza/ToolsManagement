@@ -96,7 +96,6 @@ public sealed class RemoteFileManager : FileManager
         return UploadFileReal(fileFullName, afterRootPath, tempFileName, upFileName);
     }
 
-
     public override bool DownloadFile(string? remoteAfterRootPath, string fileName, string? localAfterRootPath,
         string downFileName, string useTempExtension)
     {
@@ -132,7 +131,6 @@ public sealed class RemoteFileManager : FileManager
         Logger.LogError("DownloadFile file finished with errors: {fileFullName}", fileFullName);
         return false;
     }
-
 
     private bool UploadFileReal(string fileFullName, string? afterRootPath, string tempFileName, string fileName)
     {
@@ -185,7 +183,6 @@ public sealed class RemoteFileManager : FileManager
         return _cTools.Rename(afterRootPath, fileName, newFileName);
     }
 
-
     public override bool RenameFolder(string? afterRootPath, string folderName, string newFolderName)
     {
         return _cTools.Rename(afterRootPath, folderName, newFolderName);
@@ -195,7 +192,6 @@ public sealed class RemoteFileManager : FileManager
     {
         return _cTools.Delete(null, fileName);
     }
-
 
     //ფაილის წაშლა სახელის მითითებით
     public override bool DeleteFile(string? afterRootPath, string fileName)
@@ -218,7 +214,6 @@ public sealed class RemoteFileManager : FileManager
         return _cTools.DirectoryExists(null, directoryName);
     }
 
-
     public override bool DirectoryExists(string? afterRootPath, string directoryName)
     {
         return _cTools.DirectoryExists(afterRootPath, directoryName);
@@ -234,7 +229,6 @@ public sealed class RemoteFileManager : FileManager
         var files = _cTools.GetFilesWithInfo(afterRootPath, null, true);
         return files.SingleOrDefault(x => x.FileName == fileName);
     }
-
 
     //public override string GetPath(string afterRootPath, string fileName)
     //{

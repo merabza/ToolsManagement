@@ -124,7 +124,6 @@ public /*open*/ class FolderProcessor
             .All(file => ProcessOneFile(afterRootPath, file));
     }
 
-
     protected static bool NeedExclude(string name, string[] excludes)
     {
         var haveExclude = excludes is { Length: > 0 };

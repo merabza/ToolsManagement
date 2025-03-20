@@ -119,7 +119,6 @@ public class CreateBaseBackupParametersFabric : MessageLogger
             ? null
             : smartSchemas.GetSmartSchemaByKey(localSmartSchemaName);
 
-
         //თუ გაცვლის სერვერის პარამეტრები გვაქვს,
         //შევქმნათ შესაბამისი ფაილმენეჯერი
         Console.Write($" exchangeFileStorage - {exchangeFileStorageName}");
@@ -128,7 +127,6 @@ public class CreateBaseBackupParametersFabric : MessageLogger
 
         var needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
                                    !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath!);
-
 
         return new BaseBackupParameters(backupRestoreParameters, databaseRecoveryModel, needDownload,
             downloadTempExtension, localFileManager, localSmartSchema, needUploadToExchange, exchangeFileManager,

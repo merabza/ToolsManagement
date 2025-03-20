@@ -94,7 +94,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.IsDatabaseExists(databaseName, cancellationToken);
     }
 
-
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
     public async ValueTask<Option<IEnumerable<Err>>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
@@ -228,7 +227,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         return await dc.IsServerLocal(cancellationToken);
     }
-
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     public async Task<Option<IEnumerable<Err>>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,

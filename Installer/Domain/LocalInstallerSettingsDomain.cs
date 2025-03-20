@@ -33,7 +33,6 @@ public sealed class LocalInstallerSettingsDomain
     //public string? ServiceDescriptionSignature { get; }
     //public string? ProjectDescription { get; }
 
-
     public static async ValueTask<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
         InstallerSettings? lis, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
@@ -49,7 +48,6 @@ public sealed class LocalInstallerSettingsDomain
         StShared.WriteErrorLine("LocalInstallerSettings does not configured for support tools", true);
         return null;
     }
-
 
     private static async ValueTask<LocalInstallerSettingsDomain?> Create(ILogger? logger, bool useConsole,
         string? installerWorkFolder, string? filesUserName, string? filesUsersGroupName, string? serviceUserName,

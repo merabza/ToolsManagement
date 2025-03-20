@@ -16,7 +16,6 @@ public sealed class MaskManager
     private readonly string _dateMask;
     private readonly string _fileNamePrefix;
 
-
     public MaskManager(string fileNamePrefix, string dateMask)
     {
         _dateMask = dateMask;

@@ -51,7 +51,6 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         return true;
     }
 
-
     private async Task<string?> GetParametersFileBody(CancellationToken cancellationToken = default)
     {
         var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
@@ -71,10 +70,8 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
         await LogInfoAndSendMessage("Project Parameter files not found on exchange storage", cancellationToken);
 
-
         return null;
     }
-
 
     private static string GetPrefix(string projectName, string serverName, string environmentName, string? runtime)
     {
