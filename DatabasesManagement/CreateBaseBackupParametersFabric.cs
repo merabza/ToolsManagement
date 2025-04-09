@@ -16,7 +16,7 @@ using SystemToolsShared.Errors;
 
 namespace DatabasesManagement;
 
-public class CreateBaseBackupParametersFabric : MessageLogger
+public sealed class CreateBaseBackupParametersFabric : MessageLogger
 {
     private readonly ILogger _logger;
 

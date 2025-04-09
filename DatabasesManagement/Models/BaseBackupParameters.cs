@@ -4,7 +4,7 @@ using LibFileParameters.Models;
 
 namespace DatabasesManagement.Models;
 
-public class BaseBackupParameters
+public sealed class BaseBackupParameters
 {
     // ReSharper disable once ConvertToPrimaryConstructor
     public BaseBackupParameters(BackupRestoreParameters backupRestoreParameters,

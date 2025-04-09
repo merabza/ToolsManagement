@@ -11,7 +11,7 @@ using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public class BaseBackupRestorer
+public sealed class BaseBackupRestorer
 {
     private readonly BaseBackupParameters _baseBackupParameters;
     private readonly ILogger _logger;
