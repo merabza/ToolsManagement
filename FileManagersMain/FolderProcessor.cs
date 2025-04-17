@@ -8,6 +8,8 @@ namespace FileManagersMain;
 
 public /*open*/ class FolderProcessor
 {
+    protected readonly ExcludeSet? ExcludeSet;
+    protected readonly FileManager FileManager;
     private readonly bool _deleteEmptyFolders;
     private readonly string _description;
 
@@ -16,8 +18,6 @@ public /*open*/ class FolderProcessor
     private readonly string _name;
     private readonly bool _useProcessFiles;
     private readonly bool _useSubFolders;
-    protected readonly ExcludeSet? ExcludeSet;
-    protected readonly FileManager FileManager;
 
     protected FolderProcessor(string name, string description, FileManager fileManager, string? fileSearchPattern,
         bool deleteEmptyFolders, ExcludeSet? excludeSet, bool useSubFolders, bool useProcessFiles)
