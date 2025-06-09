@@ -109,9 +109,7 @@ public sealed class ZipClassArchiver : Archiver
     {
         var haveExclude = excludes is { Length: > 0 };
 
-        if (haveExclude && excludes.Any(name.FitsMask))
-            return true;
-        return false;
+        return haveExclude && excludes.Any(name.FitsMask);
     }
 
     private bool ArchiveFile(string startPath, FileInfo file, ZipArchive archive, string[] excludes,

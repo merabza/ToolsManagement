@@ -9,6 +9,7 @@
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\LibToolActions\LibToolActions.csproj" />
+        <ProjectReference Include="..\FileManagersMain\FileManagersMain.csproj" />
     </ItemGroup>
 
 </Project>
