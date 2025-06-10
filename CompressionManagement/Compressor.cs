@@ -15,9 +15,9 @@ public class Compressor
     private readonly string _middlePart;
     private readonly string[] _excludes;
 
-
     // ReSharper disable once ConvertToPrimaryConstructor
-    public Compressor(bool useConsole, ILogger logger, SmartSchema smartSchemaForLocal, string middlePart, string[] excludes)
+    public Compressor(bool useConsole, ILogger logger, SmartSchema smartSchemaForLocal, string middlePart,
+        string[] excludes)
     {
         _useConsole = useConsole;
         _logger = logger;
@@ -71,5 +71,4 @@ public class Compressor
 
         return true;
     }
-
 }
