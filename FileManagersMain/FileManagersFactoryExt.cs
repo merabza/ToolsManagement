@@ -6,12 +6,12 @@ using SystemToolsShared;
 
 namespace FileManagersMain;
 
-public static class FileManagersFabricExt
+public static class FileManagersFactoryExt
 {
     public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string? localPatch,
         FileStorageData fileStorage, bool allowLocalPathNull = false)
     {
-        return FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
+        return FileManagersFactory.CreateFileManager(useConsole, logger, localPatch, fileStorage, allowLocalPathNull);
     }
 
     //public static (FileStorageData?, FileManager?) CreateLocalFileStorageAndFileManager(bool useConsole,
@@ -19,7 +19,7 @@ public static class FileManagersFabricExt
     //{
     //    var fileStorageData = new FileStorageData {FileStoragePath =fileStoragePath };
 
-    //    var fmg = FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
+    //    var fmg = FileManagersFactory.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
 
     //    return fmg == null ? (null, null) : (fileStorageData, fmg);
     //}
@@ -50,7 +50,7 @@ public static class FileManagersFabricExt
         if (fileStorageData == null)
             return (null, null);
 
-        var fmg = FileManagersFabric.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
+        var fmg = FileManagersFactory.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
 
         return fmg == null ? (null, null) : (fileStorageData, fmg);
     }

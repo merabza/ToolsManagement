@@ -6,7 +6,7 @@ using SystemToolsShared;
 namespace CompressionManagement;
 
 //არქივატორების ფაბრიკა. გამოიყენება ReServer პროექტში
-public static class ArchiverFabric
+public static class ArchiverFactory
 {
     public static Archiver? CreateArchiver(ILogger logger, bool useConsole, Archivers archivers, string? archiverName)
     {

@@ -95,7 +95,7 @@ public sealed class BaseBackupRestorer
         if (!string.IsNullOrWhiteSpace(backupCreateFolderName) &&
             !FileStorageData.IsSameToLocal(backupRestoreParameters.FileStorage, backupCreateFolderName))
         {
-            var backupFolderFileManager = FileManagersFabric.CreateFileManager(true, _logger, backupCreateFolderName,
+            var backupFolderFileManager = FileManagersFactory.CreateFileManager(true, _logger, backupCreateFolderName,
                 _baseBackupParameters.LocalPath);
 
             if (backupFolderFileManager == null)

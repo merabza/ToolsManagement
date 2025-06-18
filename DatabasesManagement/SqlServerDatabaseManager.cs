@@ -183,7 +183,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //public Task<OneOf<DbServerInfo, IEnumerable<Err>>> GetDbServerInfo(CancellationToken cancellationToken = default)
     //{
 
-    //    var dc = DbClientFabric.GetDbClient(_logger, true, EDatabaseProvider.SqlServer,
+    //    var dc = DbClientFactory.GetDbClient(_logger, true, EDatabaseProvider.SqlServer,
     //        _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
     //        _databaseServerConnectionDataDomain.TrustServerCertificate, ProgramAttributes.Instance.AppName);
 
@@ -377,7 +377,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     private async ValueTask<OneOf<DbClient, IEnumerable<Err>>> GetDatabaseClient(EDatabaseProvider dataProvider,
         string? databaseName = null, CancellationToken cancellationToken = default)
     {
-        var dc = DbClientFabric.GetDbClient(_logger, _useConsole, dataProvider,
+        var dc = DbClientFactory.GetDbClient(_logger, _useConsole, dataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
             _databaseServerConnectionDataDomain.TrustServerCertificate, ProgramAttributes.Instance.AppName,
             databaseName, _messagesDataManager, _userName);

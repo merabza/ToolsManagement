@@ -29,7 +29,7 @@ public class Compressor
     public bool CompressFolder(string sourceFolderFullPath, string localPath)
     {
         const string backupFileNameSuffix = ".zip";
-        var archiver = ArchiverFabric.CreateArchiverByType(_useConsole, _logger, EArchiveType.ZipClass, null, null,
+        var archiver = ArchiverFactory.CreateArchiverByType(_useConsole, _logger, EArchiveType.ZipClass, null, null,
             backupFileNameSuffix);
 
         if (archiver is null)
@@ -57,7 +57,7 @@ public class Compressor
 
         File.Move(tempFileName, backupFileFullName);
 
-        var localFileManager = FileManagersFabric.CreateFileManager(_useConsole, _logger, localPath);
+        var localFileManager = FileManagersFactory.CreateFileManager(_useConsole, _logger, localPath);
         //წაიშალოს ადრე შექმნილი დაძველებული ფაილები
 
         if (localFileManager is null)

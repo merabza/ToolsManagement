@@ -58,7 +58,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
             return null;
         }
 
-        var serviceInstaller = await InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
             messagesDataManager, userName, cancellationToken);
 
         if (serviceInstaller == null)

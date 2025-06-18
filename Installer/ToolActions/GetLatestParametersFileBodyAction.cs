@@ -56,7 +56,7 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 
         var exchangeFileManager =
-            FileManagersFabric.CreateFileManager(_useConsole, _logger, null, _fileStorageForDownload, true);
+            FileManagersFactory.CreateFileManager(_useConsole, _logger, null, _fileStorageForDownload, true);
 
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი

@@ -5,7 +5,7 @@ using SystemToolsShared;
 
 namespace FileManagersMain;
 
-public static class FileManagersFabric
+public static class FileManagersFactory
 {
     public static FileManager? CreateFileManager(bool useConsole, ILogger logger, string storagePatch,
         string? localPatch = null)

@@ -34,7 +34,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         bool isService, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
-        var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole, _messagesDataManager,
             _userName, cancellationToken);
 
         var removeProjectAndServiceResult = await serviceInstaller.RemoveProjectAndService(projectName, environmentName,
@@ -54,7 +54,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
-        var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole, _messagesDataManager,
             _userName, cancellationToken);
 
         var stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
@@ -67,7 +67,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
-        var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole, _messagesDataManager,
             _userName, cancellationToken);
 
         var stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
@@ -80,7 +80,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
-        var serviceInstaller = await InstallerFabric.CreateInstaller(_logger, _useConsole, _messagesDataManager,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole, _messagesDataManager,
             _userName, cancellationToken);
 
         var removeProjectResult =

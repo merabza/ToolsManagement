@@ -38,7 +38,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {
-        var serviceInstaller = await InstallerFabric.CreateInstaller(logger, useConsole, dotnetRunner,
+        var serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
             messagesDataManager, userName, cancellationToken);
 
         if (serviceInstaller == null)
@@ -124,7 +124,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (projectName == ProgramAttributes.Instance.AppName)
             return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
-        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
+        var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
@@ -188,7 +188,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (projectName == ProgramAttributes.Instance.AppName)
             return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
-        var exchangeFileManager = FileManagersFabric.CreateFileManager(UseConsole, _logger,
+        var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 

@@ -16,7 +16,7 @@ using WebAgentDatabasesApiContracts;
 
 namespace DatabasesManagement;
 
-public static class DatabaseManagersFabric
+public static class DatabaseManagersFactory
 {
     public static Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger, bool useConsole,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,

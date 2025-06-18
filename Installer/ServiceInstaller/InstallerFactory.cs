@@ -6,7 +6,7 @@ using SystemToolsShared;
 
 namespace Installer.ServiceInstaller;
 
-public static class InstallerFabric
+public static class InstallerFactory
 {
     public static async ValueTask<InstallerBase?> CreateInstaller(ILogger logger, bool useConsole, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)

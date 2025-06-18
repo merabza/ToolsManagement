@@ -8,7 +8,7 @@ using SystemToolsShared;
 
 namespace Installer.ProjectManagers;
 
-public static class ProjectManagersFabric
+public static class ProjectManagersFactory
 {
     public static async ValueTask<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
         InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,

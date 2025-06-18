@@ -16,12 +16,12 @@ using SystemToolsShared.Errors;
 
 namespace DatabasesManagement;
 
-public sealed class CreateBaseBackupParametersFabric : MessageLogger
+public sealed class CreateBaseBackupParametersFactory : MessageLogger
 {
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public CreateBaseBackupParametersFabric(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
+    public CreateBaseBackupParametersFactory(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
         bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
     {
         _logger = logger;
@@ -84,7 +84,7 @@ public sealed class CreateBaseBackupParametersFabric : MessageLogger
         //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResult = await DatabaseManagersFabric.CreateDatabaseManager(_logger, true,
+        var createDatabaseManagerResult = await DatabaseManagersFactory.CreateDatabaseManager(_logger, true,
             dbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
         if (createDatabaseManagerResult.IsT1)
@@ -97,7 +97,7 @@ public sealed class CreateBaseBackupParametersFabric : MessageLogger
         if (errors.Count > 0)
             return errors;
 
-        var (fileStorage, fileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(true, _logger,
+        var (fileStorage, fileManager) = await FileManagersFactoryExt.CreateFileStorageAndFileManager(true, _logger,
             localPath!, fileStorageName, fileStorages, null, null, cancellationToken);
 
         if (fileManager == null || fileStorage == null)
@@ -109,7 +109,7 @@ public sealed class CreateBaseBackupParametersFabric : MessageLogger
 
         var needDownload = !FileStorageData.IsSameToLocal(fileStorage, localPath!);
 
-        var localFileManager = FileManagersFabric.CreateFileManager(true, _logger, localPath!);
+        var localFileManager = FileManagersFactory.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
             return (Err[])await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
@@ -122,7 +122,7 @@ public sealed class CreateBaseBackupParametersFabric : MessageLogger
         //თუ გაცვლის სერვერის პარამეტრები გვაქვს,
         //შევქმნათ შესაბამისი ფაილმენეჯერი
         Console.Write($" exchangeFileStorage - {exchangeFileStorageName}");
-        var (exchangeFileStorage, exchangeFileManager) = await FileManagersFabricExt.CreateFileStorageAndFileManager(
+        var (exchangeFileStorage, exchangeFileManager) = await FileManagersFactoryExt.CreateFileStorageAndFileManager(
             true, _logger, localPath!, exchangeFileStorageName, fileStorages, null, null, cancellationToken);
 
         var needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
