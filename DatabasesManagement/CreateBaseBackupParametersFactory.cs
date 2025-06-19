@@ -21,8 +21,8 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public CreateBaseBackupParametersFactory(ILogger logger, IMessagesDataManager? messagesDataManager, string? userName,
-        bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
+    public CreateBaseBackupParametersFactory(ILogger logger, IMessagesDataManager? messagesDataManager,
+        string? userName, bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
     {
         _logger = logger;
     }
