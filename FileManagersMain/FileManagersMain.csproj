@@ -17,7 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\ConnectionTools\ConnectTools\ConnectTools.csproj" />
-        <ProjectReference Include="..\..\ConnectionTools\CToolsFabric\CToolsFabric.csproj" />
+        <ProjectReference Include="..\..\ConnectionTools\CToolsFactory\CToolsFactory.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
     </ItemGroup>

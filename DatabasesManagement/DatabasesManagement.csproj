@@ -21,12 +21,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\DatabaseTools\DbToolsFabric\DbToolsFabric.csproj" />
+        <ProjectReference Include="..\..\DatabaseTools\DbToolsFactory\DbToolsFactory.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibDatabaseParameters\LibDatabaseParameters.csproj" />
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
         <ProjectReference Include="..\..\SystemTools\SystemToolsShared\SystemToolsShared.csproj" />
-        <ProjectReference
-            Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentDatabasesApiContracts\WebAgentDatabasesApiContracts.csproj" />
         <ProjectReference Include="..\ApiClientsManagement\ApiClientsManagement.csproj" />
         <ProjectReference Include="..\FileManagersMain\FileManagersMain.csproj" />
     </ItemGroup>
