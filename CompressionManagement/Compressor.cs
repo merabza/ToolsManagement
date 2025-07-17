@@ -9,11 +9,11 @@ namespace CompressionManagement;
 
 public class Compressor
 {
-    private readonly bool _useConsole;
-    private readonly ILogger _logger;
-    private readonly SmartSchema _smartSchemaForLocal;
-    private readonly string _middlePart;
     private readonly string[] _excludes;
+    private readonly ILogger _logger;
+    private readonly string _middlePart;
+    private readonly SmartSchema _smartSchemaForLocal;
+    private readonly bool _useConsole;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public Compressor(bool useConsole, ILogger logger, SmartSchema smartSchemaForLocal, string middlePart,
