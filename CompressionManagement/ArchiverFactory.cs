@@ -49,7 +49,7 @@ public static class ArchiverFactory
         }
 
         //დავადგინოთ არქივატორი ადგილზეა თუ არა
-        FileInfo compressProgram = new(compressProgramPatch);
+        var compressProgram = new FileInfo(compressProgramPatch);
         if (!compressProgram.Exists)
         {
             logger.LogError("Archiver program path is invalid for {archiveType}", archiveType);
@@ -69,7 +69,7 @@ public static class ArchiverFactory
             return null;
         }
 
-        FileInfo decompressProgram = new(decompressProgramPatch);
+        var decompressProgram = new FileInfo(decompressProgramPatch);
 
         if (decompressProgram.Exists)
             return new ZipArchiver(useConsole, fileExtension);

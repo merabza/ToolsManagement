@@ -129,7 +129,7 @@ public static class DatabaseManagersFactory
             return new[] { DbToolsErrors.ServerIsNotSpecifiedInApiClientSettings };
         }
 
-        ApiClientSettingsDomain apiClientSettingsDomain = new(apiClientSettings.Server, apiClientSettings.ApiKey);
+        var apiClientSettingsDomain = new ApiClientSettingsDomain(apiClientSettings.Server, apiClientSettings.ApiKey);
 
         var databaseApiClient = new DatabaseApiClient(logger, httpClientFactory, apiClientSettingsDomain.Server,
             apiClientSettingsDomain.ApiKey, useConsole);

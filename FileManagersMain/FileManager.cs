@@ -172,7 +172,7 @@ public /*open*/ class FileManager
 
     private static string GetMasked(string str)
     {
-        StringBuilder sb = new();
+        var sb = new StringBuilder();
         foreach (var c in str) sb.Append(c != '_' ? '?' : c);
 
         return sb.ToString();

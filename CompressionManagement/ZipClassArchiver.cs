@@ -30,9 +30,11 @@ public sealed class ZipClassArchiver : Archiver
             Console.WriteLine($"Creating archive file {archiveFileName}");
 
         // ReSharper disable once using
-        using FileStream zipToOpen = new(archiveFileName, FileMode.CreateNew);
+        // ReSharper disable once DisposableConstructor
+        using var zipToOpen = new FileStream(archiveFileName, FileMode.CreateNew);
         // ReSharper disable once using
-        using ZipArchive archive = new(zipToOpen, ZipArchiveMode.Create);
+        // ReSharper disable once DisposableConstructor
+        using var archive = new ZipArchive(zipToOpen, ZipArchiveMode.Create);
         foreach (var source in sources)
         {
             if (processManager is not null && processManager.CheckCancellation())
@@ -47,14 +49,14 @@ public sealed class ZipClassArchiver : Archiver
             if (Directory.Exists(source))
             {
                 // This path is a directory
-                DirectoryInfo sourceDir = new(source);
+                var sourceDir = new DirectoryInfo(source);
                 if (!ArchiveDirectory(startPath, sourceDir, archive, excludes))
                     return false;
             }
             else if (File.Exists(source))
             {
                 // This path is a file
-                FileInfo sourceFile = new(source);
+                var sourceFile = new FileInfo(source);
                 if (!ArchiveFile(startPath, sourceFile, archive, excludes))
                     return false;
             }
@@ -77,7 +79,7 @@ public sealed class ZipClassArchiver : Archiver
         {
             var fileNameParts = entry.FullName.Split('/');
             var curPath = path;
-            DirectoryInfo curDirectory = new(curPath);
+            var curDirectory = new DirectoryInfo(curPath);
             for (var i = 0; i < fileNameParts.Length - 1; i++)
             {
                 curPath = Path.Combine(curDirectory.FullName, fileNameParts[i]);

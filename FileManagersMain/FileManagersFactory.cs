@@ -37,7 +37,7 @@ public static class FileManagersFactory
             }
         }
 
-        DiskFileManager dfm = new(storagePatchChecked, useConsole, logger, localPatchChecked);
+        var dfm = new DiskFileManager(storagePatchChecked, useConsole, logger, localPatchChecked);
 
         return dfm;
     }
@@ -106,7 +106,7 @@ public static class FileManagersFactory
             return null;
         }
 
-        DiskFileManager dfm = new(fileStoragePathChecked, useConsole, logger, localPatchChecked);
+        var dfm = new DiskFileManager(fileStoragePathChecked, useConsole, logger, localPatchChecked);
 
         return dfm;
     }

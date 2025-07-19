@@ -362,7 +362,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
                 return (Err[])verifyBackupResult;
         }
 
-        BackupFileParameters backupFileParameters = new(backupFolder, backupFileName, backupFileNamePrefix,
+        var backupFileParameters = new BackupFileParameters(backupFolder, backupFileName, backupFileNamePrefix,
             backupFileNameSuffix, databaseBackupParameters.DateMask);
 
         return backupFileParameters;
