@@ -13,13 +13,11 @@ public /*open*/ class ApplicationUpdaterBase : MessageLogger
     private readonly ILogger _logger;
     private readonly IMessagesDataManager? _messagesDataManager;
     private readonly string? _userName;
-    protected readonly bool UseConsole;
 
     protected ApplicationUpdaterBase(ILogger logger, bool useConsole, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)
     {
         _logger = logger;
-        UseConsole = useConsole;
         _messagesDataManager = messagesDataManager;
         _userName = userName;
     }

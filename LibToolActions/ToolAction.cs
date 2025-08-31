@@ -8,19 +8,19 @@ namespace LibToolActions;
 
 public /*open*/ class ToolAction : MessageLogger
 {
-    public readonly ILogger? Logger;
+    //protected საჭიროა SupportTools პროექტისათვის
+    // ReSharper disable once MemberCanBePrivate.Global
+    protected readonly ILogger? Logger;
 
     //protected საჭიროა ProcessorWorker პროექტისათვის
     // ReSharper disable once MemberCanBePrivate.Global
     protected readonly string ToolActionName;
-    protected readonly bool UseConsole;
 
     protected ToolAction(ILogger? logger, string actionName, IMessagesDataManager? messagesDataManager,
         string? userName, bool useConsole = false) : base(logger, messagesDataManager, userName, useConsole)
     {
         Logger = logger;
         ToolActionName = actionName;
-        UseConsole = useConsole;
     }
 
     public async Task<bool> Run(CancellationToken cancellationToken = default)

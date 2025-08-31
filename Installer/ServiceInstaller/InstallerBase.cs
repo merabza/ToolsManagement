@@ -23,13 +23,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 {
     private readonly ILogger _logger;
     public readonly string Runtime;
-    protected readonly bool UseConsole;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)
     {
         Runtime = runtime;
-        UseConsole = useConsole;
         _logger = logger;
     }
 
