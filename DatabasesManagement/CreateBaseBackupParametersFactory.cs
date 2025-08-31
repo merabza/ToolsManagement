@@ -84,7 +84,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResult = await DatabaseManagersFactory.CreateDatabaseManager(_logger, true,
+        var createDatabaseManagerResult = await DatabaseManagersFactory.CreateDatabaseManager(_logger, UseConsole,
             dbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
         if (createDatabaseManagerResult.IsT1)
