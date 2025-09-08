@@ -11,13 +11,13 @@ using WebAgentDatabasesApiContracts.V1.Responses;
 
 namespace DatabasesManagement;
 
-public sealed class BaseBackupRestorer
+public sealed class BaseBackupRestoreTool
 {
     private readonly BaseBackupParameters _baseBackupParameters;
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public BaseBackupRestorer(ILogger logger, BaseBackupParameters baseBackupParameters)
+    public BaseBackupRestoreTool(ILogger logger, BaseBackupParameters baseBackupParameters)
     {
         _logger = logger;
         _baseBackupParameters = baseBackupParameters;
