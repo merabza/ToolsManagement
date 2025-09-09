@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Polly.Core" Version="8.6.2" />
+        <PackageReference Include="Polly.Core" Version="8.6.3" />
     </ItemGroup>
 
     <ItemGroup>
