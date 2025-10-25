@@ -122,15 +122,14 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             environmentName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.AppName)
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull,
-                cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
 
         var runTime = _installer.Runtime;
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
@@ -150,15 +149,15 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         //და ავარჩიოთ ყველაზე ახალი
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
-            return (Err[])await LogErrorAndSendMessageFromError(
-                InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
+                cancellationToken);
 
         var localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
         if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                 _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
                 cancellationToken);
 
         var assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName,
@@ -173,8 +172,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        return (Err[])await LogErrorAndSendMessageFromError(
-            InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
+        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+            cancellationToken);
     }
 
     public async Task<OneOf<string, IEnumerable<Err>>> UpdateServiceWithParameters(string projectName,
@@ -186,15 +185,14 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             projectName, environmentName, serviceUserName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.AppName)
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
 
         var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull,
-                cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
 
         var runtime = _installer.Runtime;
         var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
@@ -214,15 +212,15 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         //და ავარჩიოთ ყველაზე ახალი
         var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
-            return (Err[])await LogErrorAndSendMessageFromError(
-                InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
+                cancellationToken);
 
         var localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
         if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                 _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
+            return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
                 cancellationToken);
 
         FileNameAndTextContent? appSettingsFile = null;
@@ -235,7 +233,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 _applicationUpdaterParameters.ParametersFileDateMask,
                 _applicationUpdaterParameters.ParametersFileExtension, cancellationToken);
             if (appSettingsFileBody is null)
-                return (Err[])await LogErrorAndSendMessageFromError(
+                return await LogErrorAndSendMessageFromError(
                     InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
 
             appSettingsFile = new FileNameAndTextContent(appSettingsFileName, appSettingsFileBody);
@@ -256,8 +254,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (assemblyVersion != null)
             return assemblyVersion;
 
-        return (Err[])await LogErrorAndSendMessageFromError(
-            InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
+        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+            cancellationToken);
     }
 
     private (string, string, string) GetFileParameters(string projectName, string environmentName, string runtime,

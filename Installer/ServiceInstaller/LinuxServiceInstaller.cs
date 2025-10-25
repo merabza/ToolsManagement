@@ -116,7 +116,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         var checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsT1)
-            return (Err[])await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.DotnetLocationIsNotFound,
+            return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.DotnetLocationIsNotFound,
                 cancellationToken);
 
         var checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
@@ -167,12 +167,12 @@ public sealed class LinuxServiceInstaller : InstallerBase
             $"--no-ask-password --no-block --quiet enable {serviceEnvName}");
 
         if (processResult.IsSome)
-            return (Err[])await LogErrorAndSendMessageFromError(
+            return await LogErrorAndSendMessageFromError(
                 LinuxServiceInstallerErrors.ServiceCanNotBeEnabled(serviceEnvName), cancellationToken);
         if (IsServiceExists(serviceEnvName))
             return null;
-        return (Err[])await LogErrorAndSendMessageFromError(
-            LinuxServiceInstallerErrors.ServiceIsNotEnabled(serviceEnvName), cancellationToken);
+        return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.ServiceIsNotEnabled(serviceEnvName),
+            cancellationToken);
     }
 
     private OneOf<string, IEnumerable<Err>> CheckDotnetRunner(string? dotnetRunner)
@@ -192,7 +192,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string? filesUserName, string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
@@ -204,15 +204,14 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return StShared.RunProcess(UseConsole, _logger, "chown",
                 $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {filePath}");
 
-        return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath),
-            cancellationToken);
+        return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
 
     protected override async ValueTask<Option<IEnumerable<Err>>> ChangeFolderOwner(string folderPath,
         string filesUserName, string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
-            return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
+            return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
@@ -224,7 +223,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return StShared.RunProcess(UseConsole, _logger, "chown",
                 $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {folderPath}");
 
-        return (Err[])await LogErrorAndSendMessageFromError(InstallerErrors.FolderOwnerCanNotBeChanged(folderPath),
+        return await LogErrorAndSendMessageFromError(InstallerErrors.FolderOwnerCanNotBeChanged(folderPath),
             cancellationToken);
     }
 }

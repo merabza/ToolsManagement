@@ -101,8 +101,8 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
             localPath!, fileStorageName, fileStorages, null, null, cancellationToken);
 
         if (fileManager == null || fileStorage == null)
-            return (Err[])await LogErrorAndSendMessageFromError(
-                DatabaseManagerErrors.FileStorageAndFileManagerIsNotCreated, cancellationToken);
+            return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.FileStorageAndFileManagerIsNotCreated,
+                cancellationToken);
 
         var backupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResult.AsT0, fileManager,
             smartSchema, databaseName!, fromDatabaseParameters.DbServerFoldersSetName!, fileStorage);
@@ -112,7 +112,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         var localFileManager = FileManagersFactory.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
-            return (Err[])await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
+            return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
                 cancellationToken);
 
         var localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)

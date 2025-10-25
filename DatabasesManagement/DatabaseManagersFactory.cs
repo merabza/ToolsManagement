@@ -172,7 +172,7 @@ public static class DatabaseManagersFactory
         var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(
             databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,
             dbAuthSettingsCreatorCreateResult.AsT0, databaseServerConnectionData.TrustServerCertificate,
-            databaseServerConnectionData.DatabaseFoldersSets);
+            databaseServerConnectionData.DatabaseFoldersSets ?? []);
 
         return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain, messagesDataManager,
             userName);
