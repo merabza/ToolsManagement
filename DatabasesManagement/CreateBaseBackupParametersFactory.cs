@@ -27,7 +27,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         _logger = logger;
     }
 
-    public async Task<OneOf<BaseBackupParameters, IEnumerable<Err>>> CreateBaseBackupParameters(
+    public async Task<OneOf<BaseBackupParameters, Err[]>> CreateBaseBackupParameters(
         IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
         SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
@@ -95,7 +95,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         }
 
         if (errors.Count > 0)
-            return errors;
+            return errors.ToArray();
 
         var (fileStorage, fileManager) = await FileManagersFactoryExt.CreateFileStorageAndFileManager(true, _logger,
             localPath!, fileStorageName, fileStorages, null, null, cancellationToken);

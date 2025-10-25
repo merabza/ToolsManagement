@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -31,25 +30,25 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         _logger = logger;
     }
 
-    protected abstract ValueTask<OneOf<bool, IEnumerable<Err>>> IsServiceRegisteredProperly(string projectName,
+    protected abstract ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<IEnumerable<Err>>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected abstract ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<IEnumerable<Err>>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected abstract ValueTask<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract Option<IEnumerable<Err>> RemoveService(string serviceEnvName);
+    protected abstract Option<Err[]> RemoveService(string serviceEnvName);
 
-    protected abstract ValueTask<Option<IEnumerable<Err>>> StopService(string serviceEnvName,
+    protected abstract ValueTask<Option<Err[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<IEnumerable<Err>>> StartService(string serviceEnvName,
+    protected abstract ValueTask<Option<Err[]>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<IEnumerable<Err>>> RegisterService(string projectName, string serviceEnvName,
+    protected abstract ValueTask<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
 
@@ -74,7 +73,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return Process.GetProcessesByName(processName).Length > 1;
     }
 
-    public async ValueTask<Option<IEnumerable<Err>>> RunUpdateSettings(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> RunUpdateSettings(string projectName, string environmentName,
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
         string installFolder, CancellationToken cancellationToken = default)
     {
@@ -82,7 +81,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
 
         if (checkBeforeStartUpdateResult.IsT1)
-            return (Err[])checkBeforeStartUpdateResult.AsT1;
+            return checkBeforeStartUpdateResult.AsT1;
         var projectInstallFullPath = checkBeforeStartUpdateResult.AsT0;
 
         //დავადგინოთ დაინსტალირებული პარამეტრების ფაილის სრული გზა
@@ -193,8 +192,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken).ConfigureAwait(false);
     }
 
-    private async ValueTask<OneOf<string, IEnumerable<Err>>> CheckBeforeStartUpdate(string projectName,
-        string installFolder, string environmentName, CancellationToken cancellationToken = default)
+    private async ValueTask<OneOf<string, Err[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
+        string environmentName, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(installFolder))
             return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
@@ -212,10 +211,10 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return projectInstallFullPath;
     }
 
-    public async ValueTask<OneOf<string?, IEnumerable<Err>>> RunUpdateService(string archiveFileName,
-        string projectName, string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName,
-        string filesUserName, string filesUsersGroupName, string installWorkFolder, string installFolder,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
+    public async ValueTask<OneOf<string?, Err[]>> RunUpdateService(string archiveFileName, string projectName,
+        string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
+        string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -416,9 +415,9 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<OneOf<string?, IEnumerable<Err>>> RunUpdateApplication(string archiveFileName,
-        string projectName, string environmentName, string filesUserName, string filesUsersGroupName,
-        string installWorkFolder, string installFolder, CancellationToken cancellationToken = default)
+    public async ValueTask<OneOf<string?, Err[]>> RunUpdateApplication(string archiveFileName, string projectName,
+        string environmentName, string filesUserName, string filesUsersGroupName, string installWorkFolder,
+        string installFolder, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -523,14 +522,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
     }
 
-    public ValueTask<Option<IEnumerable<Err>>> Stop(string projectName, string environmentName,
+    public ValueTask<Option<Err[]>> Stop(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async ValueTask<Option<IEnumerable<Err>>> Stop(string serviceEnvName,
-        CancellationToken cancellationToken = default)
+    private async ValueTask<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         var serviceExists = IsServiceExists(serviceEnvName);
@@ -557,14 +555,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public ValueTask<Option<IEnumerable<Err>>> Start(string projectName, string environmentName,
+    public ValueTask<Option<Err[]>> Start(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return Start(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async ValueTask<Option<IEnumerable<Err>>> Start(string serviceEnvName,
-        CancellationToken cancellationToken = default)
+    private async ValueTask<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         var serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
@@ -583,7 +580,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<Option<IEnumerable<Err>>> RemoveProjectAndService(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName,
         bool isService, string installFolder, CancellationToken cancellationToken = default)
     {
         if (!isService)
@@ -624,7 +621,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<Option<IEnumerable<Err>>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Option<Err[]>> RemoveProject(string projectName, string environmentName,
         string installFolder, CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);

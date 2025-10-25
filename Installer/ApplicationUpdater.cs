@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -31,7 +30,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async ValueTask<OneOf<ApplicationUpdater, IEnumerable<Err>>> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
@@ -114,7 +113,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<OneOf<string, IEnumerable<Err>>> UpdateProgram(string projectName, string environmentName,
+    public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
@@ -166,7 +165,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             _applicationUpdaterParameters.InstallFolder, cancellationToken);
 
         if (assemblyVersionResult.IsT1)
-            return (Err[])assemblyVersionResult.AsT1;
+            return assemblyVersionResult.AsT1;
 
         var assemblyVersion = assemblyVersionResult.AsT0;
         if (assemblyVersion != null)
@@ -176,9 +175,9 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             cancellationToken);
     }
 
-    public async Task<OneOf<string, IEnumerable<Err>>> UpdateServiceWithParameters(string projectName,
-        string environmentName, string serviceUserName, string? appSettingsFileName,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
+    public async Task<OneOf<string, Err[]>> UpdateServiceWithParameters(string projectName, string environmentName,
+        string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",
@@ -248,7 +247,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             cancellationToken);
 
         if (runUpdateServiceResult.IsT1)
-            return (Err[])runUpdateServiceResult.AsT1;
+            return runUpdateServiceResult.AsT1;
 
         var assemblyVersion = runUpdateServiceResult.AsT0;
         if (assemblyVersion != null)

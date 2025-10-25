@@ -39,40 +39,40 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         _userName = userName;
     }
 
-    public async ValueTask<Option<IEnumerable<Err>>> CheckRepairDatabase(string databaseName,
+    public async ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async ValueTask<Option<IEnumerable<Err>>> ExecuteCommand(string executeQueryCommand,
+    public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand,
         string? databaseName = null, CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult =
             await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.ExecuteCommand(executeQueryCommand, true, true, cancellationToken);
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public async Task<OneOf<List<DatabaseInfoModel>, IEnumerable<Err>>> GetDatabaseNames(
+    public async Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.GetDatabaseInfos(cancellationToken);
@@ -81,76 +81,76 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public async Task<OneOf<bool, IEnumerable<Err>>> IsDatabaseExists(string databaseName,
+    public async Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName,
         CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.IsDatabaseExists(databaseName, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public async ValueTask<Option<IEnumerable<Err>>> RecompileProcedures(string databaseName,
+    public async ValueTask<Option<Err[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.RecompileProcedures(databaseName, cancellationToken);
     }
 
-    public async Task<Option<IEnumerable<Err>>> TestConnection(string? databaseName,
+    public async Task<Option<Err[]>> TestConnection(string? databaseName,
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult =
             await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.TestConnection(databaseName is not null, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public async ValueTask<Option<IEnumerable<Err>>> UpdateStatistics(string databaseName,
+    public async ValueTask<Option<Err[]>> UpdateStatistics(string databaseName,
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.UpdateStatistics(databaseName, cancellationToken);
     }
 
-    public async Task<Option<IEnumerable<Err>>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
+    public async Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder,
         string defLogFolder, CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.SetDefaultFolders(defBackupFolder, defDataFolder, defLogFolder, cancellationToken);
     }
 
-    //public Task<OneOf<List<string>, IEnumerable<Err>>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
+    //public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
     //{
     //    throw new NotImplementedException();
     //}
 
-    public async Task<OneOf<List<string>, IEnumerable<Err>>> GetDatabaseFoldersSetNames(
+    public async Task<OneOf<List<string>, Err[]>> GetDatabaseFoldersSetNames(
         CancellationToken cancellationToken)
     {
         //var appSettings = AppSettings.Create(_config);
@@ -168,19 +168,19 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await Task.FromResult(_databaseServerConnectionDataDomain.DatabaseFoldersSets.Keys.ToList());
     }
 
-    public async ValueTask<Option<IEnumerable<Err>>> ChangeDatabaseRecoveryModel(string databaseName,
+    public async ValueTask<Option<Err[]>> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
     }
 
-    //public Task<OneOf<DbServerInfo, IEnumerable<Err>>> GetDbServerInfo(CancellationToken cancellationToken = default)
+    //public Task<OneOf<DbServerInfo, Err[]>> GetDbServerInfo(CancellationToken cancellationToken = default)
     //{
 
     //    var dc = DbClientFactory.GetDbClient(_logger, true, EDatabaseProvider.SqlServer,
@@ -203,33 +203,33 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //}
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<OneOf<DbServerInfo, IEnumerable<Err>>> GetDatabaseServerInfo(
+    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(
         CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.GetDbServerInfo(cancellationToken);
     }
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
-    public async Task<OneOf<bool, IEnumerable<Err>>> IsServerLocal(CancellationToken cancellationToken = default)
+    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         //მონაცემთა ბაზის კლიენტის მომზადება პროვაიდერის მიხედვით
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         return await dc.IsServerLocal(cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public async Task<Option<IEnumerable<Err>>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+    public async Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         string databaseName, string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
         string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
@@ -237,7 +237,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         var hostPlatformResult = await dc.HostPlatform(cancellationToken);
@@ -311,7 +311,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(
+    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default)
     {
@@ -319,12 +319,12 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
         if (getDatabaseClientResult.IsT1)
-            return (Err[])getDatabaseClientResult.AsT1;
+            return getDatabaseClientResult.AsT1;
         var dc = getDatabaseClientResult.AsT0;
 
         var hostPlatformResult = await dc.HostPlatform(cancellationToken);
         if (hostPlatformResult.IsT1)
-            return (Err[])hostPlatformResult.AsT1;
+            return hostPlatformResult.AsT1;
         var hostPlatformName = hostPlatformResult.AsT0;
         var dirSeparator = "\\";
         if (hostPlatformName == "Linux")
@@ -368,13 +368,13 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return backupFileParameters;
     }
 
-    public ValueTask<OneOf<BackupFileParameters, IEnumerable<Err>>> CreateBackup(string backupBaseName,
+    public ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
         string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    private async ValueTask<OneOf<DbClient, IEnumerable<Err>>> GetDatabaseClient(EDatabaseProvider dataProvider,
+    private async ValueTask<OneOf<DbClient, Err[]>> GetDatabaseClient(EDatabaseProvider dataProvider,
         string? databaseName = null, CancellationToken cancellationToken = default)
     {
         var dc = DbClientFactory.GetDbClient(_logger, _useConsole, dataProvider,

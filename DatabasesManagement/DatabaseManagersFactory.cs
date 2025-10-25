@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +17,7 @@ namespace DatabasesManagement;
 
 public static class DatabaseManagersFactory
 {
-    public static Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger, bool useConsole,
+    public static Task<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         CancellationToken cancellationToken = default)
     {
@@ -26,10 +25,10 @@ public static class DatabaseManagersFactory
             null, null, cancellationToken);
     }
 
-    public static async Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
-        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
-        ApiClients? apiClients, IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager,
-        string? userName, CancellationToken cancellationToken = default)
+    public static async Task<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
+        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections, ApiClients? apiClients,
+        IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseConnectionName))
         {
@@ -53,8 +52,8 @@ public static class DatabaseManagersFactory
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateDatabaseManager(ILogger logger,
-        bool useConsole, DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
+    public static async ValueTask<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
+        DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
         IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {
@@ -84,19 +83,19 @@ public static class DatabaseManagersFactory
         }
     }
 
-    private static OneOf<IDatabaseManager, IEnumerable<Err>> CreateSqLiteDatabaseManager()
+    private static OneOf<IDatabaseManager, Err[]> CreateSqLiteDatabaseManager()
     {
         return new[] { DbToolsErrors.CreateSqLiteDatabaseManagerIsNotImplemented };
     }
 
-    private static OneOf<IDatabaseManager, IEnumerable<Err>> CreateOleDatabaseManager()
+    private static OneOf<IDatabaseManager, Err[]> CreateOleDatabaseManager()
     {
         return new[] { DbToolsErrors.CreateOleDatabaseManagerIsNotImplemented };
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateRemoteDatabaseManager(ILogger logger,
+    public static async Task<OneOf<IDatabaseManager, Err[]>> CreateRemoteDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
@@ -137,8 +136,8 @@ public static class DatabaseManagersFactory
         return new RemoteDatabaseManager(logger, databaseApiClient);
     }
 
-    private static async ValueTask<OneOf<IDatabaseManager, IEnumerable<Err>>> CreateSqlServerDatabaseManager(
-        ILogger logger, bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
+    private static async ValueTask<OneOf<IDatabaseManager, Err[]>> CreateSqlServerDatabaseManager(ILogger logger,
+        bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
@@ -167,7 +166,7 @@ public static class DatabaseManagersFactory
 
         if (dbAuthSettingsCreatorCreateResult.IsT1)
 
-            return (Err[])dbAuthSettingsCreatorCreateResult.AsT1;
+            return dbAuthSettingsCreatorCreateResult.AsT1;
 
         var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(
             databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,
