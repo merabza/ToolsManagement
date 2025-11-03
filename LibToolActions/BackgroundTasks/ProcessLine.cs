@@ -23,7 +23,7 @@ public sealed class ProcessLine : IDisposable
         _runner.Dispose();
     }
 
-    internal void StartAsync(CancellationToken token)
+    internal void StartAsync(CancellationToken token = default)
     {
         _runner.StartAsync(token);
     }
