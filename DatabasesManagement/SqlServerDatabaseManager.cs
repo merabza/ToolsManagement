@@ -52,8 +52,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand,
-        string? databaseName = null, CancellationToken cancellationToken = default)
+    public async ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+        CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult =
             await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
@@ -107,8 +107,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.RecompileProcedures(databaseName, cancellationToken);
     }
 
-    public async Task<Option<Err[]>> TestConnection(string? databaseName,
-        CancellationToken cancellationToken = default)
+    public async Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult =
             await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);
@@ -150,8 +149,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     //    throw new NotImplementedException();
     //}
 
-    public async Task<OneOf<List<string>, Err[]>> GetDatabaseFoldersSetNames(
-        CancellationToken cancellationToken)
+    public async Task<OneOf<List<string>, Err[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
     {
         //var appSettings = AppSettings.Create(_config);
 
@@ -181,8 +179,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     }
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(
-        CancellationToken cancellationToken = default)
+    public async Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
     {
         var getDatabaseClientResult = await GetDatabaseClient(EDatabaseProvider.SqlServer, null, cancellationToken);
 
