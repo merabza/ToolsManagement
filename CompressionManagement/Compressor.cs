@@ -7,7 +7,7 @@ using SystemToolsShared;
 
 namespace CompressionManagement;
 
-public class Compressor
+public sealed class Compressor
 {
     private readonly string[] _excludes;
     private readonly ILogger _logger;
