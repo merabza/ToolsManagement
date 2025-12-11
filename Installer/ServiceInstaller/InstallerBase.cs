@@ -20,8 +20,8 @@ namespace Installer.ServiceInstaller;
 
 public /*open*/ abstract class InstallerBase : MessageLogger
 {
-    private readonly ILogger _logger;
     public readonly string Runtime;
+    private readonly ILogger _logger;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)
