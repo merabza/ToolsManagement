@@ -1,17 +1,18 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Installer;
 using Installer.Domain;
-using Installer.Errors;
 using LanguageExt;
-using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using SystemToolsShared;
-using SystemToolsShared.Errors;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.Installer.Errors;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithFileStorage
 {

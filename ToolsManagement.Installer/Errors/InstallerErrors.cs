@@ -1,6 +1,6 @@
-﻿using SystemToolsShared.Errors;
+﻿using SystemTools.SystemToolsShared.Errors;
 
-namespace Installer.Errors;
+namespace ToolsManagement.Installer.Errors;
 
 public static class InstallerErrors
 {

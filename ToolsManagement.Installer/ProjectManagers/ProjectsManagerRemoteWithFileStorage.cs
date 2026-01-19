@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using LanguageExt;
 using OneOf;
-using SystemToolsShared.Errors;
-using WebAgentProjectsApiContracts;
+using SystemTools.SystemToolsShared.Errors;
+using WebAgentContracts.WebAgentProjectsApiContracts;
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWithFileStorage
 {

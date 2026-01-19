@@ -1,9 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using LanguageExt;
-using SystemToolsShared.Errors;
+using SystemTools.SystemToolsShared.Errors;
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public interface IProjectsManager
 {

@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using LanguageExt;
 using OneOf;
-using SystemToolsShared.Errors;
+using SystemTools.SystemToolsShared.Errors;
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public interface IIProjectsManagerWithFileStorage // : IDisposable
 {

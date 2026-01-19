@@ -1,7 +1,7 @@
-﻿using LibParameters;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using ParametersManagement.LibParameters;
 
-namespace Installer.Models;
+namespace ToolsManagement.Installer.Models;
 
 public sealed class InstallerSettings : ParametersWithStatus
 {

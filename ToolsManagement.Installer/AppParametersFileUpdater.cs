@@ -1,15 +1,16 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
-using Installer.Errors;
-using Installer.ServiceInstaller;
 using LanguageExt;
-using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
-using SystemToolsShared.Errors;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.Installer.Domain;
+using ToolsManagement.Installer.Errors;
+using ToolsManagement.Installer.ServiceInstaller;
 
-namespace Installer;
+namespace ToolsManagement.Installer;
 
 public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
 {

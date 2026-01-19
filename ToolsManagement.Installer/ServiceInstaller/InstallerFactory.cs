@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using SystemTools.SystemToolsShared;
 
-namespace Installer.ServiceInstaller;
+namespace ToolsManagement.Installer.ServiceInstaller;
 
 public static class InstallerFactory
 {

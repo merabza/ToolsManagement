@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.ToolActions;
-using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using ToolsManagement.Installer.ToolActions;
 
-namespace Installer;
+namespace ToolsManagement.Installer;
 
 public /*open*/ class ApplicationUpdaterBase : MessageLogger
 {

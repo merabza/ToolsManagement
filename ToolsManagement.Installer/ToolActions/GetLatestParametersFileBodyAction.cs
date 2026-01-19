@@ -1,15 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FileManagersMain;
-using LibFileParameters.Models;
-using LibToolActions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using SystemToolsShared;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using ToolsManagement.FileManagersMain;
+using ToolsManagement.LibToolActions;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.ToolActions;
+namespace ToolsManagement.Installer.ToolActions;
 
 public sealed class GetLatestParametersFileBodyAction : ToolAction
 {

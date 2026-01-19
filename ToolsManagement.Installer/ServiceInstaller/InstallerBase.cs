@@ -6,22 +6,22 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
-using Installer.Errors;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OneOf;
-using SystemToolsShared;
-using SystemToolsShared.Errors;
+using SystemTools.SystemToolsShared;
+using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.Installer.Errors;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.ServiceInstaller;
+namespace ToolsManagement.Installer.ServiceInstaller;
 
 public /*open*/ abstract class InstallerBase : MessageLogger
 {
-    public readonly string Runtime;
     private readonly ILogger _logger;
+    public readonly string Runtime;
 
     protected InstallerBase(bool useConsole, ILogger logger, string runtime, IMessagesDataManager? messagesDataManager,
         string? userName) : base(logger, messagesDataManager, userName, useConsole)

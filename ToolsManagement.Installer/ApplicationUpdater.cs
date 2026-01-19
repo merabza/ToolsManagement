@@ -3,17 +3,18 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using FileManagersMain;
 using Installer.Domain;
-using Installer.Errors;
-using Installer.ServiceInstaller;
-using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using SystemToolsShared;
-using SystemToolsShared.Errors;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.FileManagersMain;
+using ToolsManagement.Installer.Domain;
+using ToolsManagement.Installer.Errors;
+using ToolsManagement.Installer.ServiceInstaller;
 
-namespace Installer;
+namespace ToolsManagement.Installer;
 
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {

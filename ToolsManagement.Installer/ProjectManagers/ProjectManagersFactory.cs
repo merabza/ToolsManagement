@@ -1,12 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Installer.Domain;
-using Installer.Models;
-using LibFileParameters.Models;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
+using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SystemToolsShared;
+using ToolsManagement.Installer.Models;
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public static class ProjectManagersFactory
 {

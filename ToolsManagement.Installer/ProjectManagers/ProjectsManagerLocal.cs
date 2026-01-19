@@ -1,15 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Installer.Errors;
-using Installer.ServiceInstaller;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
-using SystemToolsShared;
-using SystemToolsShared.Errors;
+using SystemTools.SystemToolsShared;
+using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.Installer.Errors;
+using ToolsManagement.Installer.ServiceInstaller;
 
 // ReSharper disable ConvertToPrimaryConstructor
 
-namespace Installer.ProjectManagers;
+namespace ToolsManagement.Installer.ProjectManagers;
 
 public sealed class ProjectsManagerLocal : IProjectsManager
 {

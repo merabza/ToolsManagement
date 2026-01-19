@@ -19,9 +19,14 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\ParametersManagement\LibFileParameters\LibFileParameters.csproj" />
+        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\FileManagersMain\FileManagersMain.csproj" />
         <ProjectReference Include="..\..\ToolsManagement\LibToolActions\LibToolActions.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentProjectsApiContracts\WebAgentContracts.WebAgentProjectsApiContracts.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentProjectsApiContracts\WebAgentProjectsApiContracts.csproj" />
+        <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
+        <ProjectReference Include="..\ToolsManagement.LibToolActions\ToolsManagement.LibToolActions.csproj" />
     </ItemGroup>
 
 </Project>

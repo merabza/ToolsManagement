@@ -1,6 +1,6 @@
-﻿using LibFileParameters.Models;
+﻿using ParametersManagement.LibFileParameters.Models;
 
-namespace Installer.Domain;
+namespace ToolsManagement.Installer.Domain;
 
 public sealed class AppParametersFileUpdaterParameters
 {
