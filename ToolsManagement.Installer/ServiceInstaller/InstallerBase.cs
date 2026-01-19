@@ -5,13 +5,13 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.Domain;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using OneOf;
 using SystemTools.SystemToolsShared;
 using SystemTools.SystemToolsShared.Errors;
+using ToolsManagement.Installer.Domain;
 using ToolsManagement.Installer.Errors;
 
 // ReSharper disable ConvertToPrimaryConstructor

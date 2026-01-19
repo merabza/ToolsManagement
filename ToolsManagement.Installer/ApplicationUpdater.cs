@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Installer.Domain;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using ParametersManagement.LibFileParameters.Models;

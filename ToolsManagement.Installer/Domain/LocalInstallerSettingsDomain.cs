@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using SystemTools.SystemToolsShared;
 using ToolsManagement.Installer.Models;
 
-namespace Installer.Domain;
+namespace ToolsManagement.Installer.Domain;
 
 public sealed class LocalInstallerSettingsDomain
 {

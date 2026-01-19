@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Installer.Domain;
+namespace ToolsManagement.Installer.Domain;
 
 public sealed class FileNameAndTextContent
 {

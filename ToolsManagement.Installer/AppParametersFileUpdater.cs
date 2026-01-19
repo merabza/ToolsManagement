@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Installer.Domain;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
 using ParametersManagement.LibFileParameters.Models;
