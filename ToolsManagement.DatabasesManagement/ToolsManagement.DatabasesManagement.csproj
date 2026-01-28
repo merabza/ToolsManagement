@@ -21,11 +21,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\DatabaseTools\DatabaseTools.DbToolsFactory\DatabaseTools.DbToolsFactory.csproj" />
-        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibDatabaseParameters\ParametersManagement.LibDatabaseParameters.csproj" />
-        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
-        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
-        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentDatabasesApiContracts\WebAgentContracts.WebAgentDatabasesApiContracts.csproj" />
+        <ProjectReference
+            Include="..\..\DatabaseTools\DatabaseTools.DbToolsFactory\DatabaseTools.DbToolsFactory.csproj" />
+        <ProjectReference
+            Include="..\..\ParametersManagement\ParametersManagement.LibDatabaseParameters\ParametersManagement.LibDatabaseParameters.csproj" />
+        <ProjectReference
+            Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference
+            Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
+        <ProjectReference
+            Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentDatabasesApiContracts\WebAgentContracts.WebAgentDatabasesApiContracts.csproj" />
         <ProjectReference Include="..\ToolsManagement.ApiClientsManagement\ToolsManagement.ApiClientsManagement.csproj" />
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
     </ItemGroup>

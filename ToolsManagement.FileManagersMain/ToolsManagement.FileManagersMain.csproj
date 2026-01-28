@@ -16,10 +16,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\ConnectionTools\ConnectionTools.ConnectTools\ConnectionTools.ConnectTools.csproj" />
-        <ProjectReference Include="..\..\ConnectionTools\ConnectionTools.CToolsFactory\ConnectionTools.CToolsFactory.csproj" />
-        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
-        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
+        <ProjectReference
+            Include="..\..\ConnectionTools\ConnectionTools.ConnectTools\ConnectionTools.ConnectTools.csproj" />
+        <ProjectReference
+            Include="..\..\ConnectionTools\ConnectionTools.CToolsFactory\ConnectionTools.CToolsFactory.csproj" />
+        <ProjectReference
+            Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference
+            Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
     </ItemGroup>
 
 </Project>
