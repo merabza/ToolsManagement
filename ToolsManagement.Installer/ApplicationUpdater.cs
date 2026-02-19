@@ -37,13 +37,16 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {
-        var serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
+        InstallerBase? serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
             messagesDataManager, userName, cancellationToken);
 
         if (serviceInstaller == null)
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "Installer was Not Created", cancellationToken);
+            }
+
             logger.LogError("Installer was Not Created");
             return new[] { ApplicationUpdaterErrors.InstallerWasNotCreated };
         }
@@ -51,7 +54,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(installerWorkFolder))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "installerWorkFolder is empty", cancellationToken);
+            }
+
             logger.LogError("installerWorkFolder is empty");
             return new[] { ApplicationUpdaterErrors.InstallerWorkFolderIsEmpty };
         }
@@ -59,7 +65,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "filesUserName is empty", cancellationToken);
+            }
+
             logger.LogError("filesUserName is empty");
             return new[] { ApplicationUpdaterErrors.FilesUserNameIsEmpty };
         }
@@ -67,7 +76,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "filesUsersGroupName is empty", cancellationToken);
+            }
+
             logger.LogError("filesUsersGroupName is empty");
             return new[] { ApplicationUpdaterErrors.FilesUsersGroupNameIsEmpty };
         }
@@ -75,7 +87,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(serviceUserName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "serviceUserName is empty", cancellationToken);
+            }
+
             logger.LogError("serviceUserName is empty");
             return new[] { ApplicationUpdaterErrors.ServiceUserNameIsEmpty };
         }
@@ -83,7 +98,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "downloadTempExtension is empty", cancellationToken);
+            }
+
             logger.LogError("downloadTempExtension is empty");
             return new[] { ApplicationUpdaterErrors.DownloadTempExtensionIsEmpty };
         }
@@ -91,7 +109,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(installFolder))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "installFolder is empty", cancellationToken);
+            }
+
             logger.LogError("installFolder is empty");
             return new[] { ApplicationUpdaterErrors.InstallFolderIsEmpty };
         }
@@ -99,8 +120,11 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrWhiteSpace(dotnetRunner))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "dotnetRunner is empty. This parameter required for this OS", cancellationToken);
+            }
+
             logger.LogError("dotnetRunner is empty. This parameter required for this OS");
             return new[] { ApplicationUpdaterErrors.DotnetRunnerIsEmpty };
         }
@@ -121,24 +145,28 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             environmentName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.AppName)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+        }
 
-        var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
+        FileManager? exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
+        }
 
-        var runTime = _installer.Runtime;
-        var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
+        string runTime = _installer.Runtime;
+        string programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
 
         await LogInfoAndSendMessage(
             "GetFileParameters with parameters: projectName={0}, environmentName={1}, _serviceInstaller.Runtime={2}, _applicationUpdaterParameters.ProgramArchiveExtension={3}",
             projectName, environmentName, runTime, programArchiveExtension, cancellationToken);
 
-        var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
-            _applicationUpdaterParameters.ProgramArchiveExtension);
+        (string prefix, string dateMask, string suffix) = GetFileParameters(projectName, environmentName,
+            _installer.Runtime, _applicationUpdaterParameters.ProgramArchiveExtension);
 
         await LogInfoAndSendMessage("GetFileParameters results is: prefix={0}, dateMask={1}, suffix={2}", prefix,
             dateMask, suffix, cancellationToken);
@@ -146,30 +174,38 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         //დავადგინოთ გაცვლით სერვერზე
         //{_projectName} სახელით არსებული საინსტალაციო არქივები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
-        var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
+        BuFileInfo? lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
                 cancellationToken);
+        }
 
-        var localArchiveFileName =
+        string localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
         if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                 _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
                 cancellationToken);
+        }
 
-        var assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName,
-            environmentName, _applicationUpdaterParameters.FilesUserName,
+        OneOf<string?, Err[]> assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName,
+            projectName, environmentName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.InstallFolder, cancellationToken);
 
         if (assemblyVersionResult.IsT1)
+        {
             return assemblyVersionResult.AsT1;
+        }
 
-        var assemblyVersion = assemblyVersionResult.AsT0;
+        string? assemblyVersion = assemblyVersionResult.AsT0;
         if (assemblyVersion != null)
+        {
             return assemblyVersion;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
             cancellationToken);
@@ -184,24 +220,28 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             projectName, environmentName, serviceUserName, cancellationToken);
 
         if (projectName == ProgramAttributes.Instance.AppName)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+        }
 
-        var exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
+        FileManager? exchangeFileManager = FileManagersFactory.CreateFileManager(UseConsole, _logger,
             _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.ProgramExchangeFileStorage);
 
         if (exchangeFileManager is null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ExchangeFileManagerIsNull, cancellationToken);
+        }
 
-        var runtime = _installer.Runtime;
-        var programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
+        string runtime = _installer.Runtime;
+        string programArchiveExtension = _applicationUpdaterParameters.ProgramArchiveExtension;
 
         await LogInfoAndSendMessage(
             "GetFileParameters with parameters: projectName={0}, environmentName={1}, _serviceInstaller.Runtime={2}, _applicationUpdaterParameters.ProgramArchiveExtension={3}",
             projectName, environmentName, runtime, programArchiveExtension, cancellationToken);
 
-        var (prefix, dateMask, suffix) = GetFileParameters(projectName, environmentName, _installer.Runtime,
-            _applicationUpdaterParameters.ProgramArchiveExtension);
+        (string prefix, string dateMask, string suffix) = GetFileParameters(projectName, environmentName,
+            _installer.Runtime, _applicationUpdaterParameters.ProgramArchiveExtension);
 
         await LogInfoAndSendMessage("GetFileParameters results is: prefix={0}, dateMask={1}, suffix={2}", prefix,
             dateMask, suffix, cancellationToken);
@@ -209,49 +249,59 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         //დავადგინოთ გაცვლით სერვერზე
         //{_projectName} სახელით არსებული საინსტალაციო არქივები თუ არსებობს
         //და ავარჩიოთ ყველაზე ახალი
-        var lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
+        BuFileInfo? lastFileInfo = exchangeFileManager.GetLastFileInfo(prefix, dateMask, suffix);
         if (lastFileInfo == null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFilesNotFoundOnExchangeStorage,
                 cancellationToken);
+        }
 
-        var localArchiveFileName =
+        string localArchiveFileName =
             Path.Combine(_applicationUpdaterParameters.InstallerWorkFolder, lastFileInfo.FileName);
         //თუ ფაილი უკვე მოქაჩულია, მეორედ მისი მოქაჩვა საჭირო არ არის
         if (!File.Exists(localArchiveFileName) && !exchangeFileManager.DownloadFile(lastFileInfo.FileName,
                 _applicationUpdaterParameters.DownloadTempExtension)) //მოვქაჩოთ არჩეული საინსტალაციო არქივი
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectArchiveFileWasNotDownloaded,
                 cancellationToken);
+        }
 
         FileNameAndTextContent? appSettingsFile = null;
 
         if (!string.IsNullOrWhiteSpace(appSettingsFileName))
         {
             //მოვქაჩოთ ბოლო პარამეტრების ფაილი
-            var appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
+            string? appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
                 _applicationUpdaterParameters.ProgramExchangeFileStorage,
                 _applicationUpdaterParameters.ParametersFileDateMask,
                 _applicationUpdaterParameters.ParametersFileExtension, cancellationToken);
             if (appSettingsFileBody is null)
+            {
                 return await LogErrorAndSendMessageFromError(
                     InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
+            }
 
             appSettingsFile = new FileNameAndTextContent(appSettingsFileName, appSettingsFileBody);
         }
 
-        var resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
+        string resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
-        var runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName, projectName,
-            environmentName, appSettingsFile, resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
-            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
-            _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription,
-            cancellationToken);
+        OneOf<string?, Err[]> runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName,
+            projectName, environmentName, appSettingsFile, resolvedServiceUserName,
+            _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
+            _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder,
+            serviceDescriptionSignature, projectDescription, cancellationToken);
 
         if (runUpdateServiceResult.IsT1)
+        {
             return runUpdateServiceResult.AsT1;
+        }
 
-        var assemblyVersion = runUpdateServiceResult.AsT0;
+        string? assemblyVersion = runUpdateServiceResult.AsT0;
         if (assemblyVersion != null)
+        {
             return assemblyVersion;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
             cancellationToken);
@@ -260,11 +310,11 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
     private (string, string, string) GetFileParameters(string projectName, string environmentName, string runtime,
         string fleExtension)
     {
-        var hostName = Environment.MachineName; //.Capitalize();
+        string hostName = Environment.MachineName; //.Capitalize();
         //string prefix = $"{hostName}-{projectName}-{(runtime == null ? "-" : $"{runtime}-")}";
-        var prefix = $"{hostName}-{environmentName}-{projectName}-{runtime}-";
-        var dateMask = _applicationUpdaterParameters.ProgramArchiveDateMask;
-        var suffix = fleExtension;
+        string prefix = $"{hostName}-{environmentName}-{projectName}-{runtime}-";
+        string dateMask = _applicationUpdaterParameters.ProgramArchiveDateMask;
+        string suffix = fleExtension;
         return (prefix, dateMask, suffix);
     }
 

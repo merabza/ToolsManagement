@@ -44,7 +44,10 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
 
         if (applicationUpdater is null)
+        {
             return new[] { ProjectManagersErrors.AppParametersFileUpdaterCreateError };
+        }
+
         return await applicationUpdater.UpdateParameters(projectName, environmentName, appSettingsFileName,
             cancellationToken);
     }
@@ -53,17 +56,24 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
-        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
-            programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
-            _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
-            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
-            _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+        OneOf<ApplicationUpdater, Err[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
+            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+            parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
+            _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
+            _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
+            _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner, _messagesDataManager,
+            _userName, cancellationToken);
         if (applicationUpdaterCreateResult.IsT1)
+        {
             return applicationUpdaterCreateResult.AsT1;
-        var applicationUpdater = applicationUpdaterCreateResult.AsT0;
+        }
+
+        ApplicationUpdater? applicationUpdater = applicationUpdaterCreateResult.AsT0;
         if (applicationUpdater is null)
+        {
             return new[] { ProjectManagersErrors.ApplicationUpdaterDoesNotCreated(projectName, environmentName) };
+        }
+
         return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 
@@ -72,18 +82,22 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        var applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger, _useConsole,
-            programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
-            _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder, _localInstallerSettings.FilesUserName,
-            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.ServiceUserName,
-            _localInstallerSettings.DownloadTempExtension, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+        OneOf<ApplicationUpdater, Err[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
+            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+            parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
+            _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
+            _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
+            _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner, _messagesDataManager,
+            _userName, cancellationToken);
         if (applicationUpdaterCreateResult.IsT1)
+        {
             return applicationUpdaterCreateResult.AsT1;
-        var applicationUpdater = applicationUpdaterCreateResult.AsT0;
-        var updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(projectName,
-            environmentName, serviceUserName, appSettingsFileName, serviceDescriptionSignature, projectDescription,
-            cancellationToken);
+        }
+
+        ApplicationUpdater? applicationUpdater = applicationUpdaterCreateResult.AsT0;
+        OneOf<string, Err[]> updateServiceWithParametersResult =
+            await applicationUpdater.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
+                appSettingsFileName, serviceDescriptionSignature, projectDescription, cancellationToken);
         return updateServiceWithParametersResult;
     }
 }

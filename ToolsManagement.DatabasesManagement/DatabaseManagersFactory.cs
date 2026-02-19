@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
 using DatabaseTools.DbTools.Errors;
+using DatabaseTools.DbTools.Models;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using ParametersManagement.LibApiClientParameters;
@@ -33,17 +35,22 @@ public static class DatabaseManagersFactory
         if (string.IsNullOrWhiteSpace(databaseConnectionName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "databaseConnectionName is not specified, cannot create DatabaseApiClient", cancellationToken);
+            }
+
             logger.LogError("databaseConnectionName is not specified, cannot create DatabaseApiClient");
             return new[] { DbToolsErrors.DatabaseConnectionNameIsNotSpecified };
         }
 
         if (messagesDataManager is not null)
+        {
             await messagesDataManager.SendMessage(userName,
                 $"CreateDatabaseManager databaseConnectionName={databaseConnectionName}", cancellationToken);
+        }
 
-        var databaseServerConnection =
+        DatabaseServerConnectionData? databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
         return await CreateDatabaseManager(logger, useConsole, databaseServerConnection, apiClients, httpClientFactory,
@@ -74,12 +81,15 @@ public static class DatabaseManagersFactory
                 return CreateOleDatabaseManager();
             case EDatabaseProvider.WebAgent:
                 if (apiClients is not null && httpClientFactory is not null)
+                {
                     return await CreateRemoteDatabaseManager(logger, httpClientFactory, useConsole,
                         databaseServerConnection.DbWebAgentName, apiClients, messagesDataManager, userName,
                         cancellationToken);
-                throw new ArgumentOutOfRangeException();
+                }
+
+                throw new SwitchExpressionException();
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new SwitchExpressionException();
         }
     }
 
@@ -102,19 +112,25 @@ public static class DatabaseManagersFactory
         if (string.IsNullOrWhiteSpace(apiClientName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "apiClientName is not specified, cannot create DatabaseApiClient", cancellationToken);
+            }
+
             logger.LogError("apiClientName is not specified, cannot create DatabaseApiClient");
             return new[] { DbToolsErrors.ApiClientNameIsNotSpecifiedCannotCreateDatabaseApiClient };
         }
 
-        var apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
+        ApiClientSettings? apiClientSettings = apiClients.GetApiClientByKey(apiClientName);
 
         if (apiClientSettings is null)
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "apiClientSettings is null, cannot create DatabaseApiClient", cancellationToken);
+            }
+
             logger.LogError("apiClientSettings is null, cannot create DatabaseApiClient");
             return new[] { DbToolsErrors.ApiClientSettingsIsNull };
         }
@@ -122,8 +138,11 @@ public static class DatabaseManagersFactory
         if (string.IsNullOrWhiteSpace(apiClientSettings.Server))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "Server is not specified in apiClientSettings, cannot create DatabaseApiClient", cancellationToken);
+            }
+
             logger.LogError("cannot create DatabaseApiClient");
             return new[] { DbToolsErrors.ServerIsNotSpecifiedInApiClientSettings };
         }
@@ -143,8 +162,11 @@ public static class DatabaseManagersFactory
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName,
                     "ServerAddress is empty, Cannot create SqlServerManagementClient", cancellationToken);
+            }
+
             logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
             return new[] { DbToolsErrors.ServerAddressIsEmptyCannotCreateSqlServerManagementClient };
         }
@@ -160,13 +182,15 @@ public static class DatabaseManagersFactory
         //        $"databaseServerConnectionData.Password={databaseServerConnectionData.Password}", cancellationToken);
         //}
 
-        var dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
+        OneOf<DbAuthSettingsBase, Err[]> dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
             databaseServerConnectionData.WindowsNtIntegratedSecurity, databaseServerConnectionData.ServerUser,
             databaseServerConnectionData.ServerPass, useConsole);
 
         if (dbAuthSettingsCreatorCreateResult.IsT1)
 
+        {
             return dbAuthSettingsCreatorCreateResult.AsT1;
+        }
 
         var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(
             databaseServerConnectionData.DatabaseServerProvider, databaseServerConnectionData.ServerAddress,

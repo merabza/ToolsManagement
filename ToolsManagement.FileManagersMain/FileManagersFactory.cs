@@ -17,22 +17,22 @@ public static class FileManagersFactory
             return null;
         }
 
-        var storagePatchChecked = FileStat.CreateFolderIfNotExists(storagePatch, useConsole);
+        string? storagePatchChecked = FileStat.CreateFolderIfNotExists(storagePatch, useConsole);
         //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
         if (storagePatchChecked == null)
         {
-            logger.LogError("local path {localPatch} can not created", storagePatch);
+            logger.LogError("local path {LocalPatch} can not created", storagePatch);
             return null;
         }
 
-        var localPatchChecked = storagePatchChecked;
+        string? localPatchChecked = storagePatchChecked;
         if (!string.IsNullOrWhiteSpace(localPatch) && storagePatch != localPatch)
         {
             localPatchChecked = FileStat.CreateFolderIfNotExists(localPatch, useConsole);
             //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
             if (localPatchChecked == null)
             {
-                logger.LogError("local path {localPatch} can not created", storagePatch);
+                logger.LogError("local path {LocalPatch} can not created", storagePatch);
                 return null;
             }
         }
@@ -48,12 +48,18 @@ public static class FileManagersFactory
         FileStorageData? fileStorageData = null;
 
         if (string.IsNullOrWhiteSpace(fileStorageName))
+        {
             logger.LogError("File storage name not specified");
+        }
         else
+        {
             fileStorageData = fileStorages?.GetFileStorageDataByKey(fileStorageName);
+        }
 
         if (fileStorageData == null)
-            logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
+        {
+            logger.LogError("File storage with name {FileStorageName} not found", fileStorageName);
+        }
 
         return fileStorageData == null
             ? null
@@ -76,19 +82,23 @@ public static class FileManagersFactory
             //თუ ლოკალური ფოლდერი არ არსებობს, შეიქმნას
             if (localPatchChecked == null)
             {
-                logger.LogError("local path {localPatch} can not created", localPatch);
+                logger.LogError("local path {LocalPatch} can not created", localPatch);
                 return null;
             }
         }
 
         if (fileStorageData.FileStoragePath is null)
+        {
             throw new Exception("fileStorageData.FileStoragePath is null");
+        }
 
         if (!FileStat.IsFileSchema(fileStorageData.FileStoragePath))
         {
             var rfm = RemoteFileManager.Create(fileStorageData, useConsole, logger, localPatchChecked);
             if (rfm != null)
+            {
                 return rfm;
+            }
         }
 
         //if (fileStorageData.FileStoragePath == null)
@@ -98,11 +108,11 @@ public static class FileManagersFactory
         //}
 
         //თუ სამუშაო ფოლდერი არ არსებობს, შეიქმნას
-        var fileStoragePathChecked = FileStat.CreateFolderIfNotExists(fileStorageData.FileStoragePath, useConsole);
+        string? fileStoragePathChecked = FileStat.CreateFolderIfNotExists(fileStorageData.FileStoragePath, useConsole);
         if (fileStoragePathChecked is null)
         {
-            var fileStoragePath = fileStorageData.FileStoragePath;
-            logger.LogError("local path {fileStoragePath} can not created", fileStoragePath);
+            string? fileStoragePath = fileStorageData.FileStoragePath;
+            logger.LogError("local path {FileStoragePath} can not created", fileStoragePath);
             return null;
         }
 

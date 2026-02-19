@@ -31,12 +31,17 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
+        {
             await messagesDataManager.SendMessage(userName, "creating AppParametersFileUpdater", cancellationToken);
+        }
 
         if (string.IsNullOrWhiteSpace(installFolder))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "installFolder is empty", cancellationToken);
+            }
+
             logger.LogError("installFolder is empty");
             return null;
         }
@@ -44,7 +49,10 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "filesUserName is empty", cancellationToken);
+            }
+
             logger.LogError("filesUserName is empty");
             return null;
         }
@@ -52,18 +60,24 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "filesUsersGroupName is empty", cancellationToken);
+            }
+
             logger.LogError("filesUsersGroupName is empty");
             return null;
         }
 
-        var serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
+        InstallerBase? serviceInstaller = await InstallerFactory.CreateInstaller(logger, useConsole, dotnetRunner,
             messagesDataManager, userName, cancellationToken);
 
         if (serviceInstaller == null)
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "Installer does Not Created", cancellationToken);
+            }
+
             logger.LogError("Installer does Not Created");
             return null;
         }
@@ -79,16 +93,20 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == ProgramAttributes.Instance.AppName)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
+        }
 
         //მოვქაჩოთ ბოლო პარამეტრების ფაილი
-        var appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
+        string? appSettingsFileBody = await GetParametersFileBody(projectName, environmentName,
             _applicationUpdaterParameters.ProgramExchangeFileStorage,
             _applicationUpdaterParameters.ParametersFileDateMask, _applicationUpdaterParameters.ParametersFileExtension,
             cancellationToken);
         if (appSettingsFileBody == null)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.CannotUpdateProject(projectName, environmentName), cancellationToken);
+        }
 
         return await _serviceInstaller.RunUpdateSettings(projectName, environmentName, appSettingsFileName,
             appSettingsFileBody, _applicationUpdaterParameters.FilesUserName,

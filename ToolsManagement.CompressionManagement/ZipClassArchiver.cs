@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SystemTools.SystemToolsShared;
 using ToolsManagement.LibToolActions.BackgroundTasks;
@@ -22,12 +24,16 @@ public sealed class ZipClassArchiver : Archiver
         ProcessManager? processManager = null)
     {
         if (processManager is not null && processManager.CheckCancellation())
+        {
             return false;
+        }
 
         //დავადგინოთ გვაქვს თუ არა გამორიცხვები გამოყენებული.
         //დავადგინოთ ყველა ფაილების ჯამური სიგრძე (რომელიც უნდა შევიდეს არქივში)
         if (UseConsole)
+        {
             Console.WriteLine($"Creating archive file {archiveFileName}");
+        }
 
         // ReSharper disable once using
         // ReSharper disable once DisposableConstructor
@@ -35,11 +41,14 @@ public sealed class ZipClassArchiver : Archiver
         // ReSharper disable once using
         // ReSharper disable once DisposableConstructor
         using var archive = new ZipArchive(zipToOpen, ZipArchiveMode.Create);
-        foreach (var source in sources)
+        foreach (string source in sources)
         {
             if (processManager is not null && processManager.CheckCancellation())
+            {
                 return false;
-            var startPath = Path.GetDirectoryName(source);
+            }
+
+            string? startPath = Path.GetDirectoryName(source);
             if (startPath is null)
             {
                 _logger.LogError("startPath is null");
@@ -51,44 +60,54 @@ public sealed class ZipClassArchiver : Archiver
                 // This path is a directory
                 var sourceDir = new DirectoryInfo(source);
                 if (!ArchiveDirectory(startPath, sourceDir, archive, excludes))
+                {
                     return false;
+                }
             }
             else if (File.Exists(source))
             {
                 // This path is a file
                 var sourceFile = new FileInfo(source);
                 if (!ArchiveFile(startPath, sourceFile, archive, excludes))
+                {
                     return false;
+                }
             }
             else
             {
-                _logger.LogInformation("{source} is not a valid file or directory.", source);
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("{Source} is not a valid file or directory.", source);
+                }
             }
         }
 
         return true;
     }
 
-    public override bool ArchiveToPath(string archiveFileName, string path)
+    public async Task<bool> ArchiveToPathAsync(string archiveFileName, string path)
     {
         // ReSharper disable once using
-        using var archive = ZipFile.OpenRead(archiveFileName);
-        var result = archive.Entries.Where(currentEntry => !string.IsNullOrWhiteSpace(currentEntry.FullName));
+        await using ZipArchive archive = await ZipFile.OpenReadAsync(archiveFileName);
+        IEnumerable<ZipArchiveEntry> result =
+            archive.Entries.Where(currentEntry => !string.IsNullOrWhiteSpace(currentEntry.FullName));
 
-        foreach (var entry in result)
+        foreach (ZipArchiveEntry entry in result)
         {
-            var fileNameParts = entry.FullName.Split('/');
-            var curPath = path;
+            string[] fileNameParts = entry.FullName.Split('/');
+            string curPath = path;
             var curDirectory = new DirectoryInfo(curPath);
-            for (var i = 0; i < fileNameParts.Length - 1; i++)
+            for (int i = 0; i < fileNameParts.Length - 1; i++)
             {
                 curPath = Path.Combine(curDirectory.FullName, fileNameParts[i]);
                 curDirectory = Directory.CreateDirectory(curPath);
             }
 
-            var fileName = fileNameParts[^1];
+            string fileName = fileNameParts[^1];
             if (!string.IsNullOrWhiteSpace(fileName))
-                entry.ExtractToFile(Path.Combine(curDirectory.FullName, fileName));
+            {
+                await entry.ExtractToFileAsync(Path.Combine(curDirectory.FullName, fileName));
+            }
         }
 
         return true;
@@ -98,10 +117,14 @@ public sealed class ZipClassArchiver : Archiver
         ProcessManager? processManager = null)
     {
         if (processManager is not null && processManager.CheckCancellation())
+        {
             return false;
+        }
 
         if (NeedExclude(sourceDir.FullName, excludes))
+        {
             return true;
+        }
 
         return sourceDir.GetDirectories().All(dir => ArchiveDirectory(startPath, dir, archive, excludes)) &&
                sourceDir.GetFiles().All(file => ArchiveFile(startPath, file, archive, excludes));
@@ -109,7 +132,7 @@ public sealed class ZipClassArchiver : Archiver
 
     private static bool NeedExclude(string name, string[] excludes)
     {
-        var haveExclude = excludes is { Length: > 0 };
+        bool haveExclude = excludes is { Length: > 0 };
 
         return haveExclude && excludes.Any(name.FitsMask);
     }
@@ -118,28 +141,34 @@ public sealed class ZipClassArchiver : Archiver
         ProcessManager? processManager = null)
     {
         if (processManager is not null && processManager.CheckCancellation())
+        {
             return false;
+        }
 
         if (NeedExclude(file.FullName, excludes))
+        {
             return true;
+        }
 
-        var entryName = Path.GetRelativePath(startPath, file.FullName);
+        string entryName = Path.GetRelativePath(startPath, file.FullName);
 
-        var fileEntry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+        ZipArchiveEntry fileEntry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
         // ReSharper disable once using
-        using var inFile = file.OpenRead();
+        using FileStream inFile = file.OpenRead();
         // ReSharper disable once using
-        using var entryStream = fileEntry.Open();
+        using Stream entryStream = fileEntry.Open();
 
         //ნაწილ-ნაწილ ვარიანტი
-        var buffer = new byte[2048]; // read in chunks of 2KB
+        byte[] buffer = new byte[2048]; // read in chunks of 2KB
         try
         {
             int bytesRead;
             while ((bytesRead = inFile.Read(buffer, 0, buffer.Length)) > 0)
             {
                 if (processManager is not null && processManager.CheckCancellation())
+                {
                     return false;
+                }
 
                 entryStream.Write(buffer, 0, bytesRead);
             }

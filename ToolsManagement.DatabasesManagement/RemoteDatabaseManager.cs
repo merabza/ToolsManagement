@@ -35,10 +35,14 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(backupBaseName))
+        {
             return await ApiClient.CreateBackup(databaseBackupParameters, backupBaseName, dbServerFoldersSetName,
                 cancellationToken);
+        }
 
+#pragma warning disable CA2254
         _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
+#pragma warning restore CA2254
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
     }
 

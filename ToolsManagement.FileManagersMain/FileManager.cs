@@ -38,7 +38,7 @@ public /*open*/ class FileManager
 
     //public for UsbCopyRunner
     // ReSharper disable once MemberCanBeProtected.Global
-    public virtual List<string> GetFileNames(string? relativePath, string? searchPattern)
+    public virtual List<string> GetFileNames(string? afterRootPath, string? searchPattern)
     {
         return [];
     }
@@ -62,7 +62,7 @@ public /*open*/ class FileManager
     }
 
     //ფაილის ატვირთვა
-    public virtual bool UploadFile(string filename, string useTempExtension)
+    public virtual bool UploadFile(string fileName, string useTempExtension)
     {
         return false;
     }
@@ -87,13 +87,13 @@ public /*open*/ class FileManager
     }
 
     //სავარაუდოდ საჭირო იქნება ფაილის ჩამოტვირთვა
-    public virtual bool DownloadFile(string filename, string useTempExtension, string? afterRootPath = null)
+    public virtual bool DownloadFile(string fileName, string useTempExtension, string? afterRootPath = null)
     {
         return false;
     }
 
     //სავარაუდოდ საჭირო იქნება ფაილის ჩამოტვირთვა
-    public virtual bool DownloadFile(string? remoteAfterRootPath, string filename, string? localAfterRootPath,
+    public virtual bool DownloadFile(string? remoteAfterRootPath, string fileName, string? localAfterRootPath,
         string downFileName, string useTempExtension)
     {
         return false;
@@ -128,14 +128,17 @@ public /*open*/ class FileManager
         }
 
         //წაშლა ჭკვიანი სქემის მიხედვით
-        var files = GetFilesByMask(prefix, dateMask, suffix).OrderBy(ob => ob.FileDateTime).ToList();
-        var filesForDelete = smartSchema.GetFilesForDeleteBySchema(files);
+        List<BuFileInfo> files = GetFilesByMask(prefix, dateMask, suffix).OrderBy(ob => ob.FileDateTime).ToList();
+        List<BuFileInfo> filesForDelete = smartSchema.GetFilesForDeleteBySchema(files);
 
-        foreach (var buFileInfo in filesForDelete)
+        foreach (BuFileInfo buFileInfo in filesForDelete)
         {
-            var fileName = buFileInfo.FileName;
+            string fileName = buFileInfo.FileName;
             DeleteFile(buFileInfo.FileName);
-            Logger.LogInformation("Deleted old file {fileName}.", fileName);
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.LogInformation("Deleted old file {FileName}.", fileName);
+            }
         }
     }
 
@@ -146,10 +149,13 @@ public /*open*/ class FileManager
 
     private static DateTime GetDateTimeByMask(string fileName, string prefix, string mask, string suffix)
     {
-        if (!fileName.StartsWith(prefix) || !fileName.EndsWith(suffix))
+        if (!fileName.StartsWith(prefix, StringComparison.Ordinal) ||
+            !fileName.EndsWith(suffix, StringComparison.Ordinal))
+        {
             return DateTime.MinValue;
+        }
 
-        var strDate = fileName.Substring(prefix.Length, fileName.Length - prefix.Length - suffix.Length);
+        string strDate = fileName.Substring(prefix.Length, fileName.Length - prefix.Length - suffix.Length);
         //Console.WriteLine($"GetDateTimeByMask file Name {fileName}, date string {strDate}");
         return DateTime.ParseExact(strDate, mask, CultureInfo.InvariantCulture);
     }
@@ -157,11 +163,20 @@ public /*open*/ class FileManager
     public string PathCombine(string? path1, string? path2)
     {
         if (path1 is null && path2 is not null)
+        {
             return path2;
+        }
+
         if (path2 is null && path1 is not null)
+        {
             return path1;
+        }
+
         if (path1 is not null && path2 is not null)
+        {
             return path1.AddNeedLastPart(DirectorySeparatorChar) + path2;
+        }
+
         throw new Exception("Both paths are null in PathCombine");
     }
 
@@ -173,7 +188,10 @@ public /*open*/ class FileManager
     private static string GetMasked(string str)
     {
         var sb = new StringBuilder();
-        foreach (var c in str) sb.Append(c != '_' ? '?' : c);
+        foreach (char c in str)
+        {
+            sb.Append(c != '_' ? '?' : c);
+        }
 
         return sb.ToString();
     }
@@ -186,9 +204,9 @@ public /*open*/ class FileManager
 
     public List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
     {
-        var f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
+        List<string> f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
 
-        var files = f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
+        List<BuFileInfo> files = f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
             .Where(w => w.FileDateTime != DateTime.MinValue).ToList();
 
         return files;
@@ -199,7 +217,7 @@ public /*open*/ class FileManager
         try
         {
             //File.Copy(fromFileName, toFullName);
-            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            ResiliencePipeline pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
             {
                 MaxRetryAttempts = 3,
                 BackoffType = DelayBackoffType.Linear,
@@ -230,7 +248,7 @@ public /*open*/ class FileManager
         try
         {
             //File.Delete(fileFullName);
-            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            ResiliencePipeline pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
             {
                 MaxRetryAttempts = 3,
                 BackoffType = DelayBackoffType.Linear,
@@ -261,7 +279,7 @@ public /*open*/ class FileManager
         try
         {
             //File.Move(fromFileName, toFullName);
-            var pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
+            ResiliencePipeline pipeline = new ResiliencePipelineBuilder().AddRetry(new RetryStrategyOptions
             {
                 MaxRetryAttempts = 3,
                 BackoffType = DelayBackoffType.Linear,
@@ -317,7 +335,7 @@ public /*open*/ class FileManager
         if (DirectoryExists(newFolderName))
         {
             //თუ არსებობს, ვჩერდებით
-            Logger.LogWarning("Folder with name {newFolderName} already exists. Process Stopped", newFolderName);
+            Logger.LogWarning("Folder with name {NewFolderName} already exists. Process Stopped", newFolderName);
             return false;
         }
 
@@ -326,7 +344,7 @@ public /*open*/ class FileManager
         if (!CreateDirectory(newFolderName))
         {
             //თუ ფოლდერი ვერ შეიქმნა, ვჩერდებით
-            Logger.LogWarning("Folder with name {newFolderName} cannot created. Process Stopped", newFolderName);
+            Logger.LogWarning("Folder with name {NewFolderName} cannot created. Process Stopped", newFolderName);
             return false;
         }
 
@@ -342,9 +360,12 @@ public /*open*/ class FileManager
         if (DirectoryExists(afterRootPath, newFolderName))
         {
             if (allowExist)
+            {
                 return true;
+            }
+
             //თუ არსებობს, ვჩერდებით
-            Logger.LogWarning("Folder with name {newFolderName} already exists. Process Stopped", newFolderName);
+            Logger.LogWarning("Folder with name {NewFolderName} already exists. Process Stopped", newFolderName);
             return false;
         }
 
@@ -352,7 +373,7 @@ public /*open*/ class FileManager
         if (!CreateDirectory(afterRootPath, newFolderName))
         {
             //თუ ფოლდერი ვერ შეიქმნა, ვჩერდებით
-            Logger.LogWarning("Folder with name {newFolderName} cannot created. Process Stopped", newFolderName);
+            Logger.LogWarning("Folder with name {NewFolderName} cannot created. Process Stopped", newFolderName);
             return false;
         }
 
@@ -375,7 +396,7 @@ public /*open*/ class FileManager
         return false;
     }
 
-    public virtual bool DeleteDirectory(string? afterRootPath, string folderName, bool recursive = false)
+    public virtual bool DeleteDirectory(string? afterRootPath, string directoryName, bool recursive = false)
     {
         return false;
     }
@@ -387,7 +408,7 @@ public /*open*/ class FileManager
 
     public bool IsFolderEmpty(string? afterRootPath, string folderName)
     {
-        var folder = afterRootPath != null ? PathCombine(afterRootPath, folderName) : folderName;
+        string folder = afterRootPath != null ? PathCombine(afterRootPath, folderName) : folderName;
         return GetFileNames(folder, null).Count == 0 && GetFolderNames(folder, null).Count == 0;
     }
 

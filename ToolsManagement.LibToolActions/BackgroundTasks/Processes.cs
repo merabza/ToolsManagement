@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace ToolsManagement.LibToolActions.BackgroundTasks;
 
 //ეს კლასი გამოიყენება ApAgent-ში
-public sealed class Processes : IProcesses
+public sealed class Processes : IProcesses, IDisposable
 {
     private readonly ILogger _logger;
 
@@ -16,6 +17,11 @@ public sealed class Processes : IProcesses
         _logger = logger;
     }
 
+    public void Dispose()
+    {
+        _processManager?.Dispose();
+    }
+
     public bool IsBusy()
     {
         return _processManager != null && _processManager.IsBusy();
@@ -24,7 +30,9 @@ public sealed class Processes : IProcesses
     public async Task WaitForFinishAll()
     {
         if (_processManager != null)
+        {
             await _processManager.WaitForFinishAll();
+        }
     }
 
     public void CancelProcesses()

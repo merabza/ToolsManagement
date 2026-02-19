@@ -24,14 +24,20 @@ public /*open*/ class ProcessesToolAction : ToolAction
     public async Task RunAsync(CancellationToken cancellationToken = default)
     {
         // ReSharper disable once using
-        using var task = Task.Run(async () =>
+        using Task task = Task.Run(async () =>
         {
             if (ProcessManager is not null && ProcessManager.CheckCancellation())
+            {
                 return;
+            }
+
             if (!await Run(cancellationToken)) //თუ პროცესი ცუდად დასრულდა, ვჩერდებით
+            {
                 return;
+            }
+
             //თუ პროცესი კარგად დასრულდა, გაეშვას შემდეგი პროცესი
-            var nextAction = GetNextAction();
+            ProcessesToolAction? nextAction = GetNextAction();
             await RunNextAction(nextAction, cancellationToken);
         }, cancellationToken);
         await task.WaitAsync(cancellationToken);
@@ -52,9 +58,15 @@ public /*open*/ class ProcessesToolAction : ToolAction
         while (true)
         {
             if (ProcessManager is not null && ProcessManager.CheckCancellation())
+            {
                 return;
+            }
+
             if (nextToolAction == null)
+            {
                 return;
+            }
+
             if (ProcLineId == nextToolAction.ProcLineId)
             {
                 if (await nextToolAction.Run(cancellationToken))

@@ -29,8 +29,8 @@ public /*open*/ class ApplicationUpdaterBase : MessageLogger
         var getLatestParametersFileBodyAction = new GetLatestParametersFileBodyAction(_logger, UseConsole,
             fileStorageForDownload, projectName, Environment.MachineName, environmentName, parametersFileDateMask,
             parametersFileExtension, _messagesDataManager, _userName);
-        var result = await getLatestParametersFileBodyAction.Run(cancellationToken);
-        var appSettingsFileBody = getLatestParametersFileBodyAction.LatestParametersFileContent;
+        bool result = await getLatestParametersFileBodyAction.Run(cancellationToken);
+        string? appSettingsFileBody = getLatestParametersFileBodyAction.LatestParametersFileContent;
         return !result || string.IsNullOrWhiteSpace(appSettingsFileBody) ? null : appSettingsFileBody;
     }
 }

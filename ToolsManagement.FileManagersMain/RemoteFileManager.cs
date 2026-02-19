@@ -30,29 +30,32 @@ public sealed class RemoteFileManager : FileManager
     public static RemoteFileManager? Create(FileStorageData fileStorageData, bool useConsole, ILogger logger,
         string? localPatch)
     {
-        var fileStoragePath = fileStorageData.FileStoragePath;
+        string? fileStoragePath = fileStorageData.FileStoragePath;
         var connectToolParameters =
             ConnectToolParameters.Create(fileStoragePath, fileStorageData.UserName, fileStorageData.Password);
 
         if (connectToolParameters == null)
         {
-            logger.LogError("Can not create connection parameters to server {fileStoragePath}", fileStoragePath);
+            logger.LogError("Can not create connection parameters to server {FileStoragePath}", fileStoragePath);
             return null;
         }
 
-        var connectionTools =
+        CTools? connectionTools =
             ConnectToolsFactory.CreateConnectToolsByAddress(connectToolParameters, logger, useConsole);
 
         if (connectionTools == null)
         {
-            logger.LogError("Can not create connection to server {fileStoragePath}", fileStoragePath);
+            logger.LogError("Can not create connection to server {FileStoragePath}", fileStoragePath);
             return null;
         }
 
         if (connectionTools.CheckConnection())
+        {
             return new RemoteFileManager(connectionTools, connectToolParameters.SiteRootAddress, useConsole, logger,
                 localPatch);
-        logger.LogError("Can not connect to server {fileStoragePath}", fileStoragePath);
+        }
+
+        logger.LogError("Can not connect to server {FileStoragePath}", fileStoragePath);
         return null;
     }
 
@@ -76,10 +79,12 @@ public sealed class RemoteFileManager : FileManager
     public override bool UploadFile(string fileName, string useTempExtension)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("UploadFile: LocalPatch is null");
+        }
 
-        var fileFullName = Path.Combine(LocalPatch, fileName);
-        var tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
+        string fileFullName = Path.Combine(LocalPatch, fileName);
+        string tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
 
         return UploadFileReal(fileFullName, null, tempFileName, fileName);
     }
@@ -88,12 +93,14 @@ public sealed class RemoteFileManager : FileManager
         string upFileName, string useTempExtension)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("UploadFile: LocalPatch is null");
+        }
 
-        var fileFullName = localAfterRootPath != null
+        string fileFullName = localAfterRootPath != null
             ? Path.Combine(LocalPatch, localAfterRootPath, fileName)
             : Path.Combine(LocalPatch, fileName);
-        var tempFileName = upFileName + useTempExtension.AddNeedLeadPart(".");
+        string tempFileName = upFileName + useTempExtension.AddNeedLeadPart(".");
         return UploadFileReal(fileFullName, afterRootPath, tempFileName, upFileName);
     }
 
@@ -101,60 +108,80 @@ public sealed class RemoteFileManager : FileManager
         string downFileName, string useTempExtension)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("DownloadFile: LocalPatch is null");
+        }
 
-        var path = localAfterRootPath == null ? LocalPatch : Path.Combine(LocalPatch, localAfterRootPath);
-        var fileFullName = Path.Combine(path, fileName);
-        var tempFileName = downFileName + useTempExtension.AddNeedLeadPart(".");
+        string? path = localAfterRootPath == null ? LocalPatch : Path.Combine(LocalPatch, localAfterRootPath);
+        string fileFullName = Path.Combine(path, fileName);
+        string tempFileName = downFileName + useTempExtension.AddNeedLeadPart(".");
 
         if (_cTools.DownloadFile(remoteAfterRootPath, fileName, path, tempFileName) &&
             RenameFile(Path.Combine(path, tempFileName), fileFullName, UseConsole, Logger))
+        {
             return true;
+        }
 
-        Logger.LogError("DownloadFile file finished with errors: {fileFullName}", fileFullName);
+        Logger.LogError("DownloadFile file finished with errors: {FileFullName}", fileFullName);
         return false;
     }
 
     public override bool DownloadFile(string fileName, string useTempExtension, string? afterRootPath = null)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("DownloadFile: LocalPatch is null");
+        }
 
-        var localAfterRootPath = afterRootPath?.Replace(DirectorySeparatorChar, Path.DirectorySeparatorChar);
-        var path = localAfterRootPath == null ? LocalPatch : Path.Combine(LocalPatch, localAfterRootPath);
-        var fileFullName = Path.Combine(path, fileName);
-        var tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
+        string? localAfterRootPath = afterRootPath?.Replace(DirectorySeparatorChar, Path.DirectorySeparatorChar);
+        string? path = localAfterRootPath == null ? LocalPatch : Path.Combine(LocalPatch, localAfterRootPath);
+        string fileFullName = Path.Combine(path, fileName);
+        string tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
         //Logger.LogInformation($"Downloading file from {afterRootPath} to {fileFullName}");
         if (_cTools.DownloadFile(afterRootPath, fileName, path, tempFileName) &&
             RenameFile(Path.Combine(path, tempFileName), fileFullName, UseConsole, Logger))
+        {
             return true;
+        }
 
-        Logger.LogError("DownloadFile file finished with errors: {fileFullName}", fileFullName);
+        Logger.LogError("DownloadFile file finished with errors: {FileFullName}", fileFullName);
         return false;
     }
 
     private bool UploadFileReal(string fileFullName, string? afterRootPath, string tempFileName, string fileName)
     {
-        var rootPathName = afterRootPath ?? "Root Path";
-        Logger.LogInformation(
-            "Uploading file from {fileFullName} to {rootPathName} with temp name {tempFileName} and FinishName {fileName}",
-            fileFullName, rootPathName, tempFileName, fileName);
+        string rootPathName = afterRootPath ?? "Root Path";
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation(
+                "Uploading file from {FileFullName} to {RootPathName} with temp name {TempFileName} and FinishName {FileName}",
+                fileFullName, rootPathName, tempFileName, fileName);
+        }
+
         if (_cTools.UploadFile(fileFullName, afterRootPath, tempFileName) &&
             _cTools.Rename(afterRootPath, tempFileName, fileName))
+        {
             return true;
+        }
 
-        Logger.LogError("Upload file finished with errors: form {fileFullName}", fileFullName);
+        Logger.LogError("Upload file finished with errors: form {FileFullName}", fileFullName);
         return false;
     }
 
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
-        Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
-            _serverRootPaths, serverSideFileName);
-        if (_cTools.UploadContentToTextFile(content, null, serverSideFileName))
-            return true;
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Uploading Parameters content to {ServerRootPaths} in {ServerSideFileName}",
+                _serverRootPaths, serverSideFileName);
+        }
 
-        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}",
+        if (_cTools.UploadContentToTextFile(content, null, serverSideFileName))
+        {
+            return true;
+        }
+
+        Logger.LogError("Upload file content finished with errors: in {ServerSideFileName} to {ServerRootPaths}",
             serverSideFileName, _serverRootPaths);
         return false;
     }
@@ -162,20 +189,30 @@ public sealed class RemoteFileManager : FileManager
     public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogInformation("Uploading Parameters content to {_serverRootPaths} in {serverSideFileName}",
-            _serverRootPaths, serverSideFileName);
-        if (await _cTools.UploadContentToTextFileAsync(content, null, serverSideFileName, cancellationToken))
-            return true;
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Uploading Parameters content to {ServerRootPaths} in {ServerSideFileName}",
+                _serverRootPaths, serverSideFileName);
+        }
 
-        Logger.LogError("Upload file content finished with errors: in {serverSideFileName} to {_serverRootPaths}",
+        if (await _cTools.UploadContentToTextFileAsync(content, null, serverSideFileName, cancellationToken))
+        {
+            return true;
+        }
+
+        Logger.LogError("Upload file content finished with errors: in {ServerSideFileName} to {ServerRootPaths}",
             serverSideFileName, _serverRootPaths);
         return false;
     }
 
     public override string? GetTextFileContent(string fileName)
     {
-        Logger.LogInformation("Downloading text file {fileName} content from {_serverRootPaths}", fileName,
-            _serverRootPaths);
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Downloading text file {FileName} content from {ServerRootPaths}", fileName,
+                _serverRootPaths);
+        }
+
         return _cTools.GetTextFileContent(null, fileName);
     }
 
@@ -227,7 +264,7 @@ public sealed class RemoteFileManager : FileManager
 
     public override MyFileInfo? GetOneFileWithInfo(string? afterRootPath, string fileName)
     {
-        var files = _cTools.GetFilesWithInfo(afterRootPath, null, true);
+        List<MyFileInfo> files = _cTools.GetFilesWithInfo(afterRootPath, null, true);
         return files.SingleOrDefault(x => x.FileName == fileName);
     }
 
@@ -251,23 +288,30 @@ public sealed class RemoteFileManager : FileManager
     public override bool CreateFolderIfNotExists(string directoryName)
     {
         if (DirectoryExists(directoryName))
+        {
             return true;
+        }
+
         CreateDirectory(directoryName);
         return DirectoryExists(directoryName);
     }
 
     public override bool DeleteDirectory(string? afterRootPath, string directoryName, bool recursive = false)
     {
-        var nextDirName = afterRootPath != null ? PathCombine(afterRootPath, directoryName) : directoryName;
+        string nextDirName = afterRootPath != null ? PathCombine(afterRootPath, directoryName) : directoryName;
         if (recursive)
         {
-            var folders = GetFolderNames(nextDirName, null);
+            List<string> folders = GetFolderNames(nextDirName, null);
             if (folders.Any(folder => !DeleteDirectory(nextDirName, folder, true)))
+            {
                 return false;
+            }
 
-            var files = GetFileNames(nextDirName, null);
+            List<string> files = GetFileNames(nextDirName, null);
             if (files.Any(delFileName => !DeleteFile(nextDirName, delFileName)))
+            {
                 return false;
+            }
         }
 
         _cTools.DeleteDirectory(afterRootPath, directoryName);

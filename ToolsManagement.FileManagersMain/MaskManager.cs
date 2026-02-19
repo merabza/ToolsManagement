@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using SystemTools.SystemToolsShared;
 
@@ -37,12 +38,14 @@ public sealed class MaskManager
 
     internal DateTime GetDateTimeByMask(string fileName)
     {
-        return new DateTime(Convert.ToInt32(fileName.Substring(YearPosition, YearMask.Length)),
-            Convert.ToInt32(fileName.Substring(MonthPosition, MonthMask.Length)),
-            Convert.ToInt32(fileName.Substring(DayPosition, DayMask.Length)),
-            Convert.ToInt32(fileName.Substring(HourPosition, HourMask.Length)),
-            Convert.ToInt32(fileName.Substring(MinutePosition, MinuteMask.Length)),
-            Convert.ToInt32(fileName.Substring(SecondPosition, SecondMask.Length)));
+        return new DateTime(
+            Convert.ToInt32(fileName.Substring(YearPosition, YearMask.Length), CultureInfo.InvariantCulture),
+            Convert.ToInt32(fileName.Substring(MonthPosition, MonthMask.Length), CultureInfo.InvariantCulture),
+            Convert.ToInt32(fileName.Substring(DayPosition, DayMask.Length), CultureInfo.InvariantCulture),
+            Convert.ToInt32(fileName.Substring(HourPosition, HourMask.Length), CultureInfo.InvariantCulture),
+            Convert.ToInt32(fileName.Substring(MinutePosition, MinuteMask.Length), CultureInfo.InvariantCulture),
+            Convert.ToInt32(fileName.Substring(SecondPosition, SecondMask.Length), CultureInfo.InvariantCulture),
+            DateTimeKind.Utc);
     }
 
     public string GetFullMask(string extension)
@@ -58,13 +61,18 @@ public sealed class MaskManager
 
     public string GetFileNameForDate(DateTime forDate, string extension)
     {
-        return _fileNamePrefix + forDate.ToString(_dateMask) + extension.AddNeedLeadPart(".");
+        return _fileNamePrefix + forDate.ToString(_dateMask, CultureInfo.InvariantCulture) +
+               extension.AddNeedLeadPart(".");
     }
 
     private static string GetMasked(string str)
     {
         var sb = new StringBuilder();
-        foreach (var c in str) sb.Append(c != '_' ? '?' : c);
+        foreach (char c in str)
+        {
+            sb.Append(c != '_' ? '?' : c);
+        }
+
         return sb.ToString();
     }
 }

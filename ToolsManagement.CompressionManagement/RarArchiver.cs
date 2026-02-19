@@ -28,7 +28,7 @@ public sealed class RarArchiver : Archiver
         //-r რეკურსია, ანუ ქვე ფოლდერების გავლა არქივის შექმნისას
         //-m5 მაქსიმალური მე-5 დონის კომპრესია
         //-IBCK პროცესის გაშვება ბექგრაუნდში
-        var programArguments = "a -r -m5 -IBCK"; // _archiversRow.archSwitches;
+        string programArguments = "a -r -m5 -IBCK"; // _archiversRow.archSwitches;
 
         //დავადგინოთ გვაქვს თუ არა გამორიცხვები გამოყენებული.
         //string[] excludes = GetExcludeList();
@@ -36,7 +36,9 @@ public sealed class RarArchiver : Archiver
             //თუ გამორიცხვების რაოდენობა ცოტაა 3-მდე, მაშინ გამოვიყენოთ -X<file> გადამრთველი
             //if (Excludes.Length <= 10)
             //{
+        {
             programArguments = excludes.Aggregate(programArguments, (current, exclude) => current + " -X" + exclude);
+        }
         //}
         //else
         //{

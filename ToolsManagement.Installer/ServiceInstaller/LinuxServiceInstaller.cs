@@ -32,15 +32,15 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
     protected override bool IsServiceExists(string serviceEnvName)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
+        string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
         return File.Exists(serviceConfigFileName);
     }
 
     private static string GetServiceConfigFileName(string serviceEnvName)
     {
         const string systemFolderFullName = "/etc/systemd/system";
-        var serviceFileName = $"{serviceEnvName}.service";
-        var serviceConfigFileName = Path.Combine(systemFolderFullName, serviceFileName);
+        string serviceFileName = $"{serviceEnvName}.service";
+        string serviceConfigFileName = Path.Combine(systemFolderFullName, serviceFileName);
         return serviceConfigFileName;
     }
 
@@ -52,13 +52,15 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
     protected override Option<Err[]> RemoveService(string serviceEnvName)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
+        string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var disableProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Option<Err[]> disableProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet disable {serviceEnvName}", [1]);
 
         if (disableProcessResult.IsSome)
+        {
             return Err.RecreateErrors((Err[])disableProcessResult, InstallerErrors.TheServiceWasNotRemoved);
+        }
 
         File.Delete(serviceConfigFileName);
 
@@ -68,7 +70,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
     protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
-        var stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Option<Err[]> stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet stop {serviceEnvName}");
 
         return stopProcessResult.IsSome
@@ -80,7 +82,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
     protected override async ValueTask<Option<Err[]>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
-        var startProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Option<Err[]> startProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet start {serviceEnvName}");
 
         return startProcessResult.IsSome
@@ -93,18 +95,20 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
+        string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
+        OneOf<string, Err[]> generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
             installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature, projectDescription,
             cancellationToken);
 
         if (generateServiceFileTextResult.IsT1)
+        {
             return generateServiceFileTextResult.AsT1;
+        }
 
-        var serviceFileText = generateServiceFileTextResult.AsT0;
+        string? serviceFileText = generateServiceFileTextResult.AsT0;
 
-        var existingServiceFileText = await File.ReadAllTextAsync(serviceConfigFileName, cancellationToken);
+        string existingServiceFileText = await File.ReadAllTextAsync(serviceConfigFileName, cancellationToken);
 
         return serviceFileText == existingServiceFileText;
     }
@@ -113,15 +117,17 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string installFolderPath, string serviceUserName, string dotnetRunner, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
-        var checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
+        OneOf<string, Err[]> checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsT1)
+        {
             return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.DotnetLocationIsNotFound,
                 cancellationToken);
+        }
 
-        var checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
+        string? checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
 
-        var mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
-        var syslogIdentifier = serviceDescription.Replace(".", string.Empty);
+        string mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
+        string syslogIdentifier = serviceDescription.Replace(".", string.Empty);
 
         return $"""
                 [Unit]
@@ -149,27 +155,36 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
-        var serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
+        string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        var generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
+        OneOf<string, Err[]> generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
             installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature, projectDescription,
             cancellationToken);
         if (generateServiceFileTextResult.IsT1)
+        {
             return generateServiceFileTextResult.AsT1;
-        var serviceFileText = generateServiceFileTextResult.AsT0;
+        }
+
+        string? serviceFileText = generateServiceFileTextResult.AsT0;
 
         await LogInfoAndSendMessage("Create service file {0}", serviceConfigFileName, cancellationToken);
         await File.WriteAllTextAsync(serviceConfigFileName, serviceFileText, cancellationToken);
 
         await LogInfoAndSendMessage("Enable service {0}", serviceEnvName, cancellationToken);
-        var processResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Option<Err[]> processResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet enable {serviceEnvName}");
 
         if (processResult.IsSome)
+        {
             return await LogErrorAndSendMessageFromError(
                 LinuxServiceInstallerErrors.ServiceCanNotBeEnabled(serviceEnvName), cancellationToken);
+        }
+
         if (IsServiceExists(serviceEnvName))
+        {
             return null;
+        }
+
         return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.ServiceIsNotEnabled(serviceEnvName),
             cancellationToken);
     }
@@ -177,13 +192,23 @@ public sealed class LinuxServiceInstaller : InstallerBase
     private OneOf<string, Err[]> CheckDotnetRunner(string? dotnetRunner)
     {
         if (!string.IsNullOrWhiteSpace(dotnetRunner) && File.Exists(dotnetRunner))
+        {
             return dotnetRunner;
-        var runProcessWithOutputResult = StShared.RunProcessWithOutput(UseConsole, _logger, "which", "dotnet");
+        }
+
+        OneOf<(string, int), Err[]> runProcessWithOutputResult =
+            StShared.RunProcessWithOutput(UseConsole, _logger, "which", "dotnet");
         if (runProcessWithOutputResult.IsT1)
+        {
             return Err.RecreateErrors(runProcessWithOutputResult.AsT1, LinuxServiceInstallerErrors.WhichDotnetError);
-        var newDotnetRunner = runProcessWithOutputResult.AsT0.Item1;
+        }
+
+        string newDotnetRunner = runProcessWithOutputResult.AsT0.Item1;
         if (!string.IsNullOrWhiteSpace(newDotnetRunner) && File.Exists(newDotnetRunner))
+        {
             return newDotnetRunner;
+        }
+
         return new[] { LinuxServiceInstallerErrors.DotnetDetectError };
     }
 
@@ -191,7 +216,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
+        }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
@@ -200,8 +227,10 @@ public sealed class LinuxServiceInstaller : InstallerBase
         }
 
         if (File.Exists(filePath))
+        {
             return StShared.RunProcess(UseConsole, _logger, "chown",
                 $"{filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {filePath}");
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
@@ -210,7 +239,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
+        }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
@@ -219,8 +250,10 @@ public sealed class LinuxServiceInstaller : InstallerBase
         }
 
         if (Directory.Exists(folderPath))
+        {
             return StShared.RunProcess(UseConsole, _logger, "chown",
                 $"-R {filesUserName}{(string.IsNullOrWhiteSpace(filesUsersGroupName) ? string.Empty : $":{filesUsersGroupName}")} {folderPath}");
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.FolderOwnerCanNotBeChanged(folderPath),
             cancellationToken);

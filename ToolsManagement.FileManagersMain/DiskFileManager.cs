@@ -23,7 +23,7 @@ public sealed class DiskFileManager : FileManager
 
     public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
-        var destDir = GetDirectoryInfo(afterRootPath);
+        DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
         return GetFiles(searchPattern, destDir).Select(c => new MyFileInfo(c.Name, c.Length)).ToList();
     }
 
@@ -40,7 +40,7 @@ public sealed class DiskFileManager : FileManager
     //public for UsbCopyRunner
     public override List<string> GetFileNames(string? afterRootPath, string? searchPattern)
     {
-        var destDir = GetDirectoryInfo(afterRootPath);
+        DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
         return GetFiles(searchPattern, destDir).Select(c => c.Name).ToList();
     }
 
@@ -54,17 +54,19 @@ public sealed class DiskFileManager : FileManager
     //public for UsbCopyRunner
     public override List<string> GetFolderNames(string? afterRootPath, string? searchPattern)
     {
-        var destDir = GetDirectoryInfo(afterRootPath);
+        DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
         return GetFolders(searchPattern, destDir).Select(c => c.Name).ToList();
     }
 
     public override bool UploadFile(string fileName, string useTempExtension)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("UploadFile: LocalPatch is null");
+        }
 
-        var fileFullName = Path.Combine(LocalPatch, fileName);
-        var tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
+        string fileFullName = Path.Combine(LocalPatch, fileName);
+        string tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
 
         return CopyFile(fileFullName, _storageFolderName, tempFileName, fileName);
     }
@@ -73,13 +75,15 @@ public sealed class DiskFileManager : FileManager
         string upFileName, string useTempExtension)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("UploadFile: LocalPatch is null");
+        }
 
-        var fileFullName = localAfterRootPath != null
+        string fileFullName = localAfterRootPath != null
             ? Path.Combine(LocalPatch, localAfterRootPath, fileName)
             : Path.Combine(LocalPatch, fileName);
-        var tempFileName = upFileName + useTempExtension.AddNeedLeadPart(".");
-        var copyToFolder = PathCombine(_storageFolderName, afterRootPath);
+        string tempFileName = upFileName + useTempExtension.AddNeedLeadPart(".");
+        string copyToFolder = PathCombine(_storageFolderName, afterRootPath);
 
         return CopyFile(fileFullName, copyToFolder, tempFileName, upFileName);
     }
@@ -87,28 +91,42 @@ public sealed class DiskFileManager : FileManager
     private bool CopyFile(string fileFullName, string copyToFolder, string tempFileName, string fileName)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("CopyFile: LocalPatch is null");
+        }
 
         if (FileStat.NormalizePath(LocalPatch) == FileStat.NormalizePath(copyToFolder))
+        {
             return File.Exists(fileFullName);
+        }
 
-        Logger.LogInformation("Upload file from {fileFullName} to {copyToFolder}", fileFullName, copyToFolder);
-        var tempFileFullName = Path.Combine(copyToFolder, tempFileName);
-        var targetFileFullName = Path.Combine(copyToFolder, fileName);
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Upload file from {FileFullName} to {CopyToFolder}", fileFullName, copyToFolder);
+        }
+
+        string tempFileFullName = Path.Combine(copyToFolder, tempFileName);
+        string targetFileFullName = Path.Combine(copyToFolder, fileName);
         if (CopyFile(fileFullName, tempFileFullName, UseConsole, Logger) &&
             RenameFile(tempFileFullName, targetFileFullName, UseConsole, Logger))
+        {
             return true;
+        }
 
-        Logger.LogError("Upload file finished with errors: form {fileFullName} to {targetFileFullName}", fileFullName,
+        Logger.LogError("Upload file finished with errors: form {FileFullName} to {TargetFileFullName}", fileFullName,
             targetFileFullName);
         return false;
     }
 
     public override bool UploadContentToTextFile(string content, string serverSideFileName)
     {
-        Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
-            _storageFolderName, serverSideFileName);
-        var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Uploading Parameters content to {StorageFolderName} in {ServerSideFileName}",
+                _storageFolderName, serverSideFileName);
+        }
+
+        string targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
         File.WriteAllText(targetFileFullName, content);
         return true;
     }
@@ -116,9 +134,13 @@ public sealed class DiskFileManager : FileManager
     public override async Task<bool> UploadContentToTextFileAsync(string content, string serverSideFileName,
         CancellationToken cancellationToken = default)
     {
-        Logger.LogInformation("Uploading Parameters content to {_storageFolderName} in {serverSideFileName}",
-            _storageFolderName, serverSideFileName);
-        var targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Uploading Parameters content to {StorageFolderName} in {ServerSideFileName}",
+                _storageFolderName, serverSideFileName);
+        }
+
+        string targetFileFullName = Path.Combine(_storageFolderName, serverSideFileName);
         await File.WriteAllTextAsync(targetFileFullName, content, cancellationToken);
         return true;
     }
@@ -126,31 +148,50 @@ public sealed class DiskFileManager : FileManager
     public override bool DownloadFile(string fileName, string useTempExtension, string? afterRootPath = null)
     {
         if (LocalPatch is null)
+        {
             throw new Exception("DownloadFile: LocalPatch is null");
+        }
 
-        var fileFullName = Path.Combine(LocalPatch, fileName);
+        string fileFullName = Path.Combine(LocalPatch, fileName);
         if (FileStat.NormalizePath(LocalPatch) == FileStat.NormalizePath(_storageFolderName))
+        {
             return File.Exists(fileFullName);
+        }
 
-        var tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
-        var sourceFileFullName = Path.Combine(_storageFolderName, fileName);
-        Logger.LogInformation("Downloading File from {sourceFileFullName} to {fileFullName}", sourceFileFullName,
-            fileFullName);
-        var tempFileFullName = Path.Combine(_storageFolderName, tempFileName);
+        string tempFileName = fileName + useTempExtension.AddNeedLeadPart(".");
+        string sourceFileFullName = Path.Combine(_storageFolderName, fileName);
+
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Downloading File from {SourceFileFullName} to {FileFullName}", sourceFileFullName,
+                fileFullName);
+        }
+
+        string tempFileFullName = Path.Combine(_storageFolderName, tempFileName);
 
         if (CopyFile(sourceFileFullName, tempFileFullName, UseConsole, Logger) &&
             RenameFile(tempFileFullName, fileFullName, UseConsole, Logger))
+        {
             return true;
+        }
 
-        Logger.LogError("Downloading file was finished with errors: from {sourceFileFullName} to {fileFullName}",
-            sourceFileFullName, fileFullName);
+        if (Logger.IsEnabled(LogLevel.Error))
+        {
+            Logger.LogError("Downloading file was finished with errors: from {SourceFileFullName} to {FileFullName}",
+                sourceFileFullName, fileFullName);
+        }
+
         return false;
     }
 
     public override string GetTextFileContent(string fileName)
     {
-        var fullFileName = Path.Combine(GetDirectoryInfo(null).FullName, fileName);
-        Logger.LogInformation("Get content from text file {fullFileName}", fullFileName);
+        string fullFileName = Path.Combine(GetDirectoryInfo(null).FullName, fileName);
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Get content from text file {FullFileName}", fullFileName);
+        }
+
         // ReSharper disable once using
         // ReSharper disable once DisposableConstructor
         using var reader = new StreamReader(fullFileName);
@@ -159,7 +200,8 @@ public sealed class DiskFileManager : FileManager
 
     public override bool RenameFile(string? afterRootPath, string fileName, string newFileName)
     {
-        var folderPath = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
+        string folderPath =
+            afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
 
         return RenameFile(Path.Combine(folderPath, fileName), Path.Combine(folderPath, newFileName), UseConsole,
             Logger);
@@ -167,7 +209,8 @@ public sealed class DiskFileManager : FileManager
 
     public override bool RenameFolder(string? afterRootPath, string folderName, string newFolderName)
     {
-        var folderPath = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
+        string folderPath =
+            afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
 
         return RenameFolder(Path.Combine(folderPath, folderName), Path.Combine(folderPath, newFolderName), UseConsole,
             Logger);
@@ -219,25 +262,28 @@ public sealed class DiskFileManager : FileManager
 
     public override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
-        var inDirName = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
-        var dirFullName = Path.Combine(inDirName, directoryName);
+        string inDirName = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
+        string dirFullName = Path.Combine(inDirName, directoryName);
         Directory.CreateDirectory(dirFullName);
         return DirectoryExists(dirFullName);
     }
 
     public override bool CreateFolderIfNotExists(string directoryName)
     {
-        var dirFullName = Path.Combine(_storageFolderName, directoryName);
+        string dirFullName = Path.Combine(_storageFolderName, directoryName);
         if (Directory.Exists(dirFullName))
+        {
             return true;
+        }
+
         Directory.CreateDirectory(dirFullName);
         return DirectoryExists(dirFullName);
     }
 
     public override bool DeleteDirectory(string? afterRootPath, string directoryName, bool recursive = false)
     {
-        var inDirName = afterRootPath != null ? Path.Combine(_storageFolderName, afterRootPath) : _storageFolderName;
-        var dirFullName = Path.Combine(inDirName, directoryName);
+        string inDirName = afterRootPath != null ? Path.Combine(_storageFolderName, afterRootPath) : _storageFolderName;
+        string dirFullName = Path.Combine(inDirName, directoryName);
         Directory.Delete(dirFullName, recursive);
         return !DirectoryExists(dirFullName);
     }

@@ -31,7 +31,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     }
 
     protected abstract ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
-        string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
+        string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
 
     protected abstract ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
@@ -63,8 +63,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     private static string? GetParametersVersion(string appSettingsFileBody)
     {
-        var latestAppSetJObject = JObject.Parse(appSettingsFileBody);
-        var latestAppSettingsVersion = latestAppSetJObject["VersionInfo"]?["AppSettingsVersion"]?.Value<string>();
+        JObject latestAppSetJObject = JObject.Parse(appSettingsFileBody);
+        string? latestAppSettingsVersion = latestAppSetJObject["VersionInfo"]?["AppSettingsVersion"]?.Value<string>();
         return latestAppSettingsVersion;
     }
 
@@ -77,24 +77,27 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
         string installFolder, CancellationToken cancellationToken = default)
     {
-        var checkBeforeStartUpdateResult =
+        OneOf<string, Err[]> checkBeforeStartUpdateResult =
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
 
         if (checkBeforeStartUpdateResult.IsT1)
+        {
             return checkBeforeStartUpdateResult.AsT1;
-        var projectInstallFullPath = checkBeforeStartUpdateResult.AsT0;
+        }
+
+        string? projectInstallFullPath = checkBeforeStartUpdateResult.AsT0;
 
         //დავადგინოთ დაინსტალირებული პარამეტრების ფაილის სრული გზა
-        var appSettingsFileFullPath = Path.Combine(projectInstallFullPath, appSettingsFileName);
+        string appSettingsFileFullPath = Path.Combine(projectInstallFullPath, appSettingsFileName);
 
         //დავადგინოთ ფაილსაცავიდან მიღებული ბოლო პარამეტრების ფაილის ვერსია.
-        var latestAppSettingsVersion = GetParametersVersion(appSettingsFileBody);
+        string? latestAppSettingsVersion = GetParametersVersion(appSettingsFileBody);
         //თუ დაინსტალირებული ფაილი არსებობს, დავადგინოთ მისი ვერსია
         if (!string.IsNullOrWhiteSpace(latestAppSettingsVersion) && File.Exists(appSettingsFileFullPath))
         {
             //დავადგინოთ დაინსტალირებული პარამეტრების ფაილის ვერსია.
-            var currentAppSettingsFileBody = await File.ReadAllTextAsync(appSettingsFileFullPath, cancellationToken);
-            var currentAppSettingsVersion = GetParametersVersion(currentAppSettingsFileBody);
+            string currentAppSettingsFileBody = await File.ReadAllTextAsync(appSettingsFileFullPath, cancellationToken);
+            string? currentAppSettingsVersion = GetParametersVersion(currentAppSettingsFileBody);
             //თუ ვერსიები ემთხვევა დაინსტალირება აღარ გრძელდება, რადგან ისედაც ბოლო ვერსია აყენია
             if (!string.IsNullOrWhiteSpace(currentAppSettingsVersion) &&
                 latestAppSettingsVersion == currentAppSettingsVersion)
@@ -109,25 +112,31 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //კიდევ აქ მოსვლის მიზეზი შეიძლება იყოს, ის რომ ფაილებში არასწორად არის, ან საერთოდ არ არის გაწერილი ვერსიები
         //ამ ბოლო შემთხვევაზე ყურადღებას არ ვამახვილებთ, იმისათვის, რომ შესაძლებელი იყოს ასეთი "არასწორი" პროგრამების პარამეტრები განახლდეს.
 
-        var serviceEnvName = GetServiceEnvName(projectName, environmentName);
+        string serviceEnvName = GetServiceEnvName(projectName, environmentName);
 
-        var stopResult = await Stop(serviceEnvName, cancellationToken);
+        Option<Err[]> stopResult = await Stop(serviceEnvName, cancellationToken);
         if (!string.IsNullOrWhiteSpace(serviceEnvName))
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
-            var serviceExists = IsServiceExists(serviceEnvName);
+            bool serviceExists = IsServiceExists(serviceEnvName);
             if (serviceExists)
+            {
                 await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
+            }
             else
                 //ეს არის პარამეტრების განახლების პროცესი, ამიტომ თუ პროგრამა სერვისია და ეს სერვისი არ არსებობს განახლება ვერ მოხდება
                 //ასეთ შემთხვევაში უნდა გაეშვას უკვე მთლიანი პროგრამის განახლების პროცესი
+            {
                 return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
                     cancellationToken);
+            }
 
             //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
             await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
+            {
                 return (Err[])stopResult;
+            }
         }
         else if (IsProcessRunning(projectName))
             //თუ სერვისი არ არის და პროგრამა მაინც გაშვებულია,
@@ -140,13 +149,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         }
 
         //შევეცადოთ პარამეტრების ფაილის წაშლა
-        var appSettingsFileDeletedSuccess = true;
+        bool appSettingsFileDeletedSuccess = true;
         if (File.Exists(appSettingsFileFullPath))
         {
             appSettingsFileDeletedSuccess = false;
             await LogInfoAndSendMessage("File {0} is exists", appSettingsFileFullPath, cancellationToken);
 
-            var tryCount = 0;
+            int tryCount = 0;
             while (!appSettingsFileDeletedSuccess && tryCount < 10)
             {
                 tryCount++;
@@ -164,28 +173,34 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     await LogWarningAndSendMessage("File {0} could not deleted on try {1}", appSettingsFileFullPath,
                         tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
-                    Thread.Sleep(3000);
+                    await Task.Delay(3000, cancellationToken);
                 }
             }
         }
 
         if (!appSettingsFileDeletedSuccess)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileCanNotBeDeleted(appSettingsFileFullPath),
                 cancellationToken).ConfigureAwait(false);
+        }
 
         //შეიქმნას პარამეტრების ფაილი არსებულ ინფორმაციაზე დაყრდნობით
         await File.WriteAllTextAsync(appSettingsFileFullPath, appSettingsFileBody, cancellationToken);
         //შეიცვალოს პარამეტრების ფაილზე უფლებები საჭიროების მიხედვით.
-        var changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
+        Option<Err[]> changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOneFileOwnerResult.IsSome)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.FileOwnerCanNotBeChanged(appSettingsFileFullPath), cancellationToken);
+        }
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        var startResult = await Start(serviceEnvName, cancellationToken);
+        Option<Err[]> startResult = await Start(serviceEnvName, cancellationToken);
         if (startResult.IsNone)
+        {
             return null;
+        }
 
         //თუ სერვისი არ გაეშვა, ვაბრუნებთ შეტყობინებას
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(projectName),
@@ -196,15 +211,19 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         string environmentName, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(installFolder))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
                 cancellationToken);
+        }
 
         await LogInfoAndSendMessage("Installer install folder is {0}", installFolder, cancellationToken);
 
-        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
+        string projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
         if (!Directory.Exists(projectInstallFullPath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ProjectInstallerFolderIsNotExists(projectName),
                 cancellationToken);
+        }
 
         await LogInfoAndSendMessage("Project install folder is {0}", projectInstallFullPath, cancellationToken);
 
@@ -219,27 +238,31 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
 
-        var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
+        string? checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerWorkFolderDoesNotCreated(installWorkFolder), cancellationToken);
+        }
 
-        var projectInstallFullPath = Path.Combine(installFolder, projectName);
-        var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
+        string projectInstallFullPath = Path.Combine(installFolder, projectName);
+        string? checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
         if (checkedProjectInstallFullPath == null)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerInstallFolderDoesNotCreated(projectInstallFullPath), cancellationToken);
+        }
 
-        var projectInstallFullPathWithEnv = Path.Combine(projectInstallFullPath, environmentName);
+        string projectInstallFullPathWithEnv = Path.Combine(projectInstallFullPath, environmentName);
 
         await LogInfoAndSendMessage("Installer project install folder is {0}", projectInstallFullPathWithEnv,
             cancellationToken);
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
-        var folderName = Path.GetFileNameWithoutExtension(archiveFileName);
-        var projectFilesFolderFullName = Path.Combine(checkedWorkFolder, folderName);
-        var archiveFileFullName = Path.Combine(checkedWorkFolder, archiveFileName);
+        string folderName = Path.GetFileNameWithoutExtension(archiveFileName);
+        string projectFilesFolderFullName = Path.Combine(checkedWorkFolder, folderName);
+        string archiveFileFullName = Path.Combine(checkedWorkFolder, archiveFileName);
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
@@ -248,11 +271,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
-        ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
+        await ZipFile.ExtractToDirectoryAsync(archiveFileFullName, projectFilesFolderFullName, cancellationToken);
 
         if (!Directory.Exists(projectFilesFolderFullName))
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.ProjectFilesIsNotExtracted(projectFilesFolderFullName), cancellationToken);
+        }
 
         await LogInfoAndSendMessage("Project files is extracted to {0}", projectFilesFolderFullName, cancellationToken);
 
@@ -266,42 +291,54 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
-        var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
+        string projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
 
-        var assemblyVersion = Assembly.LoadFile(projectMainExeFileName).GetName().Version?.ToString();
+        string? assemblyVersion = Assembly.Load(projectMainExeFileName).GetName().Version?.ToString();
 
-        var serviceEnvName = GetServiceEnvName(projectName, environmentName);
+        string serviceEnvName = GetServiceEnvName(projectName, environmentName);
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
-        var serviceExists = IsServiceExists(serviceEnvName);
+        bool serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
+        {
             await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
+        }
         else
+        {
             await LogInfoAndSendMessage("Service {0} is not exists", serviceEnvName, cancellationToken);
+        }
 
         if (serviceExists)
         {
             //თუ სიაში არსებობს დავადგინოთ გაშვებულია თუ არა სერვისი.
-            var serviceIsRunning = IsServiceRunning(serviceEnvName);
+            bool serviceIsRunning = IsServiceRunning(serviceEnvName);
             if (serviceIsRunning)
+            {
                 await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
+            }
             else
+            {
                 await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
+            }
 
             if (serviceIsRunning)
             {
                 //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
                 await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
 
-                var stopResult = await Stop(serviceEnvName, cancellationToken);
+                Option<Err[]> stopResult = await Stop(serviceEnvName, cancellationToken);
                 if (stopResult.IsSome)
+                {
                     return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
                         cancellationToken);
+                }
             }
         }
 
         if (IsProcessRunning(serviceEnvName))
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.ServiceIsRunningAndCannotBeUpdated(serviceEnvName), cancellationToken);
+        }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         //თუ არსებობს, დავაარქივოთ და გადავინახოთ პროგრამის მიმდინარე ფაილები
@@ -310,11 +347,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
         if (Directory.Exists(projectInstallFullPathWithEnv))
         {
-            var deleteSuccess = false;
+            bool deleteSuccess = false;
 
             await LogInfoAndSendMessage("Folder {0} already exists", projectInstallFullPathWithEnv, cancellationToken);
 
-            var tryCount = 0;
+            int tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
             {
                 tryCount++;
@@ -332,15 +369,17 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}",
                         projectInstallFullPathWithEnv, tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
-                    Thread.Sleep(3000);
+                    await Task.Delay(3000, cancellationToken);
                 }
 
                 deleteSuccess = !Directory.Exists(projectInstallFullPathWithEnv);
             }
 
             if (!deleteSuccess)
+            {
                 return await LogErrorAndSendMessageFromError(
                     InstallerErrors.FolderCanNotBeDeleted(projectInstallFullPathWithEnv), cancellationToken);
+            }
         }
 
         await LogInfoAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPathWithEnv,
@@ -358,11 +397,13 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         await LogInfoAndSendMessage("Change Owner for Path {0} for user {1} and group {2}",
             projectInstallFullPathWithEnv, filesUserName, filesUsersGroupName, cancellationToken);
 
-        var changeOwnerResult = await ChangeFolderOwner(projectInstallFullPathWithEnv, filesUserName,
+        Option<Err[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPathWithEnv, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsSome)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.FolderOwnerCanNotBeChanged(projectInstallFullPathWithEnv), cancellationToken);
+        }
 
         //თუ სერვისი უკვე დარეგისტრირებულია, შევამოწმოთ სწორად არის თუ არა დარეგისტრირებული.
         if (serviceExists)
@@ -370,18 +411,20 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             await LogInfoAndSendMessage("Because service {0}/{1} is exists, Check if Service registered properly",
                 projectName, serviceEnvName, cancellationToken);
 
-            var isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName, serviceEnvName,
-                serviceUserName, projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription,
-                cancellationToken);
+            OneOf<bool, Err[]> isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName,
+                serviceEnvName, serviceUserName, projectInstallFullPathWithEnv, serviceDescriptionSignature,
+                projectDescription, cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
+            {
                 return Err.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
                     InstallerErrors.IsServiceRegisteredProperlyError);
+            }
 
             if (!isServiceRegisteredProperlyResult.AsT0)
             {
                 await LogInfoAndSendMessage("Service {0}/{1} registration is not properly, so will be removed",
                     projectName, serviceEnvName, cancellationToken);
-                var removeServiceError = RemoveService(serviceEnvName);
+                Option<Err[]> removeServiceError = RemoveService(serviceEnvName);
                 if (removeServiceError.IsSome)
                 {
                     Err.PrintErrorsOnConsole((Err[])removeServiceError);
@@ -398,18 +441,22 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         {
             await LogInfoAndSendMessage("registering service {0}...", serviceEnvName, cancellationToken);
 
-            var registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
+            Option<Err[]> registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
                 projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription, cancellationToken);
 
             if (registerServiceResult.IsSome)
+            {
                 return await LogErrorAndSendMessageFromError(InstallerErrors.CannotRegisterService(serviceEnvName),
                     cancellationToken);
+            }
         }
 
         //გავუშვათ სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        var startResult = await Start(serviceEnvName, cancellationToken);
+        Option<Err[]> startResult = await Start(serviceEnvName, cancellationToken);
         if (startResult.IsNone)
+        {
             return assemblyVersion;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
             cancellationToken);
@@ -421,17 +468,19 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
-        var checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
+        string? checkedWorkFolder = FileStat.CreateFolderIfNotExists(installWorkFolder, UseConsole);
         if (checkedWorkFolder == null)
+        {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.InstallerWorkFolderDoesNotCreated(installWorkFolder), cancellationToken);
+        }
 
         //გავშალოთ არქივი სამუშაო ფოლდერში, იმისათვის, რომ დავრწმუნდეთ,
         //რომ არქივი დაზიანებული არ არის და ყველა ფაილის გახსნა ხერხდება
         //ZipClassArchiver zipClassArchiver = new ZipClassArchiver(_logger, outputFolderPath, zipFileFullName);
-        var folderName = Path.GetFileNameWithoutExtension(archiveFileName);
-        var projectFilesFolderFullName = Path.Combine(checkedWorkFolder, folderName);
-        var archiveFileFullName = Path.Combine(checkedWorkFolder, archiveFileName);
+        string folderName = Path.GetFileNameWithoutExtension(archiveFileName);
+        string projectFilesFolderFullName = Path.Combine(checkedWorkFolder, folderName);
+        string archiveFileFullName = Path.Combine(checkedWorkFolder, archiveFileName);
 
         if (Directory.Exists(projectFilesFolderFullName))
         {
@@ -440,7 +489,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             Directory.Delete(projectFilesFolderFullName, true);
         }
 
-        ZipFile.ExtractToDirectory(archiveFileFullName, projectFilesFolderFullName);
+        await ZipFile.ExtractToDirectoryAsync(archiveFileFullName, projectFilesFolderFullName, cancellationToken);
         await LogInfoAndSendMessage("Project files is extracted to {0}", projectFilesFolderFullName, cancellationToken);
 
         //წავშალოთ გახსნილი არქივი, რადგან ის აღარ გვჭირდება
@@ -453,22 +502,24 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         File.Delete(archiveFileFullName);
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
-        var projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
-        var version = Assembly.LoadFile(projectMainExeFileName).GetName().Version;
-        var assemblyVersion = version?.ToString();
+        string projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
+        Version? version = Assembly.Load(projectMainExeFileName).GetName().Version;
+        string? assemblyVersion = version?.ToString();
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         //თუ არსებობს, დავაარქივოთ და გადავინახოთ პროგრამის მიმდინარე ფაილები
         //(ეს კეთდება იმისათვის, რომ შესაძლებელი იყოს წინა ვერსიაზე სწრაფად დაბრუნება)
         //რადგან გადანახვა ხდება, ზედმეტი ფაილები რომ არ დაგროვდეს, წავშალოთ წინა გადანახულები,
         //ოღონდ არ წავშალოთ ბოლო რამდენიმე. (რაოდენობა პარამეტრებით უნდა იყოს განსაზღვრული)
-        var deleteSuccess = true;
-        var projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
+        bool deleteSuccess = true;
+        string projectInstallFullPath = Path.Combine(installFolder, projectName, environmentName);
 
-        var checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
+        string? checkedProjectInstallFullPath = FileStat.CreateFolderIfNotExists(projectInstallFullPath, UseConsole);
         if (checkedProjectInstallFullPath == null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
                 cancellationToken);
+        }
 
         await LogInfoAndSendMessage("Installer project install folder is {0}", checkedProjectInstallFullPath,
             cancellationToken);
@@ -478,7 +529,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             deleteSuccess = false;
             await LogInfoAndSendMessage("Folder {0} already exists", projectInstallFullPath, cancellationToken);
 
-            var tryCount = 0;
+            int tryCount = 0;
             while (!deleteSuccess && tryCount < 10)
             {
                 tryCount++;
@@ -496,14 +547,16 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                     await LogWarningAndSendMessage("Folder {0} could not deleted on try {1}", projectInstallFullPath,
                         tryCount, cancellationToken);
                     await LogInfoAndSendMessage("waiting for 3 seconds...", cancellationToken);
-                    Thread.Sleep(3000);
+                    await Task.Delay(3000, cancellationToken);
                 }
             }
         }
 
         if (!deleteSuccess)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderCanNotBeDeleted(projectInstallFullPath),
                 cancellationToken);
+        }
 
         await LogWarningAndSendMessage("Install {0} files to {1}...", projectName, projectInstallFullPath,
             cancellationToken);
@@ -513,10 +566,12 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
 
-        var changeOwnerResult = await ChangeFolderOwner(projectInstallFullPath, filesUserName, filesUsersGroupName,
-            cancellationToken);
+        Option<Err[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPath, filesUserName,
+            filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsNone)
+        {
             return assemblyVersion;
+        }
 
         return await LogErrorAndSendMessageFromError(
             InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
@@ -531,14 +586,18 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     private async ValueTask<Option<Err[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
-        var serviceExists = IsServiceExists(serviceEnvName);
+        bool serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
+        {
             await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
+        }
         else
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
                 cancellationToken);
+        }
 
-        var serviceIsRunning = IsServiceRunning(serviceEnvName);
+        bool serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (!serviceIsRunning)
         {
             await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
@@ -547,9 +606,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
 
-        var stopServiceResult = await StopService(serviceEnvName, cancellationToken);
+        Option<Err[]> stopServiceResult = await StopService(serviceEnvName, cancellationToken);
         if (stopServiceResult.IsNone)
+        {
             return stopServiceResult;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStopped(serviceEnvName),
             cancellationToken);
@@ -563,7 +624,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     private async ValueTask<Option<Err[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
     {
-        var serviceIsRunning = IsServiceRunning(serviceEnvName);
+        bool serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
         {
             await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
@@ -572,9 +633,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
 
-        var startServiceResult = await StartService(serviceEnvName, cancellationToken);
+        Option<Err[]> startServiceResult = await StartService(serviceEnvName, cancellationToken);
         if (startServiceResult.IsNone)
+        {
             return null;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
             cancellationToken);
@@ -584,38 +647,52 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         bool isService, string installFolder, CancellationToken cancellationToken = default)
     {
         if (!isService)
+        {
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
+        }
 
-        var serviceEnvName = GetServiceEnvName(projectName, environmentName);
+        string serviceEnvName = GetServiceEnvName(projectName, environmentName);
 
         await LogInfoAndSendMessage("Remove service {0} started...", serviceEnvName, cancellationToken);
 
-        var serviceExists = IsServiceExists(serviceEnvName);
+        bool serviceExists = IsServiceExists(serviceEnvName);
         if (serviceExists)
+        {
             await LogInfoAndSendMessage("Service {0} is exists", serviceEnvName, cancellationToken);
+        }
         else
+        {
             await LogInfoAndSendMessage("Service {0} is not exists", serviceEnvName, cancellationToken);
+        }
 
-        var serviceIsRunning = false;
+        bool serviceIsRunning = false;
         if (serviceExists)
         {
             serviceIsRunning = IsServiceRunning(serviceEnvName);
             if (serviceIsRunning)
+            {
                 await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
+            }
             else
+            {
                 await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
+            }
         }
 
         if (serviceIsRunning)
         {
-            var stopResult = await Stop(serviceEnvName, cancellationToken);
+            Option<Err[]> stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
+            {
                 return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStopped(serviceEnvName),
                     cancellationToken);
+            }
         }
 
         if (RemoveService(serviceEnvName))
+        {
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeRemoved(serviceEnvName),
             cancellationToken);
@@ -626,18 +703,22 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     {
         await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);
 
-        var checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
+        string? checkedInstallFolder = FileStat.CreateFolderIfNotExists(installFolder, UseConsole);
         if (checkedInstallFolder == null)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.InstallerFolderIsNotExists(installFolder),
                 cancellationToken);
+        }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
-        var projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
+        string projectInstallFullPath = Path.Combine(checkedInstallFolder, projectName, environmentName);
 
         await LogInfoAndSendMessage("Deleting files {0}...", projectName, cancellationToken);
 
         if (Directory.Exists(projectInstallFullPath))
+        {
             Directory.Delete(projectInstallFullPath, true);
+        }
 
         return null;
     }

@@ -33,7 +33,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         // ReSharper disable once using
-        using var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
+        using ServiceController? sc = ServiceController.GetServices()
+            .FirstOrDefault(s => s.ServiceName == serviceEnvName);
         return sc != null;
 #pragma warning restore CA1416 // Validate platform compatibility
     }
@@ -42,9 +43,13 @@ public sealed class WindowsServiceInstaller : InstallerBase
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         // ReSharper disable once using
-        using var sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == serviceEnvName);
+        using ServiceController? sc = ServiceController.GetServices()
+            .FirstOrDefault(s => s.ServiceName == serviceEnvName);
         if (sc == null)
+        {
             return false;
+        }
+
         return !(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
                  sc.Status.Equals(ServiceControllerStatus.StopPending));
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -59,7 +64,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
+        {
             return new[] { InstallerErrors.ServiceIsRunningAndCanNotBeRemoved(serviceEnvName) };
+        }
 #pragma warning restore CA1416 // Validate platform compatibility
 
         // create empty pipeline
@@ -84,7 +91,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
         using var sc = new ServiceController(serviceEnvName);
 
         if (sc.Status.Equals(ServiceControllerStatus.Stopped) || sc.Status.Equals(ServiceControllerStatus.StopPending))
+        {
             return null;
+        }
 
         await LogInfoAndSendMessage("Stopping the {0} service...", serviceEnvName, cancellationToken);
 
@@ -94,7 +103,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         // Refresh and display the current service status.
         sc.Refresh();
 
-        var status = sc.Status;
+        ServiceControllerStatus status = sc.Status;
 
 #pragma warning restore CA1416 // Validate platform compatibility
 
@@ -102,8 +111,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
             cancellationToken);
 
         if (status != ServiceControllerStatus.Stopped)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
                 cancellationToken);
+        }
 
         return null;
     }
@@ -119,7 +130,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
         sc.Refresh();
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
+        {
             return null;
+        }
 
         await LogInfoAndSendMessage("Starting the {0} service...", serviceEnvName, cancellationToken);
 
@@ -128,7 +141,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         // Refresh and display the current service status.
         sc.Refresh();
 
-        var status = sc.Status;
+        ServiceControllerStatus status = sc.Status;
 
 #pragma warning restore CA1416 // Validate platform compatibility
 
@@ -136,8 +149,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
             cancellationToken);
 
         if (status != ServiceControllerStatus.Running)
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStarted(serviceEnvName),
                 cancellationToken);
+        }
 
         return null;
     }
@@ -146,19 +161,25 @@ public sealed class WindowsServiceInstaller : InstallerBase
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileNameIsEmpty, cancellationToken);
+        }
 
         if (!File.Exists(filePath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
+        }
 
-        var userName = "NT AUTHORITY\\LOCAL SERVICE";
+        string userName = "NT AUTHORITY\\LOCAL SERVICE";
         if (!string.IsNullOrWhiteSpace(filesUserName))
+        {
             userName = filesUserName;
+        }
 
         var file = new FileInfo(filePath);
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var dac = file.GetAccessControl();
+        FileSecurity dac = file.GetAccessControl();
         IdentityReference ir = new NTAccount(userName);
         var fsaRule = new FileSystemAccessRule(ir,
             FileSystemRights.Read & FileSystemRights.Write & FileSystemRights.ReadAndExecute,
@@ -175,19 +196,26 @@ public sealed class WindowsServiceInstaller : InstallerBase
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderNameIsEmpty, cancellationToken);
+        }
 
         if (!Directory.Exists(folderPath))
+        {
             return await LogErrorAndSendMessageFromError(InstallerErrors.FolderIsNotExists(folderPath),
                 cancellationToken);
+        }
 
-        var userName = "NT AUTHORITY\\LOCAL SERVICE";
-        if (!string.IsNullOrWhiteSpace(filesUserName)) userName = filesUserName;
+        string userName = "NT AUTHORITY\\LOCAL SERVICE";
+        if (!string.IsNullOrWhiteSpace(filesUserName))
+        {
+            userName = filesUserName;
+        }
 
         var installFolder = new DirectoryInfo(folderPath);
 #pragma warning disable CA1416 // Validate platform compatibility
 
-        var dac = installFolder.GetAccessControl();
+        DirectorySecurity dac = installFolder.GetAccessControl();
         IdentityReference ir = new NTAccount(userName);
         var fsaRule = new FileSystemAccessRule(ir,
             FileSystemRights.Read & FileSystemRights.Write & FileSystemRights.ReadAndExecute,
@@ -201,11 +229,11 @@ public sealed class WindowsServiceInstaller : InstallerBase
     }
 
     protected override async ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
-        string serviceEnvName, string userName, string installFolderPath, string? serviceDescriptionSignature,
+        string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
-        var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
-        var mustBeDescription =
+        string exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
+        string mustBeDescription =
             $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}";
         //თუ სერვისი უკვე დარეგისტრირებულია და გვინდა დავადგინოთ გამშვები ფაილი რომელია, გვაქვს 2 გზა
         //1. გამოვიყენოთ sc qc <service name> და გავარჩიოთ რას დააბრუნებს
@@ -214,13 +242,14 @@ public sealed class WindowsServiceInstaller : InstallerBase
         //   locate the ImagePath subkey value.
 #pragma warning disable CA1416 // Validate platform compatibility
         // ReSharper disable once using
-        using var regKey = Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
-        var imagePath = regKey?.GetValue("ImagePath")?.ToString();
-        var description = regKey?.GetValue("Description")?.ToString();
+        using RegistryKey? regKey =
+            Registry.LocalMachine.OpenSubKey($@"SYSTEM\CurrentControlSet\services\{serviceEnvName}");
+        string? imagePath = regKey?.GetValue("ImagePath")?.ToString();
+        string? description = regKey?.GetValue("Description")?.ToString();
 #pragma warning restore CA1416 // Validate platform compatibility
 
-        var toReturn = imagePath is not null && imagePath == exeFilePath && description is not null &&
-                       description == mustBeDescription;
+        bool toReturn = imagePath is not null && imagePath == exeFilePath && description is not null &&
+                        description == mustBeDescription;
         return await Task.FromResult(toReturn);
     }
 
@@ -233,7 +262,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         using var ps = PowerShell.Create();
 
         // add command
-        var exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
+        string exeFilePath = Path.Combine(installFolderPath, $"{projectName}.exe");
         ps.AddCommand("New-Service").AddParameter("Name", serviceEnvName)
             .AddParameter("Description",
                 $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}")
@@ -242,7 +271,9 @@ public sealed class WindowsServiceInstaller : InstallerBase
         await ps.InvokeAsync();
 
         if (IsServiceExists(serviceEnvName))
+        {
             return null;
+        }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
             cancellationToken);

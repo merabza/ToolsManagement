@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ConnectionTools.ConnectTools;
 using ParametersManagement.LibFileParameters.Models;
@@ -40,9 +41,12 @@ public /*open*/ class FolderProcessor
     public bool Run()
     {
         if (!CheckParameters())
+        {
             return false;
+        }
+
         Console.WriteLine(_description);
-        var toReturn = ProcessFolder();
+        bool toReturn = ProcessFolder();
         Finish();
         return toReturn;
     }
@@ -57,15 +61,15 @@ public /*open*/ class FolderProcessor
 
         if (_useSubFolders)
         {
-            var reloadFolders = true;
+            bool reloadFolders = true;
             while (reloadFolders)
             {
-                var folderNames = FileManager.GetFolderNames(afterRootPath, null).Where(x => !x.StartsWith("#"))
-                    .OrderBy(o => o).ToList();
+                List<string> folderNames = FileManager.GetFolderNames(afterRootPath, null)
+                    .Where(x => !x.StartsWith('#')).OrderBy(o => o).ToList();
                 reloadFolders = false;
-                foreach (var folderName in folderNames)
+                foreach (string folderName in folderNames)
                 {
-                    var (success, folderNameChanged, continueWithThisFolder) =
+                    (bool success, bool folderNameChanged, bool continueWithThisFolder) =
                         ProcessOneFolder(afterRootPath, folderName);
                     if (folderNameChanged)
                     {
@@ -74,27 +78,39 @@ public /*open*/ class FolderProcessor
                     }
 
                     if (!success)
+                    {
                         return false;
+                    }
 
                     if (!continueWithThisFolder)
+                    {
                         continue;
+                    }
 
-                    var folderAfterRootFullName = FileManager.PathCombine(afterRootPath, folderName);
+                    string folderAfterRootFullName = FileManager.PathCombine(afterRootPath, folderName);
                     if (!ProcessFolder(folderAfterRootFullName))
+                    {
                         return false;
+                    }
                 }
             }
         }
 
         if (_useProcessFiles && !ProcessFiles(afterRootPath))
+        {
             return false;
+        }
 
         if (!_deleteEmptyFolders)
+        {
             return true;
+        }
 
         //შევამოწმოთ დაცარიელდა თუ არა ფოლდერი და თუ დაცარიელდა, წავშალოთ
         if (afterRootPath != null && FileManager.IsFolderEmpty(afterRootPath))
+        {
             FileManager.DeleteDirectory(afterRootPath);
+        }
 
         return true;
     }
@@ -118,15 +134,15 @@ public /*open*/ class FolderProcessor
 
     private bool ProcessFiles(string? afterRootPath)
     {
-        return FileManager.GetFilesWithInfo(afterRootPath, _fileSearchPattern).OrderBy(o => o.FileName)
+        return FileManager.GetFilesWithInfo(afterRootPath, _fileSearchPattern)
             .Where(file =>
                 ExcludeSet == null || !ExcludeSet.NeedExclude(FileManager.PathCombine(afterRootPath, file.FileName)))
-            .All(file => ProcessOneFile(afterRootPath, file));
+            .OrderBy(o => o.FileName).All(file => ProcessOneFile(afterRootPath, file));
     }
 
     protected static bool NeedExclude(string name, string[] excludes)
     {
-        var haveExclude = excludes is { Length: > 0 };
+        bool haveExclude = excludes is { Length: > 0 };
         return haveExclude && excludes.Any(name.FitsMask);
     }
 }

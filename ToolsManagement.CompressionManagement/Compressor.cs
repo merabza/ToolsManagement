@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using ParametersManagement.LibFileParameters.Models;
@@ -29,8 +30,8 @@ public sealed class Compressor
     public bool CompressFolder(string sourceFolderFullPath, string localPath)
     {
         const string backupFileNameSuffix = ".zip";
-        var archiver = ArchiverFactory.CreateArchiverByType(_useConsole, _logger, EArchiveType.ZipClass, null, null,
-            backupFileNameSuffix);
+        Archiver? archiver = ArchiverFactory.CreateArchiverByType(_useConsole, _logger, EArchiveType.ZipClass, null,
+            null, backupFileNameSuffix);
 
         if (archiver is null)
         {
@@ -43,11 +44,12 @@ public sealed class Compressor
         const string tempExtension = ".go!";
         var dir = new DirectoryInfo(sourceFolderFullPath);
 
-        var backupFileNamePrefix = $"{dir.Name}{_middlePart}";
+        string backupFileNamePrefix = $"{dir.Name}{_middlePart}";
 
-        var backupFileName = $"{backupFileNamePrefix}{DateTime.Now.ToString(dateMask)}{backupFileNameSuffix}";
-        var backupFileFullName = Path.Combine(localPath, backupFileName);
-        var tempFileName = $"{backupFileFullName}{tempExtension}";
+        string backupFileName =
+            $"{backupFileNamePrefix}{DateTime.Now.ToString(dateMask, CultureInfo.InvariantCulture)}{backupFileNameSuffix}";
+        string backupFileFullName = Path.Combine(localPath, backupFileName);
+        string tempFileName = $"{backupFileFullName}{tempExtension}";
 
         if (!archiver.SourcesToArchive([sourceFolderFullPath], tempFileName, _excludes))
         {
@@ -57,7 +59,7 @@ public sealed class Compressor
 
         File.Move(tempFileName, backupFileFullName);
 
-        var localFileManager = FileManagersFactory.CreateFileManager(_useConsole, _logger, localPath);
+        FileManager? localFileManager = FileManagersFactory.CreateFileManager(_useConsole, _logger, localPath);
         //წაიშალოს ადრე შექმნილი დაძველებული ფაილები
 
         if (localFileManager is null)

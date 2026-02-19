@@ -50,8 +50,11 @@ public sealed class ProcessManager : IDisposable
         _source.Cancel();
         try
         {
-            var processLines = _processLines.Values.ToArray();
-            foreach (var processLine in processLines) processLine.WaitForFinish();
+            ProcessLine[] processLines = _processLines.Values.ToArray();
+            foreach (ProcessLine processLine in processLines)
+            {
+                processLine.WaitForFinish();
+            }
         }
         catch (OperationCanceledException e)
         {
@@ -65,13 +68,13 @@ public sealed class ProcessManager : IDisposable
 
     public void Run(ProcessesToolAction toolAction)
     {
-        var procLineId = toolAction.ProcLineId;
+        int procLineId = toolAction.ProcLineId;
         if (!_processLines.ContainsKey(procLineId))
         {
             // ReSharper disable once DisposableConstructor
             if (!_processLines.TryAdd(procLineId, new ProcessLine(_logger, _signal)))
             {
-                _logger.LogError("Cannot add New Process Line with Id {procLineId}", procLineId);
+                _logger.LogError("Cannot add New Process Line with Id {ProcLineId}", procLineId);
                 return;
             }
 
@@ -84,7 +87,9 @@ public sealed class ProcessManager : IDisposable
     public bool CheckCancellation()
     {
         if (!CancellationToken.IsCancellationRequested)
+        {
             return false;
+        }
 
         Console.WriteLine("Task was cancelled before it got started.");
         return true;

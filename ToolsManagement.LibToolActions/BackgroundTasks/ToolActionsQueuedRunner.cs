@@ -27,19 +27,19 @@ public sealed class ToolActionsQueuedRunner : BackgroundService
 
     public bool IsBusy { get; private set; }
 
-    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Queued Hosted Service is starting.");
 
-        while (!cancellationToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            var toolAction = await ToolActionsQueue.DequeueAsync(cancellationToken);
+            ProcessesToolAction? toolAction = await ToolActionsQueue.DequeueAsync(stoppingToken);
             IsBusy = true;
             try
             {
                 if (toolAction is not null)
                 {
-                    _currentTask = toolAction.RunAsync(cancellationToken);
+                    _currentTask = toolAction.RunAsync(stoppingToken);
                     await _currentTask;
                 }
 

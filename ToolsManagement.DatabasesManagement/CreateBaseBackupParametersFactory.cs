@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using DatabaseTools.DbTools;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using ParametersManagement.LibApiClientParameters;
@@ -33,59 +34,67 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
         CancellationToken cancellationToken = default)
     {
-        var localPath = databasesBackupFilesExchangeParameters?.LocalPath;
-        var localSmartSchemaName = databasesBackupFilesExchangeParameters?.LocalSmartSchemaName;
-        var exchangeFileStorageName = databasesBackupFilesExchangeParameters?.ExchangeFileStorageName;
+        string? localPath = databasesBackupFilesExchangeParameters?.LocalPath;
+        string? localSmartSchemaName = databasesBackupFilesExchangeParameters?.LocalSmartSchemaName;
+        string? exchangeFileStorageName = databasesBackupFilesExchangeParameters?.ExchangeFileStorageName;
 
-        var uploadTempExtension = string.IsNullOrWhiteSpace(databasesBackupFilesExchangeParameters?.UploadTempExtension)
-            ? DatabasesBackupFilesExchangeParameters.DefaultUploadTempExtension
-            : databasesBackupFilesExchangeParameters.UploadTempExtension;
+        string? uploadTempExtension =
+            string.IsNullOrWhiteSpace(databasesBackupFilesExchangeParameters?.UploadTempExtension)
+                ? DatabasesBackupFilesExchangeParameters.DefaultUploadTempExtension
+                : databasesBackupFilesExchangeParameters.UploadTempExtension;
 
-        var downloadTempExtension =
+        string? downloadTempExtension =
             string.IsNullOrWhiteSpace(databasesBackupFilesExchangeParameters?.DownloadTempExtension)
                 ? DatabasesBackupFilesExchangeParameters.DefaultDownloadTempExtension
                 : databasesBackupFilesExchangeParameters.DownloadTempExtension;
 
-        var dbConnectionName = fromDatabaseParameters.DbConnectionName;
-        var fileStorageName = fromDatabaseParameters.FileStorageName;
-        var smartSchemaName = fromDatabaseParameters.SmartSchemaName;
-        var databaseName = fromDatabaseParameters.DatabaseName;
-        var skipBackupBeforeRestore = fromDatabaseParameters.SkipBackupBeforeRestore;
-        var backupNamePrefix = fromDatabaseParameters.BackupNamePrefix ?? $"{Environment.MachineName}_";
-        var dateMask = fromDatabaseParameters.DateMask ?? DatabaseParameters.DefaultDateMask;
-        var backupFileExtension =
+        string? dbConnectionName = fromDatabaseParameters.DbConnectionName;
+        string? fileStorageName = fromDatabaseParameters.FileStorageName;
+        string? smartSchemaName = fromDatabaseParameters.SmartSchemaName;
+        string? databaseName = fromDatabaseParameters.DatabaseName;
+        bool skipBackupBeforeRestore = fromDatabaseParameters.SkipBackupBeforeRestore;
+        string backupNamePrefix = fromDatabaseParameters.BackupNamePrefix ?? $"{Environment.MachineName}_";
+        string dateMask = fromDatabaseParameters.DateMask ?? DatabaseParameters.DefaultDateMask;
+        string backupFileExtension =
             fromDatabaseParameters.BackupFileExtension ?? DatabaseParameters.DefaultBackupFileExtension;
-        var backupNameMiddlePart = fromDatabaseParameters.BackupNameMiddlePart ??
-                                   DatabaseParameters.DefaultBackupNameMiddlePart;
-        var databaseRecoveryModel = fromDatabaseParameters.DatabaseRecoveryModel ??
-                                    DatabaseParameters.DefaultDatabaseRecoveryModel;
-        var compress = fromDatabaseParameters.Compress ?? DatabaseParameters.DefaultCompress;
-        var verify = fromDatabaseParameters.Verify ?? DatabaseParameters.DefaultVerify;
-        var backupType = fromDatabaseParameters.BackupType ?? DatabaseParameters.DefaultBackupType;
+        string backupNameMiddlePart = fromDatabaseParameters.BackupNameMiddlePart ??
+                                      DatabaseParameters.DefaultBackupNameMiddlePart;
+        EDatabaseRecoveryModel databaseRecoveryModel = fromDatabaseParameters.DatabaseRecoveryModel ??
+                                                       DatabaseParameters.DefaultDatabaseRecoveryModel;
+        bool compress = fromDatabaseParameters.Compress ?? DatabaseParameters.DefaultCompress;
+        bool verify = fromDatabaseParameters.Verify ?? DatabaseParameters.DefaultVerify;
+        EBackupType backupType = fromDatabaseParameters.BackupType ?? DatabaseParameters.DefaultBackupType;
 
         var errors = new List<Err>();
         if (string.IsNullOrWhiteSpace(localPath))
+        {
             errors.AddRange(
                 await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalPathIsNotSpecifiedInParameters,
                     cancellationToken));
+        }
 
         if (string.IsNullOrWhiteSpace(databaseName))
+        {
             errors.AddRange(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.DatabaseNameDoesNotSpecified,
                 cancellationToken));
+        }
 
         if (string.IsNullOrWhiteSpace(fromDatabaseParameters.DbServerFoldersSetName))
+        {
             errors.AddRange(await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified, cancellationToken));
+        }
 
-        var smartSchema = string.IsNullOrWhiteSpace(smartSchemaName)
+        SmartSchema? smartSchema = string.IsNullOrWhiteSpace(smartSchemaName)
             ? null
             : smartSchemas.GetSmartSchemaByKey(smartSchemaName);
 
         //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        var createDatabaseManagerResult = await DatabaseManagersFactory.CreateDatabaseManager(_logger, UseConsole,
-            dbConnectionName, databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
+        OneOf<IDatabaseManager, Err[]> createDatabaseManagerResult =
+            await DatabaseManagersFactory.CreateDatabaseManager(_logger, UseConsole, dbConnectionName,
+                databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
         if (createDatabaseManagerResult.IsT1)
         {
@@ -95,38 +104,46 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         }
 
         if (errors.Count > 0)
+        {
             return errors.ToArray();
+        }
 
-        var (fileStorage, fileManager) = await FileManagersFactoryExt.CreateFileStorageAndFileManager(true, _logger,
-            localPath!, fileStorageName, fileStorages, null, null, cancellationToken);
+        (FileStorageData? fileStorage, FileManager? fileManager) =
+            await FileManagersFactoryExt.CreateFileStorageAndFileManager(true, _logger, localPath!, fileStorageName,
+                fileStorages, null, null, cancellationToken);
 
         if (fileManager == null || fileStorage == null)
+        {
             return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.FileStorageAndFileManagerIsNotCreated,
                 cancellationToken);
+        }
 
         var backupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResult.AsT0, fileManager,
             smartSchema, databaseName!, fromDatabaseParameters.DbServerFoldersSetName!, fileStorage);
 
-        var needDownload = !FileStorageData.IsSameToLocal(fileStorage, localPath!);
+        bool needDownload = !FileStorageData.IsSameToLocal(fileStorage, localPath!);
 
-        var localFileManager = FileManagersFactory.CreateFileManager(true, _logger, localPath!);
+        FileManager? localFileManager = FileManagersFactory.CreateFileManager(true, _logger, localPath!);
 
         if (localFileManager == null)
+        {
             return await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalFileManagerIsNotCreated,
                 cancellationToken);
+        }
 
-        var localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)
+        SmartSchema? localSmartSchema = string.IsNullOrWhiteSpace(localSmartSchemaName)
             ? null
             : smartSchemas.GetSmartSchemaByKey(localSmartSchemaName);
 
         //თუ გაცვლის სერვერის პარამეტრები გვაქვს,
         //შევქმნათ შესაბამისი ფაილმენეჯერი
         Console.Write($" exchangeFileStorage - {exchangeFileStorageName}");
-        var (exchangeFileStorage, exchangeFileManager) = await FileManagersFactoryExt.CreateFileStorageAndFileManager(
-            true, _logger, localPath!, exchangeFileStorageName, fileStorages, null, null, cancellationToken);
+        (FileStorageData? exchangeFileStorage, FileManager? exchangeFileManager) =
+            await FileManagersFactoryExt.CreateFileStorageAndFileManager(true, _logger, localPath!,
+                exchangeFileStorageName, fileStorages, null, null, cancellationToken);
 
-        var needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
-                                   !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath!);
+        bool needUploadToExchange = exchangeFileManager is not null && exchangeFileStorage is not null &&
+                                    !FileStorageData.IsSameToLocal(exchangeFileStorage, localPath!);
 
         return new BaseBackupParameters(backupRestoreParameters, databaseRecoveryModel, needDownload,
             downloadTempExtension, localFileManager, localSmartSchema, needUploadToExchange, exchangeFileManager,

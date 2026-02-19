@@ -28,16 +28,18 @@ public /*open*/ class ToolAction : MessageLogger
         try
         {
             if (!CheckValidate())
+            {
                 return false;
+            }
 
             await LogInfoAndSendMessage($"{ToolActionName} Started...", UseConsole, cancellationToken);
 
             //დავინიშნოთ დრო პროცესისათვის
-            var startDateTime = DateTime.Now;
+            DateTime startDateTime = DateTime.Now;
 
-            var success = await RunAction(cancellationToken);
+            bool success = await RunAction(cancellationToken);
 
-            var timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
+            string timeTakenMessage = StShared.TimeTakenMessage(startDateTime);
 
             await LogInfoAndSendMessage($"{ToolActionName} Finished. {timeTakenMessage}", UseConsole,
                 cancellationToken);

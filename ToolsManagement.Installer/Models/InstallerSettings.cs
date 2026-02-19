@@ -23,14 +23,14 @@ public sealed class InstallerSettings : ParametersWithStatus
     public string? FilesUserName { get; set; }
     public string? FilesUsersGroupName { get; set; }
 
-    public string GetDownloadTempExtension()
+    public string GetDownloadTempExtensionOrDefault()
     {
         return DownloadTempExtension ?? DefaultDownloadFileTempExtension;
     }
 
     public static InstallerSettings Create(IConfiguration configuration)
     {
-        var installerSettings = configuration.GetSection("InstallerSettings");
+        IConfigurationSection installerSettings = configuration.GetSection("InstallerSettings");
         return installerSettings.Get<InstallerSettings>() ?? new InstallerSettings();
     }
 }

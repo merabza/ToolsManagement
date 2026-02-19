@@ -32,7 +32,10 @@ public static class FileManagersFactoryExt
         if (string.IsNullOrWhiteSpace(fileStorageName))
         {
             if (messagesDataManager is not null)
+            {
                 await messagesDataManager.SendMessage(userName, "File storage name not specified", cancellationToken);
+            }
+
             logger.LogError("File storage name not specified");
         }
         else
@@ -41,16 +44,21 @@ public static class FileManagersFactoryExt
             if (fileStorageData == null)
             {
                 if (messagesDataManager is not null)
+                {
                     await messagesDataManager.SendMessage(userName,
                         $"File storage with name {fileStorageName} not found", cancellationToken);
-                logger.LogError("File storage with name {fileStorageName} not found", fileStorageName);
+                }
+
+                logger.LogError("File storage with name {FileStorageName} not found", fileStorageName);
             }
         }
 
         if (fileStorageData == null)
+        {
             return (null, null);
+        }
 
-        var fmg = FileManagersFactory.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
+        FileManager? fmg = FileManagersFactory.CreateFileManager(useConsole, logger, localPatch, fileStorageData);
 
         return fmg == null ? (null, null) : (fileStorageData, fmg);
     }

@@ -45,17 +45,20 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
     {
         LatestParametersFileContent = await GetParametersFileBody(cancellationToken);
         if (string.IsNullOrWhiteSpace(LatestParametersFileContent))
+        {
             return true;
-        var appSetJObject = JObject.Parse(LatestParametersFileContent);
+        }
+
+        JObject appSetJObject = JObject.Parse(LatestParametersFileContent);
         AppSettingsVersion = appSetJObject["VersionInfo"]?["AppSettingsVersion"]?.Value<string>();
         return true;
     }
 
     private async Task<string?> GetParametersFileBody(CancellationToken cancellationToken = default)
     {
-        var prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
+        string prefix = GetPrefix(_projectName, _serverName, _environmentName, null);
 
-        var exchangeFileManager =
+        FileManager? exchangeFileManager =
             FileManagersFactory.CreateFileManager(_useConsole, _logger, null, _fileStorageForDownload, true);
 
         //დავადგინოთ გაცვლით სერვერზე შესაბამისი პარამეტრების ფაილები თუ არსებობს
@@ -63,10 +66,13 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
         await LogInfoAndSendMessage("Check files on exchange storage for Prefix {0}, Date Mask {1} and extension {2}",
             prefix, _dateMask, _parametersFileExtension, cancellationToken);
 
-        var lastParametersFileInfo = exchangeFileManager?.GetLastFileInfo(prefix, _dateMask, _parametersFileExtension);
+        BuFileInfo? lastParametersFileInfo =
+            exchangeFileManager?.GetLastFileInfo(prefix, _dateMask, _parametersFileExtension);
         if (lastParametersFileInfo != null)
             //მოვქაჩოთ არჩეული პარამეტრების ფაილის შიგთავსი
+        {
             return exchangeFileManager?.GetTextFileContent(lastParametersFileInfo.FileName);
+        }
 
         await LogInfoAndSendMessage("Project Parameter files not found on exchange storage", cancellationToken);
 
@@ -75,7 +81,8 @@ public sealed class GetLatestParametersFileBodyAction : ToolAction
 
     private static string GetPrefix(string projectName, string serverName, string environmentName, string? runtime)
     {
-        var prefix = $"{serverName}-{environmentName}-{projectName}-{(runtime == null ? string.Empty : $"{runtime}-")}";
+        string prefix =
+            $"{serverName}-{environmentName}-{projectName}-{(runtime == null ? string.Empty : $"{runtime}-")}";
         return prefix;
     }
 }

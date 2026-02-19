@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
+using LanguageExt;
 using Microsoft.Extensions.Logging;
+using OneOf;
 using ParametersManagement.LibDatabaseParameters;
 using ParametersManagement.LibFileParameters.Models;
 using SystemTools.SystemToolsShared.Errors;
@@ -26,19 +28,24 @@ public sealed class BaseBackupRestoreTool
     public async Task<bool> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken = default)
     {
-        var backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
-        var databaseManager = backupRestoreParameters.DatabaseManager;
-        var databaseName = backupRestoreParameters.DatabaseName;
+        BackupRestoreParameters backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
+        IDatabaseManager databaseManager = backupRestoreParameters.DatabaseManager;
+        string databaseName = backupRestoreParameters.DatabaseName;
 
         //მიზნის ბაზის აღდგენა აქაჩული ბექაპის გამოყენებით
-        _logger.LogInformation("Restoring database {destinationDatabaseName}", databaseName);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Restoring database {DestinationDatabaseName}", databaseName);
+        }
 
-        var restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(backupFileParameters,
-            databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
+        Option<Err[]> restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(
+            backupFileParameters, databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
             _baseBackupParameters.LocalPath, cancellationToken);
 
         if (restoreDatabaseFromBackupResult.IsNone)
+        {
             return true;
+        }
 
         Err.PrintErrorsOnConsole((Err[])restoreDatabaseFromBackupResult);
         _logger.LogError("something went wrong");
@@ -47,13 +54,18 @@ public sealed class BaseBackupRestoreTool
 
     public async Task<BackupFileParameters?> CreateDatabaseBackup(CancellationToken cancellationToken = default)
     {
-        var backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
-        var databaseManager = backupRestoreParameters.DatabaseManager;
-        var databaseName = backupRestoreParameters.DatabaseName;
-        _logger.LogInformation("Check if Destination base {databaseName} exists", databaseName);
+        BackupRestoreParameters backupRestoreParameters = _baseBackupParameters.BackupRestoreParameters;
+        IDatabaseManager databaseManager = backupRestoreParameters.DatabaseManager;
+        string databaseName = backupRestoreParameters.DatabaseName;
+
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Check if Destination base {DatabaseName} exists", databaseName);
+        }
 
         //შევამოწმოთ მიზნის ბაზის არსებობა
-        var isDatabaseExistsResult = await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
+        OneOf<bool, Err[]> isDatabaseExistsResult =
+            await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
 
         if (isDatabaseExistsResult.IsT1)
         {
@@ -61,18 +73,21 @@ public sealed class BaseBackupRestoreTool
             return null;
         }
 
-        var isDatabaseExists = isDatabaseExistsResult.AsT0;
+        bool isDatabaseExists = isDatabaseExistsResult.AsT0;
 
         if (!isDatabaseExists)
         {
-            _logger.LogWarning("database {databaseName} does not exist", databaseName);
+            _logger.LogWarning("database {DatabaseName} does not exist", databaseName);
             return null;
         }
 
-        _logger.LogInformation("Create backup of existing database {databaseName}", databaseName);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Create backup of existing database {DatabaseName}", databaseName);
+        }
 
         //ბექაპის დამზადება წყაროს მხარეს
-        var createBackupResult = await databaseManager.CreateBackup(
+        OneOf<BackupFileParameters, Err[]> createBackupResult = await databaseManager.CreateBackup(
             new DatabaseBackupParametersDomain(_baseBackupParameters.BackupNamePrefix, _baseBackupParameters.DateMask,
                 _baseBackupParameters.BackupFileExtension, _baseBackupParameters.BackupNameMiddlePart,
                 _baseBackupParameters.Compress, _baseBackupParameters.Verify, _baseBackupParameters.BackupType),
@@ -85,18 +100,18 @@ public sealed class BaseBackupRestoreTool
             return null;
         }
 
-        var backupFileParametersForSource = createBackupResult.AsT0;
-        var backupCreateFolderName = backupFileParametersForSource.FolderName;
-        var fileName = backupFileParametersForSource.Name;
-        var prefix = backupFileParametersForSource.Prefix;
-        var suffix = backupFileParametersForSource.Suffix;
-        var dateMask = backupFileParametersForSource.DateMask;
+        BackupFileParameters? backupFileParametersForSource = createBackupResult.AsT0;
+        string? backupCreateFolderName = backupFileParametersForSource.FolderName;
+        string fileName = backupFileParametersForSource.Name;
+        string prefix = backupFileParametersForSource.Prefix;
+        string suffix = backupFileParametersForSource.Suffix;
+        string dateMask = backupFileParametersForSource.DateMask;
 
         if (!string.IsNullOrWhiteSpace(backupCreateFolderName) &&
             !FileStorageData.IsSameToLocal(backupRestoreParameters.FileStorage, backupCreateFolderName))
         {
-            var backupFolderFileManager = FileManagersFactory.CreateFileManager(true, _logger, backupCreateFolderName,
-                _baseBackupParameters.LocalPath);
+            FileManager? backupFolderFileManager = FileManagersFactory.CreateFileManager(true, _logger,
+                backupCreateFolderName, _baseBackupParameters.LocalPath);
 
             if (backupFolderFileManager == null)
             {
@@ -104,12 +119,15 @@ public sealed class BaseBackupRestoreTool
                 return null;
             }
 
-            _logger.LogInformation("Download File {fileName}", fileName);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Download File {FileName}", fileName);
+            }
 
             //წყაროდან ლოკალურ ფოლდერში მოქაჩვა
             if (!backupFolderFileManager.DownloadFile(fileName, _baseBackupParameters.DownloadTempExtension))
             {
-                _logger.LogError("Can not Download File {fileName}", fileName);
+                _logger.LogError("Can not Download File {FileName}", fileName);
                 return null;
             }
 
@@ -121,13 +139,16 @@ public sealed class BaseBackupRestoreTool
         //   მაშინ მოქაჩვა საჭირო აღარ არის
         else if (_baseBackupParameters.NeedDownload)
         {
-            _logger.LogInformation("Download File {fileName}", fileName);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Download File {FileName}", fileName);
+            }
 
             //წყაროდან ლოკალურ ფოლდერში მოქაჩვა
             if (!backupRestoreParameters.FileManager.DownloadFile(fileName,
                     _baseBackupParameters.DownloadTempExtension))
             {
-                _logger.LogError("Can not Download File {fileName}", fileName);
+                _logger.LogError("Can not Download File {FileName}", fileName);
                 return null;
             }
 
@@ -137,13 +158,18 @@ public sealed class BaseBackupRestoreTool
         }
 
         if (_baseBackupParameters is not { NeedUploadToExchange: true, ExchangeFileManager: not null })
+        {
             return null;
+        }
 
-        _logger.LogInformation("Upload File {fileName} to Exchange", fileName);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Upload File {FileName} to Exchange", fileName);
+        }
 
         if (!_baseBackupParameters.ExchangeFileManager.UploadFile(fileName, _baseBackupParameters.UploadTempExtension))
         {
-            _logger.LogError("Can not Upload File {destinationFileName}", fileName);
+            _logger.LogError("Can not Upload File {DestinationFileName}", fileName);
             return null;
         }
 

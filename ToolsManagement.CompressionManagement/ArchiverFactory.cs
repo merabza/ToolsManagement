@@ -16,7 +16,7 @@ public static class ArchiverFactory
             return null;
         }
 
-        var archiverData = archivers.GetArchiverDataByKey(archiverName);
+        ArchiverData? archiverData = archivers.GetArchiverDataByKey(archiverName);
 
         if (archiverData is null)
         {
@@ -39,12 +39,14 @@ public static class ArchiverFactory
         string? compressProgramPatch, string? decompressProgramPatch, string fileExtension)
     {
         if (archiveType == EArchiveType.ZipClass)
+        {
             return new ZipClassArchiver(logger, useConsole, fileExtension);
+        }
 
         //დადგინდეს გვაქვს თუ არა ინფორმაცია არქივატორის გამშვები ფაილის შესახებ
         if (string.IsNullOrWhiteSpace(compressProgramPatch))
         {
-            logger.LogError("Archiver program path is not specified for {archiveType}", archiveType);
+            logger.LogError("Archiver program path is not specified for {ArchiveType}", archiveType);
             return null;
         }
 
@@ -52,28 +54,33 @@ public static class ArchiverFactory
         var compressProgram = new FileInfo(compressProgramPatch);
         if (!compressProgram.Exists)
         {
-            logger.LogError("Archiver program path is invalid for {archiveType}", archiveType);
+            logger.LogError("Archiver program path is invalid for {ArchiveType}", archiveType);
             return null;
         }
 
         if (archiveType != EArchiveType.Zip)
+        {
             return archiveType switch
             {
                 EArchiveType.Rar => new RarArchiver(logger, compressProgramPatch, useConsole, fileExtension),
                 _ => null
             };
+        }
 
         if (string.IsNullOrWhiteSpace(decompressProgramPatch))
         {
-            logger.LogError("Archiver decompress program path is invalid for {archiveType}", archiveType);
+            logger.LogError("Archiver decompress program path is invalid for {ArchiveType}", archiveType);
             return null;
         }
 
         var decompressProgram = new FileInfo(decompressProgramPatch);
 
         if (decompressProgram.Exists)
+        {
             return new ZipArchiver(useConsole, fileExtension);
-        logger.LogError("Archiver decompress program path is invalid for {archiveType}", archiveType);
+        }
+
+        logger.LogError("Archiver decompress program path is invalid for {ArchiveType}", archiveType);
         return null;
     }
 }
