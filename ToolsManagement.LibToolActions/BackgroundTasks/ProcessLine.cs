@@ -11,6 +11,7 @@ public sealed class ProcessLine : IDisposable
 
     public ProcessLine(ILogger logger, SemaphoreSlim mainProcessSignal)
     {
+        // ReSharper disable once DisposableConstructor
         _queue = new ProcessesToolActionsQueue();
         // ReSharper disable once DisposableConstructor
         _runner = new ToolActionsQueuedRunner(_queue, logger, mainProcessSignal);
@@ -21,6 +22,7 @@ public sealed class ProcessLine : IDisposable
     public void Dispose()
     {
         _runner.Dispose();
+        _queue.Dispose();
     }
 
     internal void StartAsync(CancellationToken token = default)
