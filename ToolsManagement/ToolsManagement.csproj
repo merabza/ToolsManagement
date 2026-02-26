@@ -7,12 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ToolsManagement.ApiClientsManagement\ToolsManagement.ApiClientsManagement.csproj" />
-      <ProjectReference Include="..\ToolsManagement.CompressionManagement\ToolsManagement.CompressionManagement.csproj" />
-      <ProjectReference Include="..\ToolsManagement.DatabasesManagement\ToolsManagement.DatabasesManagement.csproj" />
-      <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
-      <ProjectReference Include="..\ToolsManagement.Installer\ToolsManagement.Installer.csproj" />
-      <ProjectReference Include="..\ToolsManagement.LibToolActions\ToolsManagement.LibToolActions.csproj" />
+        <ProjectReference Include="..\ToolsManagement.ApiClientsManagement\ToolsManagement.ApiClientsManagement.csproj" />
+        <ProjectReference
+            Include="..\ToolsManagement.CompressionManagement\ToolsManagement.CompressionManagement.csproj" />
+        <ProjectReference Include="..\ToolsManagement.DatabasesManagement\ToolsManagement.DatabasesManagement.csproj" />
+        <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
+        <ProjectReference Include="..\ToolsManagement.Installer\ToolsManagement.Installer.csproj" />
+        <ProjectReference Include="..\ToolsManagement.LibToolActions\ToolsManagement.LibToolActions.csproj" />
     </ItemGroup>
 
 </Project>
