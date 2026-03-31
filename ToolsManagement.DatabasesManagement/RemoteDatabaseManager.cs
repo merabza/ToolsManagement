@@ -30,7 +30,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    public async ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(
+    public async ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default)
     {
@@ -41,13 +41,13 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         }
 
 #pragma warning disable CA2254
-        _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.ErrorMessage);
+        _logger.LogError(DbClientErrors.DatabaseNameIsNotSpecifiedForBackup.Name);
 #pragma warning restore CA2254
         return new[] { DbClientErrors.DatabaseNameIsNotSpecifiedForBackup };
     }
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    public Task<OneOf<List<DatabaseInfoModel>, Err[]>> GetDatabaseNames(CancellationToken cancellationToken = default)
+    public Task<OneOf<List<DatabaseInfoModel>, Error[]>> GetDatabaseNames(CancellationToken cancellationToken = default)
     {
         return ApiClient.GetDatabaseNames(cancellationToken);
     }
@@ -55,14 +55,15 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
-    public Task<OneOf<bool, Err[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default)
+    public Task<OneOf<bool, Error[]>> IsDatabaseExists(string databaseName,
+        CancellationToken cancellationToken = default)
     {
         return ApiClient.IsDatabaseExists(databaseName, cancellationToken);
     }
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
-    public Task<Option<Err[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
-        string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
+    public Task<Option<Error[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters,
+        string databaseName, string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
         string? restoreFromFolderPath = null, CancellationToken cancellationToken = default)
     {
         return ApiClient.RestoreDatabaseFromBackup(backupFileParameters.Prefix, backupFileParameters.Suffix,
@@ -71,41 +72,42 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     }
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    public ValueTask<Option<Err[]>> CheckRepairDatabase(string databaseName,
+    public ValueTask<Option<Error[]>> CheckRepairDatabase(string databaseName,
         CancellationToken cancellationToken = default)
     {
         return ApiClient.CheckRepairDatabase(databaseName, cancellationToken);
     }
 
-    public Task<OneOf<DbServerInfo, Err[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
+    public Task<OneOf<DbServerInfo, Error[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<OneOf<bool, Err[]>> IsServerLocal(CancellationToken cancellationToken = default)
+    public async Task<OneOf<bool, Error[]>> IsServerLocal(CancellationToken cancellationToken = default)
     {
         return await Task.FromResult(false);
     }
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    public ValueTask<Option<Err[]>> RecompileProcedures(string databaseName,
+    public ValueTask<Option<Error[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default)
     {
         return ApiClient.RecompileProcedures(databaseName, cancellationToken);
     }
 
-    public Task<Option<Err[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
+    public Task<Option<Error[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
     {
         return ApiClient.TestConnection(databaseName, cancellationToken);
     }
 
     //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    public ValueTask<Option<Err[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default)
+    public ValueTask<Option<Error[]>> UpdateStatistics(string databaseName,
+        CancellationToken cancellationToken = default)
     {
         return ApiClient.UpdateStatistics(databaseName, cancellationToken);
     }
 
-    public Task<Option<Err[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
+    public Task<Option<Error[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
@@ -116,19 +118,19 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
     //    return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
     //}
 
-    public Task<OneOf<List<string>, Err[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
+    public Task<OneOf<List<string>, Error[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
     {
         return ApiClient.GetDatabaseFoldersSetNames(cancellationToken);
     }
 
-    public ValueTask<Option<Err[]>> ChangeDatabaseRecoveryModel(string databaseName,
+    public ValueTask<Option<Error[]>> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken)
     {
         return ApiClient.ChangeDatabaseRecoveryModel(databaseName, databaseRecoveryModel, cancellationToken);
     }
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    public ValueTask<Option<Err[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+    public ValueTask<Option<Error[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default)
     {
         return ApiClient.ExecuteCommand(executeQueryCommand, databaseName, cancellationToken);
