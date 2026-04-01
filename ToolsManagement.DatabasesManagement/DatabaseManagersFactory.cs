@@ -19,7 +19,7 @@ namespace ToolsManagement.DatabasesManagement;
 
 public static class DatabaseManagersFactory
 {
-    public static Task<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
+    public static Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         CancellationToken cancellationToken = default)
     {
@@ -27,7 +27,7 @@ public static class DatabaseManagersFactory
             null, null, cancellationToken);
     }
 
-    public static async Task<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
+    public static async Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
         string? databaseConnectionName, DatabaseServerConnections databaseServerConnections, ApiClients? apiClients,
         IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
@@ -59,7 +59,7 @@ public static class DatabaseManagersFactory
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async ValueTask<OneOf<IDatabaseManager, Err[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
+    public static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
         IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
@@ -93,19 +93,19 @@ public static class DatabaseManagersFactory
         }
     }
 
-    private static OneOf<IDatabaseManager, Err[]> CreateSqLiteDatabaseManager()
+    private static OneOf<IDatabaseManager, Error[]> CreateSqLiteDatabaseManager()
     {
         return new[] { DbToolsErrors.CreateSqLiteDatabaseManagerIsNotImplemented };
     }
 
-    private static OneOf<IDatabaseManager, Err[]> CreateOleDatabaseManager()
+    private static OneOf<IDatabaseManager, Error[]> CreateOleDatabaseManager()
     {
         return new[] { DbToolsErrors.CreateOleDatabaseManagerIsNotImplemented };
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async Task<OneOf<IDatabaseManager, Err[]>> CreateRemoteDatabaseManager(ILogger logger,
+    public static async Task<OneOf<IDatabaseManager, Error[]>> CreateRemoteDatabaseManager(ILogger logger,
         IHttpClientFactory httpClientFactory, bool useConsole, string? apiClientName, ApiClients apiClients,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
@@ -155,7 +155,7 @@ public static class DatabaseManagersFactory
         return new RemoteDatabaseManager(logger, databaseApiClient);
     }
 
-    private static async ValueTask<OneOf<IDatabaseManager, Err[]>> CreateSqlServerDatabaseManager(ILogger logger,
+    private static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateSqlServerDatabaseManager(ILogger logger,
         bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
@@ -182,7 +182,7 @@ public static class DatabaseManagersFactory
         //        $"databaseServerConnectionData.Password={databaseServerConnectionData.Password}", cancellationToken);
         //}
 
-        OneOf<DbAuthSettingsBase, Err[]> dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
+        OneOf<DbAuthSettingsBase, Error[]> dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
             databaseServerConnectionData.WindowsNtIntegratedSecurity, databaseServerConnectionData.ServerUser,
             databaseServerConnectionData.ServerPass, useConsole);
 

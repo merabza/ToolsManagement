@@ -28,7 +28,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         _logger = logger;
     }
 
-    public async Task<OneOf<BaseBackupParameters, Err[]>> CreateBaseBackupParameters(
+    public async Task<OneOf<BaseBackupParameters, Error[]>> CreateBaseBackupParameters(
         IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
         SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
@@ -65,7 +65,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         bool verify = fromDatabaseParameters.Verify ?? DatabaseParameters.DefaultVerify;
         EBackupType backupType = fromDatabaseParameters.BackupType ?? DatabaseParameters.DefaultBackupType;
 
-        var errors = new List<Err>();
+        var errors = new List<Error>();
         if (string.IsNullOrWhiteSpace(localPath))
         {
             errors.AddRange(
@@ -92,7 +92,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        OneOf<IDatabaseManager, Err[]> createDatabaseManagerResult =
+        OneOf<IDatabaseManager, Error[]> createDatabaseManagerResult =
             await DatabaseManagersFactory.CreateDatabaseManager(_logger, UseConsole, dbConnectionName,
                 databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 

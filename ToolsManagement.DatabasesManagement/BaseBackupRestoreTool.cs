@@ -38,7 +38,7 @@ public sealed class BaseBackupRestoreTool
             _logger.LogInformation("Restoring database {DestinationDatabaseName}", databaseName);
         }
 
-        Option<Err[]> restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(
+        Option<Error[]> restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(
             backupFileParameters, databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
             _baseBackupParameters.LocalPath, cancellationToken);
 
@@ -47,7 +47,7 @@ public sealed class BaseBackupRestoreTool
             return true;
         }
 
-        Err.PrintErrorsOnConsole((Err[])restoreDatabaseFromBackupResult);
+        Error.PrintErrorsOnConsole((Error[])restoreDatabaseFromBackupResult);
         _logger.LogError("something went wrong");
         return false;
     }
@@ -64,7 +64,7 @@ public sealed class BaseBackupRestoreTool
         }
 
         //შევამოწმოთ მიზნის ბაზის არსებობა
-        OneOf<bool, Err[]> isDatabaseExistsResult =
+        OneOf<bool, Error[]> isDatabaseExistsResult =
             await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
 
         if (isDatabaseExistsResult.IsT1)
@@ -87,7 +87,7 @@ public sealed class BaseBackupRestoreTool
         }
 
         //ბექაპის დამზადება წყაროს მხარეს
-        OneOf<BackupFileParameters, Err[]> createBackupResult = await databaseManager.CreateBackup(
+        OneOf<BackupFileParameters, Error[]> createBackupResult = await databaseManager.CreateBackup(
             new DatabaseBackupParametersDomain(_baseBackupParameters.BackupNamePrefix, _baseBackupParameters.DateMask,
                 _baseBackupParameters.BackupFileExtension, _baseBackupParameters.BackupNameMiddlePart,
                 _baseBackupParameters.Compress, _baseBackupParameters.Verify, _baseBackupParameters.BackupType),

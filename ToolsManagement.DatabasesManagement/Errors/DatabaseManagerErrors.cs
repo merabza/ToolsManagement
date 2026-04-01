@@ -4,37 +4,36 @@ namespace ToolsManagement.DatabasesManagement.Errors;
 
 public static class DatabaseManagerErrors
 {
-    public static readonly Err LocalPathIsNotSpecifiedInParameters = new()
+    public static readonly Error LocalPathIsNotSpecifiedInParameters = new()
     {
-        ErrorCode = nameof(LocalPathIsNotSpecifiedInParameters),
-        ErrorMessage = "localPath is not specified in databasesBackupFilesExchangeParameter"
+        Code = nameof(LocalPathIsNotSpecifiedInParameters),
+        Name = "localPath is not specified in databasesBackupFilesExchangeParameter"
     };
 
-    public static readonly Err DatabaseNameDoesNotSpecified = new()
+    public static readonly Error DatabaseNameDoesNotSpecified = new()
     {
-        ErrorCode = nameof(DatabaseNameDoesNotSpecified), ErrorMessage = "DatabaseName does not specified"
+        Code = nameof(DatabaseNameDoesNotSpecified), Name = "DatabaseName does not specified"
     };
 
-    public static readonly Err FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified = new()
+    public static readonly Error FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified = new()
     {
-        ErrorCode = nameof(FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified),
-        ErrorMessage = "fromDatabaseParameters.DbServerFoldersSetName is not specified"
+        Code = nameof(FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified),
+        Name = "fromDatabaseParameters.DbServerFoldersSetName is not specified"
     };
 
-    public static readonly Err CanNotCreateDatabaseServerClient = new()
+    public static readonly Error CanNotCreateDatabaseServerClient = new()
     {
-        ErrorCode = nameof(FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified),
-        ErrorMessage = "Can not create client for source Database server"
+        Code = nameof(CanNotCreateDatabaseServerClient), Name = "Can not create client for source Database server"
     };
 
-    public static readonly Err FileStorageAndFileManagerIsNotCreated = new()
+    public static readonly Error FileStorageAndFileManagerIsNotCreated = new()
     {
-        ErrorCode = nameof(FileStorageAndFileManagerIsNotCreated),
-        ErrorMessage = "FileStorage and sourceFileManager is Not Created"
+        Code = nameof(FileStorageAndFileManagerIsNotCreated),
+        Name = "FileStorage and sourceFileManager is Not Created"
     };
 
-    public static readonly Err LocalFileManagerIsNotCreated = new()
+    public static readonly Error LocalFileManagerIsNotCreated = new()
     {
-        ErrorCode = nameof(LocalFileManagerIsNotCreated), ErrorMessage = "localFileManager is not created"
+        Code = nameof(LocalFileManagerIsNotCreated), Name = "localFileManager is not created"
     };
 }
