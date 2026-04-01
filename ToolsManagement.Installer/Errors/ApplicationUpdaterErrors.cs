@@ -4,43 +4,43 @@ namespace ToolsManagement.Installer.Errors;
 
 public static class ApplicationUpdaterErrors
 {
-    public static readonly Err InstallerWasNotCreated = new()
+    public static readonly Error InstallerWasNotCreated = new()
     {
-        ErrorCode = nameof(InstallerWasNotCreated), ErrorMessage = "Installer was Not Created"
+        Code = nameof(InstallerWasNotCreated), Name = "Installer was Not Created"
     };
 
-    public static readonly Err InstallerWorkFolderIsEmpty = new()
+    public static readonly Error InstallerWorkFolderIsEmpty = new()
     {
-        ErrorCode = nameof(InstallerWorkFolderIsEmpty), ErrorMessage = "InstallerWorkFolder is empty"
+        Code = nameof(InstallerWorkFolderIsEmpty), Name = "InstallerWorkFolder is empty"
     };
 
-    public static readonly Err FilesUserNameIsEmpty = new()
+    public static readonly Error FilesUserNameIsEmpty = new()
     {
-        ErrorCode = nameof(FilesUserNameIsEmpty), ErrorMessage = "FilesUserName is empty"
+        Code = nameof(FilesUserNameIsEmpty), Name = "FilesUserName is empty"
     };
 
-    public static readonly Err FilesUsersGroupNameIsEmpty = new()
+    public static readonly Error FilesUsersGroupNameIsEmpty = new()
     {
-        ErrorCode = nameof(FilesUsersGroupNameIsEmpty), ErrorMessage = "FilesUsersGroupName is empty"
+        Code = nameof(FilesUsersGroupNameIsEmpty), Name = "FilesUsersGroupName is empty"
     };
 
-    public static readonly Err ServiceUserNameIsEmpty = new()
+    public static readonly Error ServiceUserNameIsEmpty = new()
     {
-        ErrorCode = nameof(ServiceUserNameIsEmpty), ErrorMessage = "serviceUserName is empty"
+        Code = nameof(ServiceUserNameIsEmpty), Name = "serviceUserName is empty"
     };
 
-    public static readonly Err DownloadTempExtensionIsEmpty = new()
+    public static readonly Error DownloadTempExtensionIsEmpty = new()
     {
-        ErrorCode = nameof(DownloadTempExtensionIsEmpty), ErrorMessage = "downloadTempExtension is empty"
+        Code = nameof(DownloadTempExtensionIsEmpty), Name = "downloadTempExtension is empty"
     };
 
-    public static readonly Err InstallFolderIsEmpty = new()
+    public static readonly Error InstallFolderIsEmpty = new()
     {
-        ErrorCode = nameof(InstallFolderIsEmpty), ErrorMessage = "installFolder is empty"
+        Code = nameof(InstallFolderIsEmpty), Name = "installFolder is empty"
     };
 
-    public static readonly Err DotnetRunnerIsEmpty = new()
+    public static readonly Error DotnetRunnerIsEmpty = new()
     {
-        ErrorCode = nameof(DotnetRunnerIsEmpty), ErrorMessage = "dotnetRunner is empty"
+        Code = nameof(DotnetRunnerIsEmpty), Name = "dotnetRunner is empty"
     };
 }

@@ -30,7 +30,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async ValueTask<OneOf<ApplicationUpdater, Err[]>> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<OneOf<ApplicationUpdater, Error[]>> Create(ILogger logger, bool useConsole,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
@@ -137,7 +137,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<OneOf<string, Err[]>> UpdateProgram(string projectName, string environmentName,
+    public async Task<OneOf<string, Error[]>> UpdateProgram(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
@@ -191,7 +191,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 cancellationToken);
         }
 
-        OneOf<string?, Err[]> assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName,
+        OneOf<string?, Error[]> assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName,
             projectName, environmentName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
             _applicationUpdaterParameters.InstallFolder, cancellationToken);
@@ -211,7 +211,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             cancellationToken);
     }
 
-    public async Task<OneOf<string, Err[]>> UpdateServiceWithParameters(string projectName, string environmentName,
+    public async Task<OneOf<string, Error[]>> UpdateServiceWithParameters(string projectName, string environmentName,
         string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -286,7 +286,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         string resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
-        OneOf<string?, Err[]> runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName,
+        OneOf<string?, Error[]> runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName,
             projectName, environmentName, appSettingsFile, resolvedServiceUserName,
             _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
             _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder,

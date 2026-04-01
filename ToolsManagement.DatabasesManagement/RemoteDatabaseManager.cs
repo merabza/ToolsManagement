@@ -113,7 +113,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
         throw new NotImplementedException();
     }
 
-    //public Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
+    //public Task<OneOf<List<string>, Error[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken)
     //{
     //    return _databaseApiClient.GetDatabaseConnectionNames(cancellationToken);
     //}
