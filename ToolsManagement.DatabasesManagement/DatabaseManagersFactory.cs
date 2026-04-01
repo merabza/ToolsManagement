@@ -59,8 +59,8 @@ public static class DatabaseManagersFactory
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
-        DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
+    public static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger,
+        bool useConsole, DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
         IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {

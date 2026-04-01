@@ -127,7 +127,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return await dc.RecompileProcedures(databaseName, cancellationToken);
     }
 
-    public async Task<Option<Error[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default)
+    public async Task<Option<Error[]>> TestConnection(string? databaseName,
+        CancellationToken cancellationToken = default)
     {
         OneOf<DbClient, Error[]> getDatabaseClientResult =
             await GetDatabaseClient(EDatabaseProvider.SqlServer, databaseName, cancellationToken);

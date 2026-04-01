@@ -65,7 +65,7 @@ public interface IDatabaseManager
     Task<Option<Error[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
         CancellationToken cancellationToken = default);
 
-    //Task<OneOf<List<string>, Err[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken = default);
+    //Task<OneOf<List<string>, Error[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken = default);
 
     Task<OneOf<List<string>, Error[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken);
 
