@@ -4,22 +4,21 @@ namespace ToolsManagement.DatabasesManagement.Errors;
 
 public static class SqlServerDatabaseManagerErrors
 {
-    public static readonly Err HostPlatformDoesNotDetected = new()
+    public static readonly Error HostPlatformDoesNotDetected = new()
     {
-        ErrorCode = nameof(HostPlatformDoesNotDetected), ErrorMessage = "Host platform does not detected"
+        Code = nameof(HostPlatformDoesNotDetected), Name = "Host platform does not detected"
     };
 
-    public static readonly Err RestoreFilesDoesNotDetected = new()
+    public static readonly Error RestoreFilesDoesNotDetected = new()
     {
-        ErrorCode = nameof(RestoreFilesDoesNotDetected), ErrorMessage = "Restore Files does not detected"
+        Code = nameof(RestoreFilesDoesNotDetected), Name = "Restore Files does not detected"
     };
 
-    public static Err CannotCreateDbClient(string? databaseName)
+    public static Error CannotCreateDbClient(string? databaseName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(CannotCreateDbClient),
-            ErrorMessage = $"Cannot create DbClient for database {databaseName}"
+            Code = nameof(CannotCreateDbClient), Name = $"Cannot create DbClient for database {databaseName}"
         };
     }
 }
