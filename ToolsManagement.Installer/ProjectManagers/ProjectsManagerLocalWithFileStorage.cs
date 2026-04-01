@@ -34,7 +34,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         _useConsole = useConsole;
     }
 
-    public async ValueTask<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
+    public async ValueTask<Option<Error[]>> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
@@ -52,11 +52,11 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
             cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
+    public async ValueTask<OneOf<string, Error[]>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, Err[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
+        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
             _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
@@ -77,12 +77,12 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
+    public async ValueTask<OneOf<string, Error[]>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, Err[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
+        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
             _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
@@ -95,7 +95,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         }
 
         ApplicationUpdater? applicationUpdater = applicationUpdaterCreateResult.AsT0;
-        OneOf<string, Err[]> updateServiceWithParametersResult =
+        OneOf<string, Error[]> updateServiceWithParametersResult =
             await applicationUpdater.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
                 appSettingsFileName, serviceDescriptionSignature, projectDescription, cancellationToken);
         return updateServiceWithParametersResult;

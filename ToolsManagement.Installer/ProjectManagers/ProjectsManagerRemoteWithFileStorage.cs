@@ -17,7 +17,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
         _projectsApiClient = projectsApiClient;
     }
 
-    public ValueTask<Option<Err[]>> UpdateAppParametersFile(string projectName, string environmentName,
+    public ValueTask<Option<Error[]>> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
@@ -25,7 +25,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
             parametersFileDateMask, parametersFileExtension, cancellationToken);
     }
 
-    public ValueTask<OneOf<string, Err[]>> InstallProgram(string projectName, string environmentName,
+    public ValueTask<OneOf<string, Error[]>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
@@ -33,7 +33,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, cancellationToken);
     }
 
-    public ValueTask<OneOf<string, Err[]>> InstallService(string projectName, string environmentName,
+    public ValueTask<OneOf<string, Error[]>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)

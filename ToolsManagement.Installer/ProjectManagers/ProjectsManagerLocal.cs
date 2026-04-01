@@ -29,14 +29,14 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         _userName = userName;
     }
 
-    public async ValueTask<Option<Err[]>> RemoveProjectAndService(string projectName, string environmentName,
+    public async ValueTask<Option<Error[]>> RemoveProjectAndService(string projectName, string environmentName,
         bool isService, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<Err[]> removeProjectAndServiceResult = await serviceInstaller.RemoveProjectAndService(projectName,
+        Option<Error[]> removeProjectAndServiceResult = await serviceInstaller.RemoveProjectAndService(projectName,
             environmentName, isService, _installFolder, cancellationToken);
 
         if (removeProjectAndServiceResult.IsNone)
@@ -54,40 +54,40 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         return new[] { ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> StopService(string projectName, string environmentName,
+    public async ValueTask<Option<Error[]>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<Err[]> stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
+        Option<Error[]> stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
         return stopResult.IsNone
             ? null
             : new[] { ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> StartService(string projectName, string environmentName,
+    public async ValueTask<Option<Error[]>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<Err[]> stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
+        Option<Error[]> stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
         return stopResult.IsNone
             ? null
             : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
     }
 
-    public async ValueTask<Option<Err[]>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Option<Error[]>> RemoveProject(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<Err[]> removeProjectResult =
+        Option<Error[]> removeProjectResult =
             await serviceInstaller.RemoveProject(projectName, environmentName, _installFolder, cancellationToken);
         if (removeProjectResult.IsNone)
         {
@@ -101,7 +101,7 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         }
 
         _logger.LogError("Project {ProjectName} can not removed", projectName);
-        return Err.RecreateErrors((Err[])removeProjectResult,
+        return Error.RecreateErrors((Error[])removeProjectResult,
             ProjectManagersErrors.ProjectCanNotBeRemoved(projectName));
     }
 }

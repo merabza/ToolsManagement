@@ -55,7 +55,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning restore CA1416 // Validate platform compatibility
     }
 
-    protected override Option<Err[]> RemoveService(string serviceEnvName)
+    protected override Option<Error[]> RemoveService(string serviceEnvName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         // ReSharper disable once using
@@ -81,7 +81,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> StopService(string serviceEnvName,
+    protected override async ValueTask<Option<Error[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -119,7 +119,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> StartService(string serviceEnvName,
+    protected override async ValueTask<Option<Error[]>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -157,7 +157,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected override async ValueTask<Option<Error[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -192,7 +192,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<Option<Err[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected override async ValueTask<Option<Error[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -228,7 +228,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return null;
     }
 
-    protected override async ValueTask<OneOf<bool, Err[]>> IsServiceRegisteredProperly(string projectName,
+    protected override async ValueTask<OneOf<bool, Error[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -253,7 +253,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return await Task.FromResult(toReturn);
     }
 
-    protected override async ValueTask<Option<Err[]>> RegisterService(string projectName, string serviceEnvName,
+    protected override async ValueTask<Option<Error[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {

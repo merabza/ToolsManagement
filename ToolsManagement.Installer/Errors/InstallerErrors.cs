@@ -4,228 +4,228 @@ namespace ToolsManagement.Installer.Errors;
 
 public static class InstallerErrors
 {
-    public static readonly Err IsServiceRegisteredProperlyError = new()
+    public static readonly Error IsServiceRegisteredProperlyError = new()
     {
-        ErrorCode = nameof(IsServiceRegisteredProperlyError),
-        ErrorMessage = "Error when check IsServiceRegisteredProperly"
+        Code = nameof(IsServiceRegisteredProperlyError),
+        Name = "Error when check IsServiceRegisteredProperly"
     };
 
-    public static readonly Err TheServiceWasNotRemoved = new()
+    public static readonly Error TheServiceWasNotRemoved = new()
     {
-        ErrorCode = nameof(TheServiceWasNotRemoved), ErrorMessage = "The service was not Removed"
+        Code = nameof(TheServiceWasNotRemoved), Name = "The service was not Removed"
     };
 
-    public static readonly Err TheServiceWasNotStopped = new()
+    public static readonly Error TheServiceWasNotStopped = new()
     {
-        ErrorCode = nameof(TheServiceWasNotStopped), ErrorMessage = "The service was not Stopped"
+        Code = nameof(TheServiceWasNotStopped), Name = "The service was not Stopped"
     };
 
-    public static readonly Err TheServiceWasNotStarted = new()
+    public static readonly Error TheServiceWasNotStarted = new()
     {
-        ErrorCode = nameof(TheServiceWasNotStarted), ErrorMessage = "The service was not Started"
+        Code = nameof(TheServiceWasNotStarted), Name = "The service was not Started"
     };
 
-    public static Err ProjectArchiveFileWasNotDownloaded =>
+    public static Error ProjectArchiveFileWasNotDownloaded =>
         new()
         {
-            ErrorCode = nameof(ProjectArchiveFileWasNotDownloaded),
-            ErrorMessage = "Project archive file not downloaded"
+            Code = nameof(ProjectArchiveFileWasNotDownloaded),
+            Name = "Project archive file not downloaded"
         };
 
-    public static Err ProjectArchiveFilesNotFoundOnExchangeStorage =>
+    public static Error ProjectArchiveFilesNotFoundOnExchangeStorage =>
         new()
         {
-            ErrorCode = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
-            ErrorMessage = "Project archive files not found on exchange storage"
+            Code = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
+            Name = "Project archive files not found on exchange storage"
         };
 
-    public static Err CannotUpdateSelf =>
-        new() { ErrorCode = nameof(CannotUpdateSelf), ErrorMessage = "Cannot update self" };
+    public static Error CannotUpdateSelf =>
+        new() { Code = nameof(CannotUpdateSelf), Name = "Cannot update self" };
 
-    public static Err ExchangeFileManagerIsNull =>
+    public static Error ExchangeFileManagerIsNull =>
         new()
         {
-            ErrorCode = nameof(ExchangeFileManagerIsNull),
-            ErrorMessage = "exchangeFileManager is null in UpdateProgramWithParameters"
+            Code = nameof(ExchangeFileManagerIsNull),
+            Name = "exchangeFileManager is null in UpdateProgramWithParameters"
         };
 
-    public static Err FileNameIsEmpty =>
-        new() { ErrorCode = nameof(FileNameIsEmpty), ErrorMessage = "File name is empty" };
+    public static Error FileNameIsEmpty =>
+        new() { Code = nameof(FileNameIsEmpty), Name = "File name is empty" };
 
-    public static Err FolderNameIsEmpty =>
-        new() { ErrorCode = nameof(FolderNameIsEmpty), ErrorMessage = "Folder name is empty" };
+    public static Error FolderNameIsEmpty =>
+        new() { Code = nameof(FolderNameIsEmpty), Name = "Folder name is empty" };
 
-    public static Err CannotUpdateProject(string projectName, string environmentName)
+    public static Error CannotUpdateProject(string projectName, string environmentName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(CannotUpdateProject), ErrorMessage = $"Cannot Update {projectName}/{environmentName}"
-        };
-    }
-
-    public static Err CannotRegisterService(string serviceEnvName)
-    {
-        return new Err
-        {
-            ErrorCode = nameof(ExchangeFileManagerIsNull),
-            ErrorMessage = $"cannot register Service {serviceEnvName}"
+            Code = nameof(CannotUpdateProject), Name = $"Cannot Update {projectName}/{environmentName}"
         };
     }
 
-    public static Err FileCanNotBeDeleted(string fileName)
+    public static Error CannotRegisterService(string serviceEnvName)
     {
-        return new Err { ErrorCode = nameof(FileCanNotBeDeleted), ErrorMessage = $"File {fileName} can not Deleted" };
-    }
-
-    public static Err FileIsNotExists(string fileName)
-    {
-        return new Err { ErrorCode = nameof(FileIsNotExists), ErrorMessage = $"File {fileName} is not exists" };
-    }
-
-    public static Err FileOwnerCanNotBeChanged(string fileName)
-    {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(FileOwnerCanNotBeChanged), ErrorMessage = $"File {fileName} owner can not be changed"
+            Code = nameof(ExchangeFileManagerIsNull),
+            Name = $"cannot register Service {serviceEnvName}"
         };
     }
 
-    public static Err FolderCanNotBeDeleted(string folderName)
+    public static Error FileCanNotBeDeleted(string fileName)
     {
-        return new Err
+        return new Error { Code = nameof(FileCanNotBeDeleted), Name = $"File {fileName} can not Deleted" };
+    }
+
+    public static Error FileIsNotExists(string fileName)
+    {
+        return new Error { Code = nameof(FileIsNotExists), Name = $"File {fileName} is not exists" };
+    }
+
+    public static Error FileOwnerCanNotBeChanged(string fileName)
+    {
+        return new Error
         {
-            ErrorCode = nameof(FileCanNotBeDeleted), ErrorMessage = $"Folder {folderName} can not be Deleted"
+            Code = nameof(FileOwnerCanNotBeChanged), Name = $"File {fileName} owner can not be changed"
         };
     }
 
-    public static Err FolderIsNotExists(string folderName)
+    public static Error FolderCanNotBeDeleted(string folderName)
     {
-        return new Err { ErrorCode = nameof(FolderIsNotExists), ErrorMessage = $"File {folderName} is not exists" };
-    }
-
-    public static Err FolderOwnerCanNotBeChanged(string folderName)
-    {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(FolderOwnerCanNotBeChanged),
-            ErrorMessage = $"Folder {folderName} owner can not be changed"
+            Code = nameof(FileCanNotBeDeleted), Name = $"Folder {folderName} can not be Deleted"
         };
     }
 
-    public static Err InstallerFolderIsNotExists(string folderName)
+    public static Error FolderIsNotExists(string folderName)
     {
-        return new Err
+        return new Error { Code = nameof(FolderIsNotExists), Name = $"File {folderName} is not exists" };
+    }
+
+    public static Error FolderOwnerCanNotBeChanged(string folderName)
+    {
+        return new Error
         {
-            ErrorCode = nameof(InstallerFolderIsNotExists),
-            ErrorMessage = $"Installer install folder {folderName} is not exists"
+            Code = nameof(FolderOwnerCanNotBeChanged),
+            Name = $"Folder {folderName} owner can not be changed"
         };
     }
 
-    public static Err InstallerInstallFolderDoesNotCreated(string folderName)
+    public static Error InstallerFolderIsNotExists(string folderName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(InstallerInstallFolderDoesNotCreated),
-            ErrorMessage = $"Installer work install folder {folderName} does not created"
+            Code = nameof(InstallerFolderIsNotExists),
+            Name = $"Installer install folder {folderName} is not exists"
         };
     }
 
-    public static Err InstallerWorkFolderDoesNotCreated(string folderName)
+    public static Error InstallerInstallFolderDoesNotCreated(string folderName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(InstallerWorkFolderDoesNotCreated),
-            ErrorMessage = $"Installer work folder {folderName} does not created"
+            Code = nameof(InstallerInstallFolderDoesNotCreated),
+            Name = $"Installer work install folder {folderName} does not created"
         };
     }
 
-    public static Err ProcessIsRunningAndCannotBeUpdated(string projectName)
+    public static Error InstallerWorkFolderDoesNotCreated(string folderName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ProcessIsRunningAndCannotBeUpdated),
-            ErrorMessage = $"Process {projectName} is running and cannot be updated"
+            Code = nameof(InstallerWorkFolderDoesNotCreated),
+            Name = $"Installer work folder {folderName} does not created"
         };
     }
 
-    public static Err ProjectFilesIsNotExtracted(string folderName)
+    public static Error ProcessIsRunningAndCannotBeUpdated(string projectName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ProjectFilesIsNotExtracted),
-            ErrorMessage = $"Project files is not extracted to {folderName}"
+            Code = nameof(ProcessIsRunningAndCannotBeUpdated),
+            Name = $"Process {projectName} is running and cannot be updated"
         };
     }
 
-    public static Err ProjectInstallerFolderIsNotExists(string folderName)
+    public static Error ProjectFilesIsNotExtracted(string folderName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(InstallerFolderIsNotExists),
-            ErrorMessage = $"Project Installer install folder {folderName} is not exists"
+            Code = nameof(ProjectFilesIsNotExtracted),
+            Name = $"Project files is not extracted to {folderName}"
         };
     }
 
-    public static Err ServiceCanNotBeRemoved(string serviceEnvName)
+    public static Error ProjectInstallerFolderIsNotExists(string folderName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceCanNotBeRemoved),
-            ErrorMessage = $"Service with name {serviceEnvName} can not be removed"
+            Code = nameof(InstallerFolderIsNotExists),
+            Name = $"Project Installer install folder {folderName} is not exists"
         };
     }
 
-    public static Err ServiceCanNotBeStarted(string serviceEnvName)
+    public static Error ServiceCanNotBeRemoved(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceCanNotBeStarted),
-            ErrorMessage = $"Service with name {serviceEnvName} can not be started"
+            Code = nameof(ServiceCanNotBeRemoved),
+            Name = $"Service with name {serviceEnvName} can not be removed"
         };
     }
 
-    public static Err ServiceCanNotBeStopped(string serviceEnvName)
+    public static Error ServiceCanNotBeStarted(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceCanNotBeStopped),
-            ErrorMessage = $"Service with name {serviceEnvName} can not be stopped"
+            Code = nameof(ServiceCanNotBeStarted),
+            Name = $"Service with name {serviceEnvName} can not be started"
         };
     }
 
-    public static Err ServiceIsNotExists(string serviceEnvName)
+    public static Error ServiceCanNotBeStopped(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceIsNotExists),
-            ErrorMessage = $"Service {serviceEnvName} does not exists, cannot update settings file"
+            Code = nameof(ServiceCanNotBeStopped),
+            Name = $"Service with name {serviceEnvName} can not be stopped"
         };
     }
 
-    public static Err ServiceIsNotStopped(string serviceEnvName)
+    public static Error ServiceIsNotExists(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceIsNotStopped),
-            ErrorMessage = $"Service with name {serviceEnvName} is not be stopped"
+            Code = nameof(ServiceIsNotExists),
+            Name = $"Service {serviceEnvName} does not exists, cannot update settings file"
         };
     }
 
-    public static Err ServiceIsRunningAndCannotBeUpdated(string serviceEnvName)
+    public static Error ServiceIsNotStopped(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceIsNotStopped),
-            ErrorMessage = $"Service {serviceEnvName} is running and cannot be updated"
+            Code = nameof(ServiceIsNotStopped),
+            Name = $"Service with name {serviceEnvName} is not be stopped"
         };
     }
 
-    public static Err ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)
+    public static Error ServiceIsRunningAndCannotBeUpdated(string serviceEnvName)
     {
-        return new Err
+        return new Error
         {
-            ErrorCode = nameof(ServiceIsRunningAndCanNotBeRemoved),
-            ErrorMessage = $"Service {serviceEnvName} is running and can not be removed"
+            Code = nameof(ServiceIsNotStopped),
+            Name = $"Service {serviceEnvName} is running and cannot be updated"
+        };
+    }
+
+    public static Error ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)
+    {
+        return new Error
+        {
+            Code = nameof(ServiceIsRunningAndCanNotBeRemoved),
+            Name = $"Service {serviceEnvName} is running and can not be removed"
         };
     }
 }
