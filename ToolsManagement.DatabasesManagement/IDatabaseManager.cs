@@ -19,7 +19,7 @@ public interface IDatabaseManager
         DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default);
 
-    //ValueTask<OneOf<BackupFileParameters, Err[]>> CreateBackup(string backupBaseName,
+    //ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(string backupBaseName,
     //    string dbServerFoldersSetName, CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან

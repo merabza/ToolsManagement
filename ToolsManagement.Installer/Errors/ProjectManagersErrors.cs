@@ -6,8 +6,7 @@ public static class ProjectManagersErrors
 {
     public static readonly Error AppParametersFileUpdaterCreateError = new()
     {
-        Code = nameof(AppParametersFileUpdaterCreateError),
-        Name = "AppParametersFileUpdater does not created"
+        Code = nameof(AppParametersFileUpdaterCreateError), Name = "AppParametersFileUpdater does not created"
     };
 
     public static Error ProjectServiceCanNotRemoved(string projectName, string environmentName)
@@ -39,10 +38,7 @@ public static class ProjectManagersErrors
 
     public static Error ProjectCanNotBeRemoved(string projectName)
     {
-        return new Error
-        {
-            Code = nameof(ProjectCanNotBeRemoved), Name = $"Project {projectName} can not be removed"
-        };
+        return new Error { Code = nameof(ProjectCanNotBeRemoved), Name = $"Project {projectName} can not be removed" };
     }
 
     public static Error ApplicationUpdaterDoesNotCreated(string projectName, string environmentName)

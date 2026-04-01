@@ -74,8 +74,8 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<Error[]> stopResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
-        return stopResult.IsNone
+        Option<Error[]> startResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
+        return startResult.IsNone
             ? null
             : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
     }

@@ -6,8 +6,7 @@ public static class InstallerErrors
 {
     public static readonly Error IsServiceRegisteredProperlyError = new()
     {
-        Code = nameof(IsServiceRegisteredProperlyError),
-        Name = "Error when check IsServiceRegisteredProperly"
+        Code = nameof(IsServiceRegisteredProperlyError), Name = "Error when check IsServiceRegisteredProperly"
     };
 
     public static readonly Error TheServiceWasNotRemoved = new()
@@ -26,11 +25,7 @@ public static class InstallerErrors
     };
 
     public static Error ProjectArchiveFileWasNotDownloaded =>
-        new()
-        {
-            Code = nameof(ProjectArchiveFileWasNotDownloaded),
-            Name = "Project archive file not downloaded"
-        };
+        new() { Code = nameof(ProjectArchiveFileWasNotDownloaded), Name = "Project archive file not downloaded" };
 
     public static Error ProjectArchiveFilesNotFoundOnExchangeStorage =>
         new()
@@ -39,8 +34,7 @@ public static class InstallerErrors
             Name = "Project archive files not found on exchange storage"
         };
 
-    public static Error CannotUpdateSelf =>
-        new() { Code = nameof(CannotUpdateSelf), Name = "Cannot update self" };
+    public static Error CannotUpdateSelf => new() { Code = nameof(CannotUpdateSelf), Name = "Cannot update self" };
 
     public static Error ExchangeFileManagerIsNull =>
         new()
@@ -49,11 +43,9 @@ public static class InstallerErrors
             Name = "exchangeFileManager is null in UpdateProgramWithParameters"
         };
 
-    public static Error FileNameIsEmpty =>
-        new() { Code = nameof(FileNameIsEmpty), Name = "File name is empty" };
+    public static Error FileNameIsEmpty => new() { Code = nameof(FileNameIsEmpty), Name = "File name is empty" };
 
-    public static Error FolderNameIsEmpty =>
-        new() { Code = nameof(FolderNameIsEmpty), Name = "Folder name is empty" };
+    public static Error FolderNameIsEmpty => new() { Code = nameof(FolderNameIsEmpty), Name = "Folder name is empty" };
 
     public static Error CannotUpdateProject(string projectName, string environmentName)
     {
@@ -67,8 +59,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ExchangeFileManagerIsNull),
-            Name = $"cannot register Service {serviceEnvName}"
+            Code = nameof(ExchangeFileManagerIsNull), Name = $"cannot register Service {serviceEnvName}"
         };
     }
 
@@ -92,10 +83,7 @@ public static class InstallerErrors
 
     public static Error FolderCanNotBeDeleted(string folderName)
     {
-        return new Error
-        {
-            Code = nameof(FileCanNotBeDeleted), Name = $"Folder {folderName} can not be Deleted"
-        };
+        return new Error { Code = nameof(FileCanNotBeDeleted), Name = $"Folder {folderName} can not be Deleted" };
     }
 
     public static Error FolderIsNotExists(string folderName)
@@ -107,8 +95,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(FolderOwnerCanNotBeChanged),
-            Name = $"Folder {folderName} owner can not be changed"
+            Code = nameof(FolderOwnerCanNotBeChanged), Name = $"Folder {folderName} owner can not be changed"
         };
     }
 
@@ -116,8 +103,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(InstallerFolderIsNotExists),
-            Name = $"Installer install folder {folderName} is not exists"
+            Code = nameof(InstallerFolderIsNotExists), Name = $"Installer install folder {folderName} is not exists"
         };
     }
 
@@ -152,8 +138,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ProjectFilesIsNotExtracted),
-            Name = $"Project files is not extracted to {folderName}"
+            Code = nameof(ProjectFilesIsNotExtracted), Name = $"Project files is not extracted to {folderName}"
         };
     }
 
@@ -170,8 +155,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ServiceCanNotBeRemoved),
-            Name = $"Service with name {serviceEnvName} can not be removed"
+            Code = nameof(ServiceCanNotBeRemoved), Name = $"Service with name {serviceEnvName} can not be removed"
         };
     }
 
@@ -179,8 +163,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ServiceCanNotBeStarted),
-            Name = $"Service with name {serviceEnvName} can not be started"
+            Code = nameof(ServiceCanNotBeStarted), Name = $"Service with name {serviceEnvName} can not be started"
         };
     }
 
@@ -188,8 +171,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ServiceCanNotBeStopped),
-            Name = $"Service with name {serviceEnvName} can not be stopped"
+            Code = nameof(ServiceCanNotBeStopped), Name = $"Service with name {serviceEnvName} can not be stopped"
         };
     }
 
@@ -206,8 +188,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ServiceIsNotStopped),
-            Name = $"Service with name {serviceEnvName} is not be stopped"
+            Code = nameof(ServiceIsNotStopped), Name = $"Service with name {serviceEnvName} is not be stopped"
         };
     }
 
@@ -215,8 +196,7 @@ public static class InstallerErrors
     {
         return new Error
         {
-            Code = nameof(ServiceIsNotStopped),
-            Name = $"Service {serviceEnvName} is running and cannot be updated"
+            Code = nameof(ServiceIsNotStopped), Name = $"Service {serviceEnvName} is running and cannot be updated"
         };
     }
 
