@@ -5,8 +5,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using SystemTools.BackgroundTasks;
 using SystemTools.SystemToolsShared;
-using ToolsManagement.LibToolActions.BackgroundTasks;
 
 namespace ToolsManagement.CompressionManagement;
 
