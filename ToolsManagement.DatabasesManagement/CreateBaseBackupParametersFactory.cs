@@ -19,12 +19,14 @@ namespace ToolsManagement.DatabasesManagement;
 
 public sealed class CreateBaseBackupParametersFactory : MessageLogger
 {
+    private readonly string _appName;
     private readonly ILogger _logger;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public CreateBaseBackupParametersFactory(ILogger logger, IMessagesDataManager? messagesDataManager,
+    public CreateBaseBackupParametersFactory(string appName, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName, bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
     {
+        _appName = appName;
         _logger = logger;
     }
 
@@ -93,7 +95,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
         OneOf<IDatabaseManager, Error[]> createDatabaseManagerResult =
-            await DatabaseManagersFactory.CreateDatabaseManager(_logger, UseConsole, dbConnectionName,
+            await DatabaseManagersFactory.CreateDatabaseManager(_appName, _logger, UseConsole, dbConnectionName,
                 databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
         if (createDatabaseManagerResult.IsT1)

@@ -45,13 +45,13 @@ public interface IDatabaseManager
         CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
-    //გამოიყენება ApAgent-ში
+    //გამოიყენება Replicator-ში
     Task<OneOf<DbServerInfo, Error[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default);
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
     //DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
     //რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
-    //გამოიყენება ApAgent-ში
+    //გამოიყენება Replicator-ში
     Task<OneOf<bool, Error[]>> IsServerLocal(CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება

@@ -22,6 +22,7 @@ namespace ToolsManagement.DatabasesManagement;
 
 public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
+    private readonly string _appName;
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
     private readonly ILogger _logger;
     private readonly IMessagesDataManager? _messagesDataManager;
@@ -29,10 +30,11 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     private readonly string? _userName;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public SqlServerDatabaseManager(ILogger logger, bool useConsole,
+    public SqlServerDatabaseManager(string appName, ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
         IMessagesDataManager? messagesDataManager, string? userName)
     {
+        _appName = appName;
         _logger = logger;
         _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
@@ -442,8 +444,8 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     {
         DbClient? dc = DbClientFactory.GetDbClient(_logger, _useConsole, dataProvider,
             _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            _databaseServerConnectionDataDomain.TrustServerCertificate, ProgramAttributes.Instance.AppName,
-            databaseName, _messagesDataManager, _userName);
+            _databaseServerConnectionDataDomain.TrustServerCertificate, _appName, databaseName, _messagesDataManager,
+            _userName);
 
         if (dc is not null)
         {

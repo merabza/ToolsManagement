@@ -19,18 +19,18 @@ namespace ToolsManagement.DatabasesManagement;
 
 public static class DatabaseManagersFactory
 {
-    public static Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
-        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+    public static Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(string appName, ILogger logger,
+        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
         CancellationToken cancellationToken = default)
     {
-        return CreateDatabaseManager(logger, useConsole, databaseConnectionName, databaseServerConnections, null, null,
-            null, null, cancellationToken);
+        return CreateDatabaseManager(appName, logger, useConsole, databaseConnectionName, databaseServerConnections,
+            null, null, null, null, cancellationToken);
     }
 
-    public static async Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger, bool useConsole,
-        string? databaseConnectionName, DatabaseServerConnections databaseServerConnections, ApiClients? apiClients,
-        IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
-        CancellationToken cancellationToken = default)
+    public static async Task<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(string appName, ILogger logger,
+        bool useConsole, string? databaseConnectionName, DatabaseServerConnections databaseServerConnections,
+        ApiClients? apiClients, IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager,
+        string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseConnectionName))
         {
@@ -53,14 +53,14 @@ public static class DatabaseManagersFactory
         DatabaseServerConnectionData? databaseServerConnection =
             databaseServerConnections.GetDatabaseServerConnectionByKey(databaseConnectionName);
 
-        return await CreateDatabaseManager(logger, useConsole, databaseServerConnection, apiClients, httpClientFactory,
-            messagesDataManager, userName, cancellationToken);
+        return await CreateDatabaseManager(appName, logger, useConsole, databaseServerConnection, apiClients,
+            httpClientFactory, messagesDataManager, userName, cancellationToken);
     }
 
     //public იყენებს supportTools
     // ReSharper disable once MemberCanBePrivate.Global
-    public static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(ILogger logger,
-        bool useConsole, DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
+    public static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateDatabaseManager(string appName,
+        ILogger logger, bool useConsole, DatabaseServerConnectionData? databaseServerConnection, ApiClients? apiClients,
         IHttpClientFactory? httpClientFactory, IMessagesDataManager? messagesDataManager, string? userName,
         CancellationToken cancellationToken = default)
     {
@@ -71,7 +71,7 @@ public static class DatabaseManagersFactory
         switch (databaseServerConnection.DatabaseServerProvider)
         {
             case EDatabaseProvider.SqlServer:
-                return await CreateSqlServerDatabaseManager(logger, useConsole, databaseServerConnection,
+                return await CreateSqlServerDatabaseManager(appName, logger, useConsole, databaseServerConnection,
                     messagesDataManager, userName, cancellationToken);
             case EDatabaseProvider.None:
                 return new[] { DbToolsErrors.DatabaseProviderIsNone };
@@ -155,8 +155,8 @@ public static class DatabaseManagersFactory
         return new RemoteDatabaseManager(logger, databaseApiClient);
     }
 
-    private static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateSqlServerDatabaseManager(ILogger logger,
-        bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
+    private static async ValueTask<OneOf<IDatabaseManager, Error[]>> CreateSqlServerDatabaseManager(string appName,
+        ILogger logger, bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
@@ -170,17 +170,6 @@ public static class DatabaseManagersFactory
             logger.LogError("ServerAddress is empty, Cannot create SqlServerManagementClient");
             return new[] { DbToolsErrors.ServerAddressIsEmptyCannotCreateSqlServerManagementClient };
         }
-
-        //if (messagesDataManager is not null)
-        //{
-        //    await messagesDataManager.SendMessage(userName,
-        //        $"DbAuthSettingsCreator.Create databaseServerConnectionData.WindowsNtIntegratedSecurity={databaseServerConnectionData.WindowsNtIntegratedSecurity}",
-        //        cancellationToken);
-        //    await messagesDataManager.SendMessage(userName,
-        //        $"databaseServerConnectionData.User={databaseServerConnectionData.User}", cancellationToken);
-        //    await messagesDataManager.SendMessage(userName,
-        //        $"databaseServerConnectionData.Password={databaseServerConnectionData.Password}", cancellationToken);
-        //}
 
         OneOf<DbAuthSettingsBase, Error[]> dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(
             databaseServerConnectionData.WindowsNtIntegratedSecurity, databaseServerConnectionData.ServerUser,
@@ -197,7 +186,7 @@ public static class DatabaseManagersFactory
             dbAuthSettingsCreatorCreateResult.AsT0, databaseServerConnectionData.TrustServerCertificate,
             databaseServerConnectionData.DatabaseFoldersSets ?? []);
 
-        return new SqlServerDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain, messagesDataManager,
-            userName);
+        return new SqlServerDatabaseManager(appName, logger, useConsole, databaseServerConnectionDataDomain,
+            messagesDataManager, userName);
     }
 }
