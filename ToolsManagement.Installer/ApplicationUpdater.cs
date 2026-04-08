@@ -18,20 +18,23 @@ namespace ToolsManagement.Installer;
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {
     private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
+    private readonly string _appName;
     private readonly InstallerBase _installer;
     private readonly ILogger _logger;
 
-    private ApplicationUpdater(ILogger logger, ApplicationUpdaterParameters applicationUpdaterParameters,
-        InstallerBase serviceInstaller, bool useConsole, IMessagesDataManager? messagesDataManager, string? userName) :
-        base(logger, useConsole, messagesDataManager, userName)
+    private ApplicationUpdater(string appName, ILogger logger,
+        ApplicationUpdaterParameters applicationUpdaterParameters, InstallerBase serviceInstaller, bool useConsole,
+        IMessagesDataManager? messagesDataManager, string? userName) : base(logger, useConsole, messagesDataManager,
+        userName)
     {
+        _appName = appName;
         _logger = logger;
         _applicationUpdaterParameters = applicationUpdaterParameters;
         _installer = serviceInstaller;
     }
 
-    public static async ValueTask<OneOf<ApplicationUpdater, Error[]>> Create(ILogger logger, bool useConsole,
-        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
+    public static async ValueTask<OneOf<ApplicationUpdater, Error[]>> Create(string appName, ILogger logger,
+        bool useConsole, string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
         string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
@@ -133,7 +136,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             fileStorageForUpload, parametersFileDateMask, parametersFileExtension, filesUserName, filesUsersGroupName,
             programArchiveDateMask, serviceUserName, downloadTempExtension, installerWorkFolder, installFolder);
 
-        return new ApplicationUpdater(logger, applicationUpdaterParameters, serviceInstaller, useConsole,
+        return new ApplicationUpdater(appName, logger, applicationUpdaterParameters, serviceInstaller, useConsole,
             messagesDataManager, userName);
     }
 
@@ -144,7 +147,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}", projectName,
             environmentName, cancellationToken);
 
-        if (projectName == ProgramAttributes.Instance.AppName)
+        if (projectName == _appName)
         {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
         }
@@ -219,7 +222,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",
             projectName, environmentName, serviceUserName, cancellationToken);
 
-        if (projectName == ProgramAttributes.Instance.AppName)
+        if (projectName == _appName)
         {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
         }

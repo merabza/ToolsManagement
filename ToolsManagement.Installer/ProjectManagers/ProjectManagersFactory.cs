@@ -10,9 +10,10 @@ namespace ToolsManagement.Installer.ProjectManagers;
 
 public static class ProjectManagersFactory
 {
-    public static async ValueTask<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(ILogger logger,
-        InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload, bool useConsole,
-        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+    public static async ValueTask<IIProjectsManagerWithFileStorage?> CreateAgentClientWithFileStorage(string appName,
+        ILogger logger, InstallerSettings webAgentInstallerSettings, FileStorageData fileStorageForUpload,
+        bool useConsole, IMessagesDataManager? messagesDataManager, string? userName,
+        CancellationToken cancellationToken = default)
     {
         if (messagesDataManager is not null)
         {
@@ -25,7 +26,7 @@ public static class ProjectManagersFactory
 
         if (localInstallerSettingsDomain is not null)
         {
-            return new ProjectsManagerLocalWithFileStorage(logger, useConsole, fileStorageForUpload,
+            return new ProjectsManagerLocalWithFileStorage(appName, logger, useConsole, fileStorageForUpload,
                 localInstallerSettingsDomain, messagesDataManager, userName);
         }
 

@@ -15,6 +15,7 @@ namespace ToolsManagement.Installer.ProjectManagers;
 
 public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithFileStorage
 {
+    private readonly string _appName;
     private readonly FileStorageData _fileStorageForUpload;
     private readonly LocalInstallerSettingsDomain _localInstallerSettings;
     private readonly ILogger _logger;
@@ -22,10 +23,11 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    public ProjectsManagerLocalWithFileStorage(ILogger logger, bool useConsole, FileStorageData fileStorageForUpload,
-        LocalInstallerSettingsDomain localInstallerSettings, IMessagesDataManager? messagesDataManager,
-        string? userName)
+    public ProjectsManagerLocalWithFileStorage(string appName, ILogger logger, bool useConsole,
+        FileStorageData fileStorageForUpload, LocalInstallerSettingsDomain localInstallerSettings,
+        IMessagesDataManager? messagesDataManager, string? userName)
     {
+        _appName = appName;
         _logger = logger;
         _fileStorageForUpload = fileStorageForUpload;
         _localInstallerSettings = localInstallerSettings;
@@ -38,10 +40,11 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
-        var applicationUpdater = await AppParametersFileUpdater.Create(_logger, _useConsole, parametersFileDateMask,
-            parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.FilesUserName,
-            _localInstallerSettings.FilesUsersGroupName, _localInstallerSettings.InstallFolder,
-            _localInstallerSettings.DotnetRunner, _messagesDataManager, _userName, cancellationToken);
+        var applicationUpdater = await AppParametersFileUpdater.Create(_appName, _logger, _useConsole,
+            parametersFileDateMask, parametersFileExtension, _fileStorageForUpload,
+            _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
+            _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner, _messagesDataManager,
+            _userName, cancellationToken);
 
         if (applicationUpdater is null)
         {
@@ -56,8 +59,8 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
-            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
+            _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
@@ -82,7 +85,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_logger,
+        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName, _logger,
             _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,

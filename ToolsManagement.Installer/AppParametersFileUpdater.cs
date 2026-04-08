@@ -14,18 +14,20 @@ namespace ToolsManagement.Installer;
 public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
 {
     private readonly AppParametersFileUpdaterParameters _applicationUpdaterParameters;
+    private readonly string _appName;
     private readonly InstallerBase _serviceInstaller;
 
-    private AppParametersFileUpdater(ILogger logger, bool useConsole,
+    private AppParametersFileUpdater(string appName, ILogger logger, bool useConsole,
         AppParametersFileUpdaterParameters applicationUpdaterParameters, InstallerBase serviceInstaller,
         IMessagesDataManager? messagesDataManager, string? userName) : base(logger, useConsole, messagesDataManager,
         userName)
     {
+        _appName = appName;
         _applicationUpdaterParameters = applicationUpdaterParameters;
         _serviceInstaller = serviceInstaller;
     }
 
-    public static async ValueTask<AppParametersFileUpdater?> Create(ILogger logger, bool useConsole,
+    public static async ValueTask<AppParametersFileUpdater?> Create(string appName, ILogger logger, bool useConsole,
         string parametersFileDateMask, string parametersFileExtension, FileStorageData fileStorageForUpload,
         string? filesUserName, string? filesUsersGroupName, string? installFolder, string? dotnetRunner,
         IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
@@ -85,14 +87,14 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
         var applicationUpdaterParameters = new AppParametersFileUpdaterParameters(fileStorageForUpload,
             parametersFileDateMask, parametersFileExtension, filesUserName, filesUsersGroupName, installFolder);
 
-        return new AppParametersFileUpdater(logger, useConsole, applicationUpdaterParameters, serviceInstaller,
+        return new AppParametersFileUpdater(appName, logger, useConsole, applicationUpdaterParameters, serviceInstaller,
             messagesDataManager, userName);
     }
 
     public async Task<Option<Error[]>> UpdateParameters(string projectName, string environmentName,
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
-        if (projectName == ProgramAttributes.Instance.AppName)
+        if (projectName == _appName)
         {
             return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateSelf, cancellationToken);
         }
