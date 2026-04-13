@@ -85,8 +85,8 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName, _logger,
-            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+        OneOf<ApplicationUpdater, Error[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
+            _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
