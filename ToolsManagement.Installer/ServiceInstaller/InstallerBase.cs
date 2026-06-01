@@ -294,9 +294,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
         string projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
 
-#pragma warning disable S3885
-        string? assemblyVersion = Assembly.LoadFrom(projectMainExeFileName).GetName().Version?.ToString();
-#pragma warning restore S3885
+        string? assemblyVersion = AssemblyName.GetAssemblyName(projectMainExeFileName).Version?.ToString();
 
         string serviceEnvName = GetServiceEnvName(projectName, environmentName);
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
@@ -506,10 +504,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         //დავადგინოთ პროგრამის ვერსია და დავაბრუნოთ
         string projectMainExeFileName = Path.Combine(projectFilesFolderFullName, $"{projectName}.dll");
-#pragma warning disable S3885
-        Version? version = Assembly.LoadFrom(projectMainExeFileName).GetName().Version;
-#pragma warning restore S3885
-        string? assemblyVersion = version?.ToString();
+        string? assemblyVersion = AssemblyName.GetAssemblyName(projectMainExeFileName).Version?.ToString();
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
         //თუ არსებობს, დავაარქივოთ და გადავინახოთ პროგრამის მიმდინარე ფაილები
