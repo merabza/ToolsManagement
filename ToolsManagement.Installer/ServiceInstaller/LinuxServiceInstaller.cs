@@ -50,7 +50,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
             $"--no-ask-password --no-block --quiet is-active {serviceEnvName}").IsNone;
     }
 
-    protected override Option<Error[]> RemoveService(string serviceEnvName)
+    protected override async ValueTask<Option<Error[]>> RemoveService(string serviceEnvName,
+        CancellationToken cancellationToken = default)
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
@@ -59,7 +60,8 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         if (disableProcessResult.IsSome)
         {
-            return Error.RecreateErrors((Error[])disableProcessResult, InstallerErrors.TheServiceWasNotRemoved);
+            return await Task.FromResult(Error.RecreateErrors((Error[])disableProcessResult,
+                InstallerErrors.TheServiceWasNotRemoved));
         }
 
         File.Delete(serviceConfigFileName);

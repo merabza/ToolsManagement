@@ -40,7 +40,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     protected abstract ValueTask<Option<Error[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract Option<Error[]> RemoveService(string serviceEnvName);
+    protected abstract ValueTask<Option<Error[]>> RemoveService(string serviceEnvName,
+        CancellationToken cancellationToken = default);
 
     protected abstract ValueTask<Option<Error[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default);
@@ -426,7 +427,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             {
                 await LogInfoAndSendMessage("Service {0}/{1} registration is not properly, so will be removed",
                     projectName, serviceEnvName, cancellationToken);
-                Option<Error[]> removeServiceError = RemoveService(serviceEnvName);
+                Option<Error[]> removeServiceError = await RemoveService(serviceEnvName, cancellationToken);
                 if (removeServiceError.IsSome)
                 {
                     Error.PrintErrorsOnConsole((Error[])removeServiceError);
@@ -693,7 +694,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             }
         }
 
-        if (RemoveService(serviceEnvName))
+        Option<Error[]> removeServiceResult = await RemoveService(serviceEnvName, cancellationToken);
+        if (removeServiceResult.IsNone)
         {
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
         }

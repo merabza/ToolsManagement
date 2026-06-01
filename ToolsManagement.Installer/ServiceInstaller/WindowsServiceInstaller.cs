@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Security.AccessControl;
@@ -55,7 +57,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning restore CA1416 // Validate platform compatibility
     }
 
-    protected override Option<Error[]> RemoveService(string serviceEnvName)
+    protected override async ValueTask<Option<Error[]>> RemoveService(string serviceEnvName,
+        CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
         // ReSharper disable once using
@@ -76,9 +79,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
         // add command
         ps.AddCommand("Remove-Service").AddParameter("Name", serviceEnvName);
 
-        ps.Invoke();
-
-        return null;
+        return await InvokePowerShellAndCheckErrors(ps, nameof(RemoveService),
+            nameof(InstallerErrors.ServiceCanNotBeRemoved), cancellationToken);
     }
 
     protected override async ValueTask<Option<Error[]>> StopService(string serviceEnvName,
@@ -268,7 +270,12 @@ public sealed class WindowsServiceInstaller : InstallerBase
                 $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}")
             .AddParameter("BinaryPathName", exeFilePath).AddParameter("StartupType", "Automatic");
 
-        await ps.InvokeAsync();
+        Option<Error[]> invokeResult = await InvokePowerShellAndCheckErrors(ps, nameof(RegisterService),
+            nameof(InstallerErrors.CannotRegisterService), cancellationToken);
+        if (invokeResult.IsSome)
+        {
+            return invokeResult;
+        }
 
         if (IsServiceExists(serviceEnvName))
         {
@@ -277,5 +284,36 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
             cancellationToken);
+    }
+
+    //PowerShell-ის ბრძანების გაშვება და შეცდომების გაანალიზება.
+    //ტერმინირებად (exception) და არატერმინირებად (Error ნაკადი) შეცდომებს გამოვიტანთ მომხმარებლისთვის და ვაბრუნებთ Error-ებად.
+    private async ValueTask<Option<Error[]>> InvokePowerShellAndCheckErrors(PowerShell ps, string methodName,
+        string streamErrorCode, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await ps.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            //PowerShell-ის ტერმინირებადი შეცდომა (მაგალითად, ადმინისტრატორის უფლებების უქონლობა) — გამოვიტანოთ მისი ტექსტი მომხმარებლისთვის
+            return new[] { await LogErrorAndSendMessageFromException(ex, methodName, cancellationToken) };
+        }
+
+        //PowerShell-ის არატერმინირებადი შეცდომები გროვდება Error ნაკადში — წავიკითხოთ და გამოვიტანოთ მომხმარებლისთვის
+        if (ps.Streams.Error.Count > 0)
+        {
+            var errors = new List<Error>();
+            foreach (ErrorRecord errorRecord in ps.Streams.Error)
+            {
+                errors.AddRange(await LogErrorAndSendMessageFromError(streamErrorCode, errorRecord.ToString(),
+                    cancellationToken));
+            }
+
+            return errors.ToArray();
+        }
+
+        return null;
     }
 }
