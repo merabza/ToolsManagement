@@ -207,7 +207,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
             return Error.RecreateErrors(runProcessWithOutputResult.AsT1, LinuxServiceInstallerErrors.WhichDotnetError);
         }
 
-        string newDotnetRunner = runProcessWithOutputResult.AsT0.Item1;
+        string newDotnetRunner = runProcessWithOutputResult.AsT0.Item1.Trim('\0', ' ', '\t', '\r', '\n');
         if (!string.IsNullOrWhiteSpace(newDotnetRunner) && File.Exists(newDotnetRunner))
         {
             return newDotnetRunner;
