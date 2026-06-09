@@ -57,6 +57,15 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     protected abstract bool IsServiceRunning(string serviceEnvName);
 
+    //ძველი (შესაძლოა ობოლი) პროცესის PID-ის დადგენა და მისი მოკვლა, რომ გათავისუფლდეს პორტი.
+    //ნაგულისხმევად არაფერს აკეთებს. გადატვირთულია Linux-ისთვის, სადაც systemctl stop ყოველთვის
+    //არ წყვეტს პროცესს (განსაკუთრებით ობოლს). Windows-ზე პროცესს ასრულებს SCM-ით გაჩერება.
+    protected virtual ValueTask<Option<Error[]>> KillProcessByPid(string serviceEnvName, string projectName,
+        string installFolderPath, CancellationToken cancellationToken = default)
+    {
+        return default;
+    }
+
     private static string GetServiceEnvName(string projectName, string environmentName)
     {
         return $"{projectName}{environmentName}";
@@ -335,12 +344,15 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             }
         }
 
-        //დავრწმუნდეთ, რომ გაჩერების შემდეგ სერვისი ნამდვილად აღარ მუშაობს; თუ ჯერ კიდევ
-        //მუშაობს — განახლება ვერ გაგრძელდება, რადგან ძველი პროცესი იკავებს პორტს.
-        if (serviceExists && !await WaitForServiceStopped(serviceEnvName, cancellationToken))
+        //გრაციოზული გაჩერების მიუხედავად, პროცესი შესაძლოა მაინც ცოცხალი იყოს — მაგალითად
+        //ობოლი პროცესი წინა გაუმართავი განახლებიდან, რომელსაც systemd ვეღარ აკონტროლებს
+        //(.service ფაილი წაშლილია, მაგრამ პროცესი პორტს კვლავ იკავებს). ამიტომ ნებისმიერ
+        //შემთხვევაში დავადგინოთ გაშვებული პროცესის PID და მოვკლათ, რომ პორტი გათავისუფლდეს.
+        Option<Error[]> killProcessResult =
+            await KillProcessByPid(serviceEnvName, projectName, projectInstallFullPathWithEnv, cancellationToken);
+        if (killProcessResult.IsSome)
         {
-            return await LogErrorAndSendMessageFromError(
-                InstallerErrors.ServiceIsRunningAndCannotBeUpdated(serviceEnvName), cancellationToken);
+            return (Error[])killProcessResult;
         }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
@@ -583,25 +595,6 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         CancellationToken cancellationToken = default)
     {
         return Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
-    }
-
-    //სერვისის გაჩერების შემდეგ დავრწმუნდეთ, რომ ის ნამდვილად აღარ მუშაობს.
-    //IsServiceRunning ჯვარედინ-პლატფორმულად სწორია; სახელზე დაფუძნებული შემოწმება
-    //არასაიმედოა (Linux-ზე პროცესი "dotnet"-ია), ამიტომ მას აქ აღარ ვიყენებთ.
-    private async ValueTask<bool> WaitForServiceStopped(string serviceEnvName,
-        CancellationToken cancellationToken = default)
-    {
-        const int maxTryCount = 10;
-        int tryCount = 0;
-        while (IsServiceRunning(serviceEnvName) && tryCount < maxTryCount)
-        {
-            tryCount++;
-            await LogInfoAndSendMessage("Service {0} is still running after stop, waiting 3 seconds... {1}",
-                serviceEnvName, tryCount, cancellationToken);
-            await Task.Delay(3000, cancellationToken);
-        }
-
-        return !IsServiceRunning(serviceEnvName);
     }
 
     private async ValueTask<Option<Error[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)

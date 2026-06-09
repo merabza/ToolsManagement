@@ -21,4 +21,12 @@ public static class LinuxServiceInstallerErrors
     {
         return new Error { Code = nameof(ServiceIsNotEnabled), Name = $"Service {serviceEnvName} is not enabled" };
     }
+
+    public static Error ProcessCanNotBeKilled(int processId)
+    {
+        return new Error
+        {
+            Code = nameof(ProcessCanNotBeKilled), Name = $"Process with PID {processId} can not be killed"
+        };
+    }
 }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using LanguageExt;
@@ -82,6 +84,59 @@ public sealed class LinuxServiceInstaller : InstallerBase
             ? await Task.FromResult(Error.RecreateErrors((Error[])stopProcessResult,
                 InstallerErrors.TheServiceWasNotStopped))
             : null;
+    }
+
+    //ძველი (შესაძლოა ობოლი) პროცესის PID-ის დადგენა მთავარი dll-ის გზით და მისი მოკვლა PID-ით.
+    protected override async ValueTask<Option<Error[]>> KillProcessByPid(string serviceEnvName, string projectName,
+        string installFolderPath, CancellationToken cancellationToken = default)
+    {
+        //გაშვებული პროცესის ამოცნობა ხდება მთავარი dll-ის სრული გზით — ეს მუშაობს მაშინაც,
+        //როცა systemd-ს პროცესი აღარ აკონტროლებს (ობოლი პროცესი წინა გაუმართავი განახლებიდან).
+        string mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
+
+        //pgrep -f პოულობს პროცესებს, რომელთა ბრძანების ხაზი შეიცავს ამ გზას, და აბრუნებს PID-ებს.
+        //pgrep აბრუნებს 1-ს, თუ ვერცერთი პროცესი ვერ მოიძებნა — ეს ნორმალური (უშეცდომო) შემთხვევაა.
+        OneOf<(string, int), Error[]> pgrepResult =
+            StShared.RunProcessWithOutput(UseConsole, _logger, "pgrep", $"-f \"{mainDllFileName}\"", [1]);
+        if (pgrepResult.IsT1)
+        {
+            //pgrep ვერ შესრულდა (მაგ. დაყენებული არ არის) — გავაფრთხილოთ და გავაგრძელოთ.
+            await LogWarningAndSendMessage("Cannot determine running process PID for {0}", mainDllFileName,
+                cancellationToken);
+            return null;
+        }
+
+        (string pgrepOutput, _) = pgrepResult.AsT0;
+
+        string[] pidStrings =
+            pgrepOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (pidStrings.Length == 0)
+        {
+            await LogInfoAndSendMessage("No running process found for {0}", mainDllFileName, cancellationToken);
+            return null;
+        }
+
+        foreach (string pidString in pidStrings)
+        {
+            if (!int.TryParse(pidString, CultureInfo.InvariantCulture, out int processId) || processId <= 0)
+            {
+                continue;
+            }
+
+            await LogInfoAndSendMessage("Killing process with PID {0} for {1}", processId, mainDllFileName,
+                cancellationToken);
+
+            //ვკლავთ კონკრეტული PID-ის მიხედვით SIGKILL-ით. თუ პროცესი უკვე აღარ არსებობს,
+            //kill აბრუნებს 1-ს — ამ შემთხვევას დასაშვებად ვთვლით.
+            Option<Error[]> killResult = StShared.RunProcess(UseConsole, _logger, "kill", $"-9 {processId}", [1]);
+            if (killResult.IsSome)
+            {
+                return await LogErrorAndSendMessageFromError(
+                    LinuxServiceInstallerErrors.ProcessCanNotBeKilled(processId), cancellationToken);
+            }
+        }
+
+        return null;
     }
 
     protected override async ValueTask<Option<Error[]>> StartService(string serviceEnvName,
