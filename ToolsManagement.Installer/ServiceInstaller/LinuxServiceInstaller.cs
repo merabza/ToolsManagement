@@ -72,8 +72,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
     protected override async ValueTask<Option<Error[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
+        //--no-block განზრახ მოშორებულია: stop უნდა იყოს სინქრონული, რომ systemd დაელოდოს
+        //უნიტის სრულ გაჩერებას (საჭიროების შემთხვევაში მოკვლას TimeoutStopSec-ის შემდეგ),
+        //თორემ ძველი პროცესი კვლავ იკავებს TCP პორტს და განახლება ჩაიშლება.
         Option<Error[]> stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
-            $"--no-ask-password --no-block --quiet stop {serviceEnvName}");
+            $"--no-ask-password --quiet stop {serviceEnvName}");
 
         return stopProcessResult.IsSome
             ? await Task.FromResult(Error.RecreateErrors((Error[])stopProcessResult,

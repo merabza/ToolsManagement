@@ -71,7 +71,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
     private static bool IsProcessRunning(string processName)
     {
-        return Process.GetProcessesByName(processName).Length > 1;
+        return Process.GetProcessesByName(processName).Length > 0;
     }
 
     public async ValueTask<Option<Error[]>> RunUpdateSettings(string projectName, string environmentName,
@@ -335,7 +335,9 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             }
         }
 
-        if (IsProcessRunning(serviceEnvName))
+        //დავრწმუნდეთ, რომ გაჩერების შემდეგ სერვისი ნამდვილად აღარ მუშაობს; თუ ჯერ კიდევ
+        //მუშაობს — განახლება ვერ გაგრძელდება, რადგან ძველი პროცესი იკავებს პორტს.
+        if (serviceExists && !await WaitForServiceStopped(serviceEnvName, cancellationToken))
         {
             return await LogErrorAndSendMessageFromError(
                 InstallerErrors.ServiceIsRunningAndCannotBeUpdated(serviceEnvName), cancellationToken);
@@ -581,6 +583,25 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         CancellationToken cancellationToken = default)
     {
         return Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
+    }
+
+    //სერვისის გაჩერების შემდეგ დავრწმუნდეთ, რომ ის ნამდვილად აღარ მუშაობს.
+    //IsServiceRunning ჯვარედინ-პლატფორმულად სწორია; სახელზე დაფუძნებული შემოწმება
+    //არასაიმედოა (Linux-ზე პროცესი "dotnet"-ია), ამიტომ მას აქ აღარ ვიყენებთ.
+    private async ValueTask<bool> WaitForServiceStopped(string serviceEnvName,
+        CancellationToken cancellationToken = default)
+    {
+        const int maxTryCount = 10;
+        int tryCount = 0;
+        while (IsServiceRunning(serviceEnvName) && tryCount < maxTryCount)
+        {
+            tryCount++;
+            await LogInfoAndSendMessage("Service {0} is still running after stop, waiting 3 seconds... {1}",
+                serviceEnvName, tryCount, cancellationToken);
+            await Task.Delay(3000, cancellationToken);
+        }
+
+        return !IsServiceRunning(serviceEnvName);
     }
 
     private async ValueTask<Option<Error[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
