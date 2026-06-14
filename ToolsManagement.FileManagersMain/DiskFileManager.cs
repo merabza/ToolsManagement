@@ -14,7 +14,6 @@ public sealed class DiskFileManager : FileManager
 {
     private readonly string _storageFolderName;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
     public DiskFileManager(string storageFolderName, bool useConsole, ILogger logger, string? localPatch) : base(
         useConsole, logger, localPatch)
     {
