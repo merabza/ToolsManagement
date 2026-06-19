@@ -348,8 +348,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //ობოლი პროცესი წინა გაუმართავი განახლებიდან, რომელსაც systemd ვეღარ აკონტროლებს
         //(.service ფაილი წაშლილია, მაგრამ პროცესი პორტს კვლავ იკავებს). ამიტომ ნებისმიერ
         //შემთხვევაში დავადგინოთ გაშვებული პროცესის PID და მოვკლათ, რომ პორტი გათავისუფლდეს.
-        Option<Error[]> killProcessResult =
-            await KillProcessByPid(serviceEnvName, projectName, projectInstallFullPathWithEnv, cancellationToken);
+        Option<Error[]> killProcessResult = await KillProcessByPid(serviceEnvName, projectName,
+            projectInstallFullPathWithEnv, cancellationToken);
         if (killProcessResult.IsSome)
         {
             return (Error[])killProcessResult;
