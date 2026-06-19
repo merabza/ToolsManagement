@@ -24,6 +24,7 @@
     </Folder>
     <Folder Name="/SystemTools/">
         <Project Path="../SystemTools/SystemTools.ApiContracts/SystemTools.ApiContracts.csproj" />
+        <Project Path="../SystemTools/SystemTools.BackgroundTasks/SystemTools.BackgroundTasks.csproj" />
         <Project Path="../SystemTools/SystemTools.StringMessagesApiContracts/SystemTools.StringMessagesApiContracts.csproj" />
         <Project Path="../SystemTools/SystemTools.SystemToolsShared/SystemTools.SystemToolsShared.csproj" />
     </Folder>
@@ -36,6 +37,5 @@
     <Project Path="ToolsManagement.DatabasesManagement/ToolsManagement.DatabasesManagement.csproj" />
     <Project Path="ToolsManagement.FileManagersMain/ToolsManagement.FileManagersMain.csproj" />
     <Project Path="ToolsManagement.Installer/ToolsManagement.Installer.csproj" />
-    <Project Path="ToolsManagement.LibToolActions/ToolsManagement.LibToolActions.csproj" />
     <Project Path="ToolsManagement/ToolsManagement.csproj" />
 </Solution>

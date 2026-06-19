@@ -180,7 +180,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         OneOf<string, Error[]> checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsT1)
         {
-            var errors = Error.RecreateErrors(checkedDotnetRunnerResult.AsT1,
+            Error[] errors = Error.RecreateErrors(checkedDotnetRunnerResult.AsT1,
                 LinuxServiceInstallerErrors.DotnetLocationIsNotFound);
 
             return await LogErrorsAndSendMessageFromError(errors, cancellationToken);
