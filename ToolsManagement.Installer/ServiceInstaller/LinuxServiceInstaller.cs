@@ -48,8 +48,11 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
     protected override bool IsServiceRunning(string serviceEnvName)
     {
-        return StShared.RunProcess(UseConsole, _logger, "systemctl",
-            $"--no-ask-password --no-block --quiet is-active {serviceEnvName}").IsNone;
+        //is-active აბრუნებს 0-ს active მდგომარეობისას, 3-ს — გაჩერებულის/არარსებულის.
+        //3 დასაშვებ კოდად ითვლება, რომ გაჩერებულმა სერვისმა (ნორმალური შემთხვევა) error-ლოგი არ გამოიწვიოს.
+        OneOf<(string, int), Error[]> result = StShared.RunProcessWithOutput(UseConsole, _logger, "systemctl",
+            $"--no-ask-password --quiet is-active {serviceEnvName}", [3]);
+        return result.IsT0 && result.AsT0.Item2 == 0;
     }
 
     protected override async ValueTask<Option<Error[]>> RemoveService(string serviceEnvName,
