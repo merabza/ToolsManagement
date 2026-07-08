@@ -334,7 +334,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             {
                 //თუ სერვისი გაშვებულია უკვე, გავაჩეროთ
                 await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
-                await LogInfoAndSendMessage("Please be patient, the process may take a few seconds, maybe even a minute...", cancellationToken);
+                await LogInfoAndSendMessage(
+                    "Please be patient, the process may take a few seconds, maybe even a minute...", cancellationToken);
 
                 Option<Error[]> stopResult = await Stop(serviceEnvName, cancellationToken);
                 if (stopResult.IsSome)
