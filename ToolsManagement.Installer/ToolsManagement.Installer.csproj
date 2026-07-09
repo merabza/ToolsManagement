@@ -10,12 +10,11 @@
         <PackageReference Include="System.IO.FileSystem.AccessControl" />
         <PackageReference Include="System.Management.Automation" />
         <PackageReference Include="System.ServiceProcess.ServiceController" />
+        <PackageReference Include="SystemTools.BackgroundTasks" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
-        <ProjectReference Include="..\..\SystemTools\SystemTools.BackgroundTasks\SystemTools.BackgroundTasks.csproj" />
-        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
         <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentProjectsApiContracts\WebAgentContracts.WebAgentProjectsApiContracts.csproj" />
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
     </ItemGroup>
