@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="SystemTools.BackgroundTasks" />
+      <PackageReference Include="SystemTools.SystemToolsShared" />
     </ItemGroup>
 
 </Project>

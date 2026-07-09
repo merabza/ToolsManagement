@@ -11,6 +11,7 @@
         <PackageReference Include="System.Management.Automation" />
         <PackageReference Include="System.ServiceProcess.ServiceController" />
         <PackageReference Include="SystemTools.BackgroundTasks" />
+        <PackageReference Include="SystemTools.SystemToolsShared" />
     </ItemGroup>
 
     <ItemGroup>
