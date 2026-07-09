@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="ParametersManagement.LibFileParameters" />
       <PackageReference Include="SystemTools.BackgroundTasks" />
       <PackageReference Include="SystemTools.SystemToolsShared" />
     </ItemGroup>
