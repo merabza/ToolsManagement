@@ -23,8 +23,8 @@
     <PackageVersion Include="System.Management.Automation" Version="7.6.2" />
     <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
-    <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9689.2043" />
-    <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9689.2043" />
+    <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9691.25951" />
+    <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9691.25951" />
     <PackageVersion Include="WebAgentContracts.WebAgentDatabasesApiContracts" Version="1.0.9686.34669" />
     <PackageVersion Include="WebAgentContracts.WebAgentProjectsApiContracts" Version="1.0.9686.34669" />
   </ItemGroup>
