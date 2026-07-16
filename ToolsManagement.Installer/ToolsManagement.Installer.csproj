@@ -7,17 +7,17 @@
         <PackageReference Include="Microsoft.PowerShell.Commands.Utility" />
         <PackageReference Include="Microsoft.PowerShell.ConsoleHost" />
         <PackageReference Include="Microsoft.WSMan.Management" />
-        <PackageReference Include="ParametersManagement.LibFileParameters" />
         <PackageReference Include="System.IO.FileSystem.AccessControl" />
         <PackageReference Include="System.Management.Automation" />
         <PackageReference Include="System.ServiceProcess.ServiceController" />
-        <PackageReference Include="SystemTools.BackgroundTasks" />
-        <PackageReference Include="SystemTools.SystemToolsShared" />
-        <PackageReference Include="WebAgentContracts.WebAgentProjectsApiContracts" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
+        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.BackgroundTasks\SystemTools.BackgroundTasks.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentProjectsApiContracts\WebAgentContracts.WebAgentProjectsApiContracts.csproj" />
     </ItemGroup>
 
 </Project>

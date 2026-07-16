@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="DatabaseTools.DbToolsFactory" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
         <PackageReference Include="OneOf" />
-        <PackageReference Include="ParametersManagement.LibDatabaseParameters" />
-        <PackageReference Include="ParametersManagement.LibFileParameters" />
-        <PackageReference Include="SystemTools.SystemToolsShared" />
-        <PackageReference Include="WebAgentContracts.WebAgentDatabasesApiContracts" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ToolsManagement.ApiClientsManagement\ToolsManagement.ApiClientsManagement.csproj" />
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
+        <ProjectReference Include="..\..\DatabaseTools\DatabaseTools.DbToolsFactory\DatabaseTools.DbToolsFactory.csproj" />
+        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibDatabaseParameters\ParametersManagement.LibDatabaseParameters.csproj" />
+        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
+        <ProjectReference Include="..\..\WebAgentContracts\WebAgentContracts.WebAgentDatabasesApiContracts\WebAgentContracts.WebAgentDatabasesApiContracts.csproj" />
     </ItemGroup>
 
 </Project>
