@@ -4,11 +4,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ConnectionTools.ConnectTools" Version="1.0.9686.36920" />
-    <PackageVersion Include="ConnectionTools.CToolsFactory" Version="1.0.9686.36920" />
-    <PackageVersion Include="DatabaseTools.DbToolsFactory" Version="1.0.9686.36920" />
-    <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9686.36920" />
-    <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9686.36920" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.29.0.143774" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
@@ -22,10 +17,5 @@
     <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageVersion Include="System.Management.Automation" Version="7.6.3" />
     <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
-    <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9691.25951" />
-    <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9691.25983" />
-    <PackageVersion Include="WebAgentContracts.WebAgentDatabasesApiContracts" Version="1.0.9686.36920" />
-    <PackageVersion Include="WebAgentContracts.WebAgentProjectsApiContracts" Version="1.0.9686.36050" />
   </ItemGroup>
 </Project>
