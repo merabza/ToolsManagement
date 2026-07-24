@@ -128,7 +128,7 @@ public /*open*/ class FileManager
         }
 
         //წაშლა ჭკვიანი სქემის მიხედვით
-        List<BuFileInfo> files = GetFilesByMask(prefix, dateMask, suffix).OrderBy(ob => ob.FileDateTime).ToList();
+        List<BuFileInfo> files = [.. GetFilesByMask(prefix, dateMask, suffix).OrderBy(ob => ob.FileDateTime)];
         List<BuFileInfo> filesForDelete = smartSchema.GetFilesForDeleteBySchema(files);
 
         foreach (BuFileInfo buFileInfo in filesForDelete)
@@ -198,16 +198,18 @@ public /*open*/ class FileManager
 
     public BuFileInfo[] GetFilesByMask(int fileManagerId, MaskManager maskManager, string extension, bool isOriginal)
     {
-        return GetFileNames(null, maskManager.GetFullMask(extension)).Select(c =>
-            new BuFileInfo(c, isOriginal, maskManager.GetDateTimeByMask(c), fileManagerId)).ToArray();
+        return
+        [
+            .. GetFileNames(null, maskManager.GetFullMask(extension)).Select(c =>
+                new BuFileInfo(c, isOriginal, maskManager.GetDateTimeByMask(c), fileManagerId))
+        ];
     }
 
-    public List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
+    private List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
     {
         List<string> f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
 
-        List<BuFileInfo> files = f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
-            .Where(w => w.FileDateTime != DateTime.MinValue).ToList();
+        List<BuFileInfo> files = [.. f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix))).Where(w => w.FileDateTime != DateTime.MinValue)];
 
         return files;
     }
@@ -381,12 +383,12 @@ public /*open*/ class FileManager
         return true;
     }
 
-    public virtual bool CreateDirectory(string directoryName)
+    protected virtual bool CreateDirectory(string directoryName)
     {
         return false;
     }
 
-    public virtual bool CreateDirectory(string? afterRootPath, string directoryName)
+    protected virtual bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         return false;
     }
@@ -417,7 +419,7 @@ public /*open*/ class FileManager
         return GetFileNames(afterRootPath, null).Count == 0 && GetFolderNames(afterRootPath, null).Count == 0;
     }
 
-    public virtual bool DirectoryExists(string directoryName)
+    protected virtual bool DirectoryExists(string directoryName)
     {
         return false;
     }

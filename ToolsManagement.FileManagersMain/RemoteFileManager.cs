@@ -247,7 +247,7 @@ public sealed class RemoteFileManager : FileManager
         return _cTools.FileExists(null, fileName);
     }
 
-    public override bool DirectoryExists(string directoryName)
+    protected override bool DirectoryExists(string directoryName)
     {
         return _cTools.DirectoryExists(null, directoryName);
     }
@@ -273,13 +273,13 @@ public sealed class RemoteFileManager : FileManager
     //    return PathCombine(PathCombine(_serverRootPaths, afterRootPath), fileName);
     //}
 
-    public override bool CreateDirectory(string directoryName)
+    protected override bool CreateDirectory(string directoryName)
     {
         _cTools.CreateDirectory(null, directoryName);
         return DirectoryExists(directoryName);
     }
 
-    public override bool CreateDirectory(string? afterRootPath, string directoryName)
+    protected override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         _cTools.CreateDirectory(afterRootPath, directoryName);
         return DirectoryExists(afterRootPath, directoryName);

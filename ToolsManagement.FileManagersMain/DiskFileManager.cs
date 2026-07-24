@@ -23,7 +23,7 @@ public sealed class DiskFileManager : FileManager
     public override IEnumerable<MyFileInfo> GetFilesWithInfo(string? afterRootPath, string? searchPattern)
     {
         DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
-        return GetFiles(searchPattern, destDir).Select(c => new MyFileInfo(c.Name, c.Length)).ToList();
+        return [.. GetFiles(searchPattern, destDir).Select(c => new MyFileInfo(c.Name, c.Length))];
     }
 
     private static FileInfo[] GetFiles(string? searchPattern, DirectoryInfo destDir)
@@ -40,7 +40,7 @@ public sealed class DiskFileManager : FileManager
     public override List<string> GetFileNames(string? afterRootPath, string? searchPattern)
     {
         DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
-        return GetFiles(searchPattern, destDir).Select(c => c.Name).ToList();
+        return [.. GetFiles(searchPattern, destDir).Select(c => c.Name)];
     }
 
     private DirectoryInfo GetDirectoryInfo(string? afterRootPath)
@@ -54,7 +54,7 @@ public sealed class DiskFileManager : FileManager
     public override List<string> GetFolderNames(string? afterRootPath, string? searchPattern)
     {
         DirectoryInfo destDir = GetDirectoryInfo(afterRootPath);
-        return GetFolders(searchPattern, destDir).Select(c => c.Name).ToList();
+        return [.. GetFolders(searchPattern, destDir).Select(c => c.Name)];
     }
 
     public override bool UploadFile(string fileName, string useTempExtension)
@@ -231,7 +231,7 @@ public sealed class DiskFileManager : FileManager
         return File.Exists(Path.Combine(_storageFolderName, fileName));
     }
 
-    public override bool DirectoryExists(string directoryName)
+    protected override bool DirectoryExists(string directoryName)
     {
         return Directory.Exists(Path.Combine(_storageFolderName, directoryName));
     }
@@ -253,13 +253,13 @@ public sealed class DiskFileManager : FileManager
             : Path.Combine(_storageFolderName, afterRootPath, fileName);
     }
 
-    public override bool CreateDirectory(string directoryName)
+    protected override bool CreateDirectory(string directoryName)
     {
         Directory.CreateDirectory(Path.Combine(_storageFolderName, directoryName));
         return DirectoryExists(directoryName);
     }
 
-    public override bool CreateDirectory(string? afterRootPath, string directoryName)
+    protected override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         string inDirName = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
         string dirFullName = Path.Combine(inDirName, directoryName);

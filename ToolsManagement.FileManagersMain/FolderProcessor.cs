@@ -64,8 +64,10 @@ public /*open*/ class FolderProcessor
             bool reloadFolders = true;
             while (reloadFolders)
             {
-                List<string> folderNames = FileManager.GetFolderNames(afterRootPath, null)
-                    .Where(x => !x.StartsWith('#')).OrderBy(o => o).ToList();
+                List<string> folderNames =
+                [
+                    .. FileManager.GetFolderNames(afterRootPath, null).Where(x => !x.StartsWith('#')).OrderBy(o => o)
+                ];
                 reloadFolders = false;
                 foreach (string folderName in folderNames)
                 {
