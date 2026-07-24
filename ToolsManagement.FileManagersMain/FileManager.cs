@@ -205,7 +205,8 @@ public /*open*/ class FileManager
         ];
     }
 
-    private List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
+    //public საჭიროა CurrentPeriodFileChecker-თვის
+    public List<BuFileInfo> GetFilesByMask(string prefix, string dateMask, string suffix)
     {
         List<string> f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
 
@@ -392,7 +393,8 @@ public /*open*/ class FileManager
         return false;
     }
 
-    protected virtual bool CreateDirectory(string? afterRootPath, string directoryName)
+    //public საჭიროა UnZipOnPlace-თვის
+    public virtual bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         return false;
     }

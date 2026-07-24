@@ -259,7 +259,7 @@ public sealed class DiskFileManager : FileManager
         return DirectoryExists(directoryName);
     }
 
-    protected override bool CreateDirectory(string? afterRootPath, string directoryName)
+    public override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         string inDirName = afterRootPath == null ? _storageFolderName : Path.Combine(_storageFolderName, afterRootPath);
         string dirFullName = Path.Combine(inDirName, directoryName);

@@ -279,7 +279,7 @@ public sealed class RemoteFileManager : FileManager
         return DirectoryExists(directoryName);
     }
 
-    protected override bool CreateDirectory(string? afterRootPath, string directoryName)
+    public override bool CreateDirectory(string? afterRootPath, string directoryName)
     {
         _cTools.CreateDirectory(afterRootPath, directoryName);
         return DirectoryExists(afterRootPath, directoryName);
