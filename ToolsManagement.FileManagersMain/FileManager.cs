@@ -209,7 +209,11 @@ public /*open*/ class FileManager
     {
         List<string> f = GetFileNames(null, GetFullMask(prefix, dateMask, suffix));
 
-        List<BuFileInfo> files = [.. f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix))).Where(w => w.FileDateTime != DateTime.MinValue)];
+        List<BuFileInfo> files =
+        [
+            .. f.Select(fn => new BuFileInfo(fn, GetDateTimeByMask(fn, prefix, dateMask, suffix)))
+                .Where(w => w.FileDateTime != DateTime.MinValue)
+        ];
 
         return files;
     }

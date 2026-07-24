@@ -17,8 +17,8 @@ namespace ToolsManagement.Installer;
 
 public sealed class ApplicationUpdater : ApplicationUpdaterBase
 {
-    private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
     private readonly string _appName;
+    private readonly ApplicationUpdaterParameters _applicationUpdaterParameters;
     private readonly InstallerBase _installer;
     private readonly ILogger _logger;
 

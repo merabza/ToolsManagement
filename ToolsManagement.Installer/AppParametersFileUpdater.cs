@@ -13,8 +13,8 @@ namespace ToolsManagement.Installer;
 
 public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
 {
-    private readonly AppParametersFileUpdaterParameters _applicationUpdaterParameters;
     private readonly string _appName;
+    private readonly AppParametersFileUpdaterParameters _applicationUpdaterParameters;
     private readonly InstallerBase _serviceInstaller;
 
     private AppParametersFileUpdater(string appName, ILogger logger, bool useConsole,
