@@ -433,11 +433,11 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
         return backupFileParameters;
     }
 
-    public ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(string backupBaseName,
-        string dbServerFoldersSetName, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+    //public ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(string backupBaseName,
+    //    string dbServerFoldersSetName, CancellationToken cancellationToken = default)
+    //{
+    //    throw new NotImplementedException();
+    //}
 
     private async ValueTask<OneOf<DbClient, Error[]>> GetDatabaseClient(EDatabaseProvider dataProvider,
         string? databaseName = null, CancellationToken cancellationToken = default)
