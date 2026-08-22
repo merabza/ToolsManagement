@@ -15,60 +15,62 @@ public interface IDatabaseManager
 {
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
     //ასევე ამ მეთოდის ამოცანაა უზრუნველყოს ბექაპის ჩამოსაქაჩად ხელმისაწვდომ ადგილას მოხვედრა
-    ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(
+    ValueTask<OneOf<BackupFileParameters, ErrorOmd[]>> CreateBackup(
         DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
         CancellationToken cancellationToken = default);
 
-    //ValueTask<OneOf<BackupFileParameters, Error[]>> CreateBackup(string backupBaseName,
+    //ValueTask<OneOf<BackupFileParameters, ErrorOmd[]>> CreateBackup(string backupBaseName,
     //    string dbServerFoldersSetName, CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სიის მიღება სერვერიდან
-    Task<OneOf<List<DatabaseInfoModel>, Error[]>> GetDatabaseNames(CancellationToken cancellationToken = default);
+    Task<OneOf<List<DatabaseInfoModel>, ErrorOmd[]>> GetDatabaseNames(CancellationToken cancellationToken = default);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, იმის დასადგენად,
     //მიზნის ბაზა უკვე არსებობს თუ არა, რომ არ მოხდეს ამ ბაზის ისე წაშლა ახლით,
     //რომ არსებულის გადანახვა არ მოხდეს.
     // ReSharper disable once UnusedMember.Global
-    Task<OneOf<bool, Error[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default);
+    Task<OneOf<bool, ErrorOmd[]>> IsDatabaseExists(string databaseName, CancellationToken cancellationToken = default);
 
     //გამოიყენება ბაზის დამაკოპირებელ ინსტრუმენტში, დაკოპირებული ბაზის აღსადგენად,
     // ReSharper disable once UnusedMember.Global
-    Task<Option<Error[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
+    Task<Option<ErrorOmd[]>> RestoreDatabaseFromBackup(BackupFileParameters backupFileParameters, string databaseName,
         string dbServerFoldersSetName, EDatabaseRecoveryModel databaseRecoveryModel,
         string? restoreFromFolderPath = null, CancellationToken cancellationToken = default);
 
     //შემოწმდეს არსებული ბაზის მდგომარეობა და საჭიროების შემთხვევაში გამოასწოროს ბაზა
-    ValueTask<Option<Error[]>> CheckRepairDatabase(string databaseName, CancellationToken cancellationToken = default);
+    ValueTask<Option<ErrorOmd[]>> CheckRepairDatabase(string databaseName,
+        CancellationToken cancellationToken = default);
 
     //სერვერის მხარეს მონაცემთა ბაზაში ბრძანების გაშვება
-    ValueTask<Option<Error[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
+    ValueTask<Option<ErrorOmd[]>> ExecuteCommand(string executeQueryCommand, string? databaseName = null,
         CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზების სერვერის შესახებ ზოგადი ინფორმაციის მიღება
     //გამოიყენება Replicator-ში
-    Task<OneOf<DbServerInfo, Error[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default);
+    Task<OneOf<DbServerInfo, ErrorOmd[]>> GetDatabaseServerInfo(CancellationToken cancellationToken = default);
 
     //გამოიყენება იმის დასადგენად მონაცემთა ბაზის სერვერი ლოკალურია თუ არა
     //DatabaseApiClients-ში არ არის რეალიზებული, რადგან ითვლება,
     //რომ apiClient-ით მხოლოდ მოშორებულ სერვერს ვუკავშირდებით
     //გამოიყენება Replicator-ში
-    Task<OneOf<bool, Error[]>> IsServerLocal(CancellationToken cancellationToken = default);
+    Task<OneOf<bool, ErrorOmd[]>> IsServerLocal(CancellationToken cancellationToken = default);
 
     //მონაცემთა ბაზაში არსებული პროცედურების რეკომპილირება
-    ValueTask<Option<Error[]>> RecompileProcedures(string databaseName, CancellationToken cancellationToken = default);
-
-    Task<Option<Error[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default);
-
-    //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
-    ValueTask<Option<Error[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default);
-
-    Task<Option<Error[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
+    ValueTask<Option<ErrorOmd[]>> RecompileProcedures(string databaseName,
         CancellationToken cancellationToken = default);
 
-    //Task<OneOf<List<string>, Error[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken = default);
+    Task<Option<ErrorOmd[]>> TestConnection(string? databaseName, CancellationToken cancellationToken = default);
 
-    Task<OneOf<List<string>, Error[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken);
+    //მონაცემთა ბაზაში არსებული სტატისტიკების დაანგარიშება
+    ValueTask<Option<ErrorOmd[]>> UpdateStatistics(string databaseName, CancellationToken cancellationToken = default);
 
-    ValueTask<Option<Error[]>> ChangeDatabaseRecoveryModel(string databaseName,
+    Task<Option<ErrorOmd[]>> SetDefaultFolders(string defBackupFolder, string defDataFolder, string defLogFolder,
+        CancellationToken cancellationToken = default);
+
+    //Task<OneOf<List<string>, ErrorOmd[]>> GetDatabaseConnectionNames(CancellationToken cancellationToken = default);
+
+    Task<OneOf<List<string>, ErrorOmd[]>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken);
+
+    ValueTask<Option<ErrorOmd[]>> ChangeDatabaseRecoveryModel(string databaseName,
         EDatabaseRecoveryModel databaseRecoveryModel, CancellationToken cancellationToken);
 }

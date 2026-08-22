@@ -30,26 +30,26 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         _logger = logger;
     }
 
-    protected abstract ValueTask<OneOf<bool, Error[]>> IsServiceRegisteredProperly(string projectName,
+    protected abstract ValueTask<OneOf<bool, ErrorOmd[]>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> RemoveService(string serviceEnvName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> RemoveService(string serviceEnvName,
         CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> StopService(string serviceEnvName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> StartService(string serviceEnvName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default);
 
-    protected abstract ValueTask<Option<Error[]>> RegisterService(string projectName, string serviceEnvName,
+    protected abstract ValueTask<Option<ErrorOmd[]>> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
 
@@ -60,7 +60,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     //ძველი (შესაძლოა ობოლი) პროცესის PID-ის დადგენა და მისი მოკვლა, რომ გათავისუფლდეს პორტი.
     //ნაგულისხმევად არაფერს აკეთებს. გადატვირთულია Linux-ისთვის, სადაც systemctl stop ყოველთვის
     //არ წყვეტს პროცესს (განსაკუთრებით ობოლს). Windows-ზე პროცესს ასრულებს SCM-ით გაჩერება.
-    protected virtual ValueTask<Option<Error[]>> KillProcessByPid(string serviceEnvName, string projectName,
+    protected virtual ValueTask<Option<ErrorOmd[]>> KillProcessByPid(string serviceEnvName, string projectName,
         string installFolderPath, CancellationToken cancellationToken = default)
     {
         return default;
@@ -83,11 +83,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return Process.GetProcessesByName(processName).Length > 0;
     }
 
-    public async ValueTask<Option<Error[]>> RunUpdateSettings(string projectName, string environmentName,
+    public async ValueTask<Option<ErrorOmd[]>> RunUpdateSettings(string projectName, string environmentName,
         string appSettingsFileName, string appSettingsFileBody, string? filesUserName, string? filesUsersGroupName,
         string installFolder, CancellationToken cancellationToken = default)
     {
-        OneOf<string, Error[]> checkBeforeStartUpdateResult =
+        OneOf<string, ErrorOmd[]> checkBeforeStartUpdateResult =
             await CheckBeforeStartUpdate(projectName, installFolder, environmentName, cancellationToken);
 
         if (checkBeforeStartUpdateResult.IsT1)
@@ -124,7 +124,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         string serviceEnvName = GetServiceEnvName(projectName, environmentName);
 
-        Option<Error[]> stopResult = await Stop(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> stopResult = await Stop(serviceEnvName, cancellationToken);
         if (!string.IsNullOrWhiteSpace(serviceEnvName))
         {
             //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {projectName}
@@ -145,7 +145,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             await LogInfoAndSendMessage("Try to stop Service {0}", serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
             {
-                return (Error[])stopResult;
+                return (ErrorOmd[])stopResult;
             }
         }
         else if (IsProcessRunning(projectName))
@@ -197,7 +197,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //შეიქმნას პარამეტრების ფაილი არსებულ ინფორმაციაზე დაყრდნობით
         await File.WriteAllTextAsync(appSettingsFileFullPath, appSettingsFileBody, cancellationToken);
         //შეიცვალოს პარამეტრების ფაილზე უფლებები საჭიროების მიხედვით.
-        Option<Error[]> changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
+        Option<ErrorOmd[]> changeOneFileOwnerResult = await ChangeOneFileOwner(appSettingsFileFullPath, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOneFileOwnerResult.IsSome)
         {
@@ -206,7 +206,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         }
 
         //თუ სერვისია, გავუშვათ ეს სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        Option<Error[]> startResult = await Start(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> startResult = await Start(serviceEnvName, cancellationToken);
         if (startResult.IsNone)
         {
             return null;
@@ -217,7 +217,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken).ConfigureAwait(false);
     }
 
-    private async ValueTask<OneOf<string, Error[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
+    private async ValueTask<OneOf<string, ErrorOmd[]>> CheckBeforeStartUpdate(string projectName, string installFolder,
         string environmentName, CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(installFolder))
@@ -240,7 +240,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         return projectInstallFullPath;
     }
 
-    public async ValueTask<OneOf<string?, Error[]>> RunUpdateService(string archiveFileName, string projectName,
+    public async ValueTask<OneOf<string?, ErrorOmd[]>> RunUpdateService(string archiveFileName, string projectName,
         string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
         string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
@@ -337,7 +337,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
                 await LogInfoAndSendMessage(
                     "Please be patient, the process may take a few seconds, maybe even a minute...", cancellationToken);
 
-                Option<Error[]> stopResult = await Stop(serviceEnvName, cancellationToken);
+                Option<ErrorOmd[]> stopResult = await Stop(serviceEnvName, cancellationToken);
                 if (stopResult.IsSome)
                 {
                     return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotStopped(serviceEnvName),
@@ -350,11 +350,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //ობოლი პროცესი წინა გაუმართავი განახლებიდან, რომელსაც systemd ვეღარ აკონტროლებს
         //(.service ფაილი წაშლილია, მაგრამ პროცესი პორტს კვლავ იკავებს). ამიტომ ნებისმიერ
         //შემთხვევაში დავადგინოთ გაშვებული პროცესის PID და მოვკლათ, რომ პორტი გათავისუფლდეს.
-        Option<Error[]> killProcessResult = await KillProcessByPid(serviceEnvName, projectName,
+        Option<ErrorOmd[]> killProcessResult = await KillProcessByPid(serviceEnvName, projectName,
             projectInstallFullPathWithEnv, cancellationToken);
         if (killProcessResult.IsSome)
         {
-            return (Error[])killProcessResult;
+            return (ErrorOmd[])killProcessResult;
         }
 
         //თუ არსებობს, წაიშალოს არსებული ფაილები.
@@ -414,7 +414,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         await LogInfoAndSendMessage("Change Owner for Path {0} for user {1} and group {2}",
             projectInstallFullPathWithEnv, filesUserName, filesUsersGroupName, cancellationToken);
 
-        Option<Error[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPathWithEnv, filesUserName,
+        Option<ErrorOmd[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPathWithEnv, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsSome)
         {
@@ -428,12 +428,12 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             await LogInfoAndSendMessage("Because service {0}/{1} is exists, Check if Service registered properly",
                 projectName, serviceEnvName, cancellationToken);
 
-            OneOf<bool, Error[]> isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName,
+            OneOf<bool, ErrorOmd[]> isServiceRegisteredProperlyResult = await IsServiceRegisteredProperly(projectName,
                 serviceEnvName, serviceUserName, projectInstallFullPathWithEnv, serviceDescriptionSignature,
                 projectDescription, cancellationToken);
             if (isServiceRegisteredProperlyResult.IsT1)
             {
-                return Error.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
+                return ErrorOmd.RecreateErrors(isServiceRegisteredProperlyResult.AsT1,
                     InstallerErrors.IsServiceRegisteredProperlyError);
             }
 
@@ -441,11 +441,11 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             {
                 await LogInfoAndSendMessage("Service {0}/{1} registration is not properly, so will be removed",
                     projectName, serviceEnvName, cancellationToken);
-                Option<Error[]> removeServiceError = await RemoveService(serviceEnvName, cancellationToken);
+                Option<ErrorOmd[]> removeServiceError = await RemoveService(serviceEnvName, cancellationToken);
                 if (removeServiceError.IsSome)
                 {
-                    Error.PrintErrorsOnConsole((Error[])removeServiceError);
-                    return (Error[])removeServiceError;
+                    ErrorOmd.PrintErrorsOnConsole((ErrorOmd[])removeServiceError);
+                    return (ErrorOmd[])removeServiceError;
                 }
 
                 //რადგან სერვისი წავშალეთ ის აღარ არსებობს და შემდგომში თავიდან უნდა შეიქმნას
@@ -458,8 +458,9 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         {
             await LogInfoAndSendMessage("registering service {0}...", serviceEnvName, cancellationToken);
 
-            Option<Error[]> registerServiceResult = await RegisterService(projectName, serviceEnvName, serviceUserName,
-                projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription, cancellationToken);
+            Option<ErrorOmd[]> registerServiceResult = await RegisterService(projectName, serviceEnvName,
+                serviceUserName, projectInstallFullPathWithEnv, serviceDescriptionSignature, projectDescription,
+                cancellationToken);
 
             if (registerServiceResult.IsSome)
             {
@@ -469,7 +470,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         }
 
         //გავუშვათ სერვისი და დავრწმუნდეთ, რომ გაეშვა.
-        Option<Error[]> startResult = await Start(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> startResult = await Start(serviceEnvName, cancellationToken);
         if (startResult.IsNone)
         {
             return assemblyVersion;
@@ -479,7 +480,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<OneOf<string?, Error[]>> RunUpdateApplication(string archiveFileName, string projectName,
+    public async ValueTask<OneOf<string?, ErrorOmd[]>> RunUpdateApplication(string archiveFileName, string projectName,
         string environmentName, string filesUserName, string filesUsersGroupName, string installWorkFolder,
         string installFolder, CancellationToken cancellationToken = default)
     {
@@ -582,7 +583,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
         //გაშლილი არქივის ფაილები გადავიტანოთ სერვისის ფოლდერში
         Directory.Move(projectFilesFolderFullName, projectInstallFullPath);
 
-        Option<Error[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPath, filesUserName,
+        Option<ErrorOmd[]> changeOwnerResult = await ChangeFolderOwner(projectInstallFullPath, filesUserName,
             filesUsersGroupName, cancellationToken);
         if (changeOwnerResult.IsNone)
         {
@@ -593,13 +594,14 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             InstallerErrors.FolderOwnerCanNotBeChanged(checkedProjectInstallFullPath), cancellationToken);
     }
 
-    public ValueTask<Option<Error[]>> Stop(string projectName, string environmentName,
+    public ValueTask<Option<ErrorOmd[]>> Stop(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return Stop(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async ValueTask<Option<Error[]>> Stop(string serviceEnvName, CancellationToken cancellationToken = default)
+    private async ValueTask<Option<ErrorOmd[]>> Stop(string serviceEnvName,
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა სერვისების სიაში სერვისი სახელით {serviceEnvName}
         bool serviceExists = IsServiceExists(serviceEnvName);
@@ -622,7 +624,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         await LogInfoAndSendMessage("Service {0} is running", serviceEnvName, cancellationToken);
 
-        Option<Error[]> stopServiceResult = await StopService(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> stopServiceResult = await StopService(serviceEnvName, cancellationToken);
         if (stopServiceResult.IsNone)
         {
             return stopServiceResult;
@@ -632,13 +634,14 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public ValueTask<Option<Error[]>> Start(string projectName, string environmentName,
+    public ValueTask<Option<ErrorOmd[]>> Start(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return Start(GetServiceEnvName(projectName, environmentName), cancellationToken);
     }
 
-    private async ValueTask<Option<Error[]>> Start(string serviceEnvName, CancellationToken cancellationToken = default)
+    private async ValueTask<Option<ErrorOmd[]>> Start(string serviceEnvName,
+        CancellationToken cancellationToken = default)
     {
         bool serviceIsRunning = IsServiceRunning(serviceEnvName);
         if (serviceIsRunning)
@@ -649,7 +652,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         await LogInfoAndSendMessage("Service {0} is not running", serviceEnvName, cancellationToken);
 
-        Option<Error[]> startServiceResult = await StartService(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> startServiceResult = await StartService(serviceEnvName, cancellationToken);
         if (startServiceResult.IsNone)
         {
             return null;
@@ -659,7 +662,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<Option<Error[]>> RemoveProjectAndService(string projectName, string environmentName,
+    public async ValueTask<Option<ErrorOmd[]>> RemoveProjectAndService(string projectName, string environmentName,
         bool isService, string installFolder, CancellationToken cancellationToken = default)
     {
         if (!isService)
@@ -697,7 +700,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
 
         if (serviceIsRunning)
         {
-            Option<Error[]> stopResult = await Stop(serviceEnvName, cancellationToken);
+            Option<ErrorOmd[]> stopResult = await Stop(serviceEnvName, cancellationToken);
             if (stopResult.IsSome)
             {
                 return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceCanNotBeStopped(serviceEnvName),
@@ -705,7 +708,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             }
         }
 
-        Option<Error[]> removeServiceResult = await RemoveService(serviceEnvName, cancellationToken);
+        Option<ErrorOmd[]> removeServiceResult = await RemoveService(serviceEnvName, cancellationToken);
         if (removeServiceResult.IsNone)
         {
             return await RemoveProject(projectName, environmentName, installFolder, cancellationToken);
@@ -715,7 +718,7 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             cancellationToken);
     }
 
-    public async ValueTask<Option<Error[]>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Option<ErrorOmd[]>> RemoveProject(string projectName, string environmentName,
         string installFolder, CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage("Remove project {0} started...", projectName, cancellationToken);

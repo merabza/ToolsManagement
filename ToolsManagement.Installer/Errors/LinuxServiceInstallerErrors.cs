@@ -4,27 +4,31 @@ namespace ToolsManagement.Installer.Errors;
 
 public static class LinuxServiceInstallerErrors
 {
-    public static Error DotnetDetectError => new() { Code = nameof(DotnetDetectError), Name = "Dotnet detect Errors" };
+    public static ErrorOmd DotnetDetectError =>
+        new() { Code = nameof(DotnetDetectError), Name = "Dotnet detect Errors" };
 
-    public static Error DotnetLocationIsNotFound =>
+    public static ErrorOmd DotnetLocationIsNotFound =>
         new() { Code = nameof(DotnetLocationIsNotFound), Name = "dotnet location can not found" };
 
-    public static Error WhichDotnetError =>
+    public static ErrorOmd WhichDotnetError =>
         new() { Code = nameof(WhichDotnetError), Name = "Which Dotnet finished with Errors" };
 
-    public static Error ServiceCanNotBeEnabled(string serviceEnvName)
+    public static ErrorOmd ServiceCanNotBeEnabled(string serviceEnvName)
     {
-        return new Error { Code = nameof(ServiceCanNotBeEnabled), Name = $"Service {serviceEnvName} is not enabled" };
+        return new ErrorOmd
+        {
+            Code = nameof(ServiceCanNotBeEnabled), Name = $"Service {serviceEnvName} is not enabled"
+        };
     }
 
-    public static Error ServiceIsNotEnabled(string serviceEnvName)
+    public static ErrorOmd ServiceIsNotEnabled(string serviceEnvName)
     {
-        return new Error { Code = nameof(ServiceIsNotEnabled), Name = $"Service {serviceEnvName} is not enabled" };
+        return new ErrorOmd { Code = nameof(ServiceIsNotEnabled), Name = $"Service {serviceEnvName} is not enabled" };
     }
 
-    public static Error ProcessCanNotBeKilled(int processId)
+    public static ErrorOmd ProcessCanNotBeKilled(int processId)
     {
-        return new Error
+        return new ErrorOmd
         {
             Code = nameof(ProcessCanNotBeKilled), Name = $"Process with PID {processId} can not be killed"
         };

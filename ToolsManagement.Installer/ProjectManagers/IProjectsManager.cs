@@ -10,12 +10,12 @@ public interface IProjectsManager
     //არასერვისი პროგრამებისათვის მოშორებული წაშლა არ მოხდება, რადგან ასეთი პროგრამებისათვის სერვერზე დაინსტალირება გათვალისწინებული არ გვაქვს
     //თუ მომავალში გადავაკეთებთ, ისე, რომ არასერვისული პროგრამებისათვის სერვერის მითითება შესაძლებელი იქნება და მოშორებულ სერვერზე ასეთი პროგრამის დაყენება შესაძლებელი იქნება, მაშინ RemoveProject უნდა აღდგეს
     //Task<bool> RemoveProject(string projectName);
-    ValueTask<Option<Error[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
+    ValueTask<Option<ErrorOmd[]>> RemoveProjectAndService(string projectName, string environmentName, bool isService,
         CancellationToken cancellationToken = default);
 
-    ValueTask<Option<Error[]>> StopService(string projectName, string environmentName,
+    ValueTask<Option<ErrorOmd[]>> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default);
 
-    ValueTask<Option<Error[]>> StartService(string projectName, string environmentName,
+    ValueTask<Option<ErrorOmd[]>> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default);
 }

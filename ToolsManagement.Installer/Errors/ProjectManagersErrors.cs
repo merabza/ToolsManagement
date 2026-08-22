@@ -4,46 +4,49 @@ namespace ToolsManagement.Installer.Errors;
 
 public static class ProjectManagersErrors
 {
-    public static readonly Error AppParametersFileUpdaterCreateError = new()
+    public static readonly ErrorOmd AppParametersFileUpdaterCreateError = new()
     {
         Code = nameof(AppParametersFileUpdaterCreateError), Name = "AppParametersFileUpdater does not created"
     };
 
-    public static Error ProjectServiceCanNotRemoved(string projectName, string environmentName)
+    public static ErrorOmd ProjectServiceCanNotRemoved(string projectName, string environmentName)
     {
-        return new Error
+        return new ErrorOmd
         {
             Code = nameof(ProjectServiceCanNotRemoved),
             Name = $"Project {projectName} => service {projectName}/{environmentName} can not removed"
         };
     }
 
-    public static Error ServiceCanNotBeStopped(string projectName, string environmentName)
+    public static ErrorOmd ServiceCanNotBeStopped(string projectName, string environmentName)
     {
-        return new Error
+        return new ErrorOmd
         {
             Code = nameof(ServiceCanNotBeStopped),
             Name = $"service {projectName}/{environmentName} can not be stopped"
         };
     }
 
-    public static Error ServiceCanNotBeStarted(string projectName, string environmentName)
+    public static ErrorOmd ServiceCanNotBeStarted(string projectName, string environmentName)
     {
-        return new Error
+        return new ErrorOmd
         {
             Code = nameof(ServiceCanNotBeStarted),
             Name = $"service {projectName}/{environmentName} can not be started"
         };
     }
 
-    public static Error ProjectCanNotBeRemoved(string projectName)
+    public static ErrorOmd ProjectCanNotBeRemoved(string projectName)
     {
-        return new Error { Code = nameof(ProjectCanNotBeRemoved), Name = $"Project {projectName} can not be removed" };
+        return new ErrorOmd
+        {
+            Code = nameof(ProjectCanNotBeRemoved), Name = $"Project {projectName} can not be removed"
+        };
     }
 
-    public static Error ApplicationUpdaterDoesNotCreated(string projectName, string environmentName)
+    public static ErrorOmd ApplicationUpdaterDoesNotCreated(string projectName, string environmentName)
     {
-        return new Error
+        return new ErrorOmd
         {
             Code = nameof(ApplicationUpdaterDoesNotCreated),
             Name = $"ApplicationUpdater for {projectName}/{environmentName} does not created"

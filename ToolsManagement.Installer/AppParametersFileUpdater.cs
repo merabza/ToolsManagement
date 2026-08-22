@@ -91,7 +91,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<Option<Error[]>> UpdateParameters(string projectName, string environmentName,
+    public async Task<Option<ErrorOmd[]>> UpdateParameters(string projectName, string environmentName,
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == _appName)
