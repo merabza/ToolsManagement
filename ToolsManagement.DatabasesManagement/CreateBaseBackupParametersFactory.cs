@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using ParametersManagement.LibApiClientParameters;
 using ParametersManagement.LibDatabaseParameters;
 using ParametersManagement.LibFileParameters.Models;
@@ -30,7 +29,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         _logger = logger;
     }
 
-    public async Task<OneOf<BaseBackupParameters, Error>> CreateBaseBackupParameters(
+    public async Task<Result<BaseBackupParameters>> CreateBaseBackupParameters(
         IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
         SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
