@@ -1,12 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using ParametersManagement.LibDatabaseParameters;
 using ParametersManagement.LibFileParameters.Models;
-using SystemTools.SystemToolsShared.Errors;
+using SystemTools.SharedKernel;
+using SystemTools.SystemToolsShared;
 using ToolsManagement.DatabasesManagement.Models;
 using ToolsManagement.FileManagersMain;
 using WebAgentContracts.WebAgentDatabasesApiContracts.V1.Responses;
@@ -38,16 +37,16 @@ public sealed class BaseBackupRestoreTool
             _logger.LogInformation("Restoring database {DestinationDatabaseName}", databaseName);
         }
 
-        Option<ErrorOmd[]> restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(
-            backupFileParameters, databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
+        Result restoreDatabaseFromBackupResult = await databaseManager.RestoreDatabaseFromBackup(backupFileParameters,
+            databaseName, backupRestoreParameters.DbServerFoldersSetName, databaseRecoveryModel,
             _baseBackupParameters.LocalPath, cancellationToken);
 
-        if (restoreDatabaseFromBackupResult.IsNone)
+        if (restoreDatabaseFromBackupResult.IsSuccess)
         {
             return true;
         }
 
-        ErrorOmd.PrintErrorsOnConsole((ErrorOmd[])restoreDatabaseFromBackupResult);
+        restoreDatabaseFromBackupResult.Error.PrintErrorsOnConsole();
         _logger.LogError("something went wrong");
         return false;
     }
@@ -64,16 +63,15 @@ public sealed class BaseBackupRestoreTool
         }
 
         //შევამოწმოთ მიზნის ბაზის არსებობა
-        OneOf<bool, ErrorOmd[]> isDatabaseExistsResult =
-            await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
+        Result<bool> isDatabaseExistsResult = await databaseManager.IsDatabaseExists(databaseName, cancellationToken);
 
-        if (isDatabaseExistsResult.IsT1)
+        if (isDatabaseExistsResult.IsFailure)
         {
             _logger.LogInformation("The existence of the base could not be determined");
             return null;
         }
 
-        bool isDatabaseExists = isDatabaseExistsResult.AsT0;
+        bool isDatabaseExists = isDatabaseExistsResult.Value;
 
         if (!isDatabaseExists)
         {
@@ -87,20 +85,20 @@ public sealed class BaseBackupRestoreTool
         }
 
         //ბექაპის დამზადება წყაროს მხარეს
-        OneOf<BackupFileParameters, ErrorOmd[]> createBackupResult = await databaseManager.CreateBackup(
+        Result<BackupFileParameters> createBackupResult = await databaseManager.CreateBackup(
             new DatabaseBackupParametersDomain(_baseBackupParameters.BackupNamePrefix, _baseBackupParameters.DateMask,
                 _baseBackupParameters.BackupFileExtension, _baseBackupParameters.BackupNameMiddlePart,
                 _baseBackupParameters.Compress, _baseBackupParameters.Verify, _baseBackupParameters.BackupType),
             databaseName, backupRestoreParameters.DbServerFoldersSetName, cancellationToken);
 
         //თუ ბექაპის დამზადებისას რაიმე პრობლემა დაფიქსირდა, ვჩერდებით.
-        if (createBackupResult.IsT1)
+        if (createBackupResult.IsFailure)
         {
             _logger.LogError("Backup not created");
             return null;
         }
 
-        BackupFileParameters? backupFileParametersForSource = createBackupResult.AsT0;
+        BackupFileParameters backupFileParametersForSource = createBackupResult.Value;
         string? backupCreateFolderName = backupFileParametersForSource.FolderName;
         string fileName = backupFileParametersForSource.Name;
         string prefix = backupFileParametersForSource.Prefix;

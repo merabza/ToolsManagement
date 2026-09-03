@@ -5,12 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using DatabaseTools.DbTools;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using ParametersManagement.LibApiClientParameters;
 using ParametersManagement.LibDatabaseParameters;
 using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.DatabasesManagement.Errors;
 using ToolsManagement.DatabasesManagement.Models;
 using ToolsManagement.FileManagersMain;
@@ -30,7 +29,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         _logger = logger;
     }
 
-    public async Task<OneOf<BaseBackupParameters, ErrorOmd[]>> CreateBaseBackupParameters(
+    public async Task<Result<BaseBackupParameters>> CreateBaseBackupParameters(
         IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
         DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
         SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
@@ -67,23 +66,22 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         bool verify = fromDatabaseParameters.Verify ?? DatabaseParameters.DefaultVerify;
         EBackupType backupType = fromDatabaseParameters.BackupType ?? DatabaseParameters.DefaultBackupType;
 
-        var errors = new List<ErrorOmd>();
+        var errors = new List<Error>();
         if (string.IsNullOrWhiteSpace(localPath))
         {
-            errors.AddRange(
-                await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalPathIsNotSpecifiedInParameters,
-                    cancellationToken));
+            errors.Add(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.LocalPathIsNotSpecifiedInParameters,
+                cancellationToken));
         }
 
         if (string.IsNullOrWhiteSpace(databaseName))
         {
-            errors.AddRange(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.DatabaseNameDoesNotSpecified,
+            errors.Add(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.DatabaseNameDoesNotSpecified,
                 cancellationToken));
         }
 
         if (string.IsNullOrWhiteSpace(fromDatabaseParameters.DbServerFoldersSetName))
         {
-            errors.AddRange(await LogErrorAndSendMessageFromError(
+            errors.Add(await LogErrorAndSendMessageFromError(
                 DatabaseManagerErrors.FromDatabaseParametersDbServerFoldersSetNameIsNotSpecified, cancellationToken));
         }
 
@@ -94,20 +92,20 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         //DbWebAgentName
         //პარამეტრების მიხედვით ბაზის სარეზერვო ასლის დამზადება და მოქაჩვა
         //წყაროს სერვერის აგენტის შექმნა
-        OneOf<IDatabaseManager, ErrorOmd[]> createDatabaseManagerResult =
+        Result<IDatabaseManager> createDatabaseManagerResult =
             await DatabaseManagersFactory.CreateDatabaseManager(_appName, _logger, UseConsole, dbConnectionName,
                 databaseServerConnections, apiClients, httpClientFactory, null, null, cancellationToken);
 
-        if (createDatabaseManagerResult.IsT1)
+        if (createDatabaseManagerResult.IsFailure)
         {
-            errors.AddRange(createDatabaseManagerResult.AsT1);
-            errors.AddRange(await LogErrorAndSendMessageFromError(
-                DatabaseManagerErrors.CanNotCreateDatabaseServerClient, cancellationToken));
+            errors.Add(createDatabaseManagerResult.Error);
+            errors.Add(await LogErrorAndSendMessageFromError(DatabaseManagerErrors.CanNotCreateDatabaseServerClient,
+                cancellationToken));
         }
 
         if (errors.Count > 0)
         {
-            return errors.ToArray();
+            return Result.CreateValidationError([.. errors]);
         }
 
         (FileStorageData? fileStorage, FileManager? fileManager) =
@@ -120,7 +118,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
                 cancellationToken);
         }
 
-        var backupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResult.AsT0, fileManager,
+        var backupRestoreParameters = new BackupRestoreParameters(createDatabaseManagerResult.Value, fileManager,
             smartSchema, databaseName!, fromDatabaseParameters.DbServerFoldersSetName!, fileStorage);
 
         bool needDownload = !FileStorageData.IsSameToLocal(fileStorage, localPath!);
