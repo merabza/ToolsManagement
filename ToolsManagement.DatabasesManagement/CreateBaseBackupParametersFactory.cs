@@ -22,7 +22,7 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
     private readonly string _appName;
     private readonly ILogger _logger;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public CreateBaseBackupParametersFactory(string appName, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName, bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
     {

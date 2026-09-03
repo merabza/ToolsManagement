@@ -18,7 +18,7 @@ public sealed class BaseBackupRestoreTool
     private readonly BaseBackupParameters _baseBackupParameters;
     private readonly ILogger _logger;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public BaseBackupRestoreTool(ILogger logger, BaseBackupParameters baseBackupParameters)
     {
         _logger = logger;

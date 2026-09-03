@@ -2,7 +2,7 @@
 
 public sealed class ApiClientSettingsDomain
 {
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public ApiClientSettingsDomain(string server, string? apiKey)
     {
         Server = server;

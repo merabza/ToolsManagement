@@ -19,7 +19,7 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 {
     private readonly ILogger _logger;
 
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public RemoteDatabaseManager(ILogger logger, DatabaseApiClient databaseApiClient)
     {
         _logger = logger;

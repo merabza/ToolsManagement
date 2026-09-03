@@ -6,7 +6,7 @@ namespace ToolsManagement.DatabasesManagement.Models;
 
 public sealed class BaseBackupParameters
 {
-    // ReSharper disable once ConvertToPrimaryConstructor
+    
     public BaseBackupParameters(BackupRestoreParameters backupRestoreParameters,
         EDatabaseRecoveryModel databaseRecoveryModel, bool needDownload, string downloadTempExtension,
         FileManager localFileManager, SmartSchema? localSmartSchema, bool needUploadToExchange,
