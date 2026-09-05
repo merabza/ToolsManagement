@@ -2,7 +2,6 @@
 
 public sealed class ApiClientSettingsDomain
 {
-    
     public ApiClientSettingsDomain(string server, string? apiKey)
     {
         Server = server;
