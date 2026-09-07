@@ -51,7 +51,7 @@ public sealed class RarArchiver : Archiver
 
         programArguments = sources.Aggregate(programArguments, (current, source) => current + " \"" + source + "\"");
 
-        return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments).IsNone;
+        return StShared.RunProcess(UseConsole, _logger, _compressProgramPatch, programArguments).IsSuccess;
 
         //ProgRunner runProg = new ProgRunner(progPath, programArguments);
         //runProg.Execute();
