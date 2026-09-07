@@ -1,36 +1,29 @@
-﻿using SystemTools.SystemToolsShared.Errors;
+﻿using SystemTools.SharedKernel;
 
 namespace ToolsManagement.Installer.Errors;
 
 public static class LinuxServiceInstallerErrors
 {
-    public static ErrorOmd DotnetDetectError =>
-        new() { Code = nameof(DotnetDetectError), Name = "Dotnet detect Errors" };
+    public static Error DotnetDetectError => Error.Problem(nameof(DotnetDetectError), "Dotnet detect Errors");
 
-    public static ErrorOmd DotnetLocationIsNotFound =>
-        new() { Code = nameof(DotnetLocationIsNotFound), Name = "dotnet location can not found" };
+    public static Error DotnetLocationIsNotFound =>
+        Error.Problem(nameof(DotnetLocationIsNotFound), "dotnet location can not found");
 
-    public static ErrorOmd WhichDotnetError =>
-        new() { Code = nameof(WhichDotnetError), Name = "Which Dotnet finished with Errors" };
+    public static Error WhichDotnetError =>
+        Error.Problem(nameof(WhichDotnetError), "Which Dotnet finished with Errors");
 
-    public static ErrorOmd ServiceCanNotBeEnabled(string serviceEnvName)
+    public static Error ServiceCanNotBeEnabled(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceCanNotBeEnabled), Name = $"Service {serviceEnvName} is not enabled"
-        };
+        return Error.Problem(nameof(ServiceCanNotBeEnabled), $"Service {serviceEnvName} is not enabled");
     }
 
-    public static ErrorOmd ServiceIsNotEnabled(string serviceEnvName)
+    public static Error ServiceIsNotEnabled(string serviceEnvName)
     {
-        return new ErrorOmd { Code = nameof(ServiceIsNotEnabled), Name = $"Service {serviceEnvName} is not enabled" };
+        return Error.Problem(nameof(ServiceIsNotEnabled), $"Service {serviceEnvName} is not enabled");
     }
 
-    public static ErrorOmd ProcessCanNotBeKilled(int processId)
+    public static Error ProcessCanNotBeKilled(int processId)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ProcessCanNotBeKilled), Name = $"Process with PID {processId} can not be killed"
-        };
+        return Error.Problem(nameof(ProcessCanNotBeKilled), $"Process with PID {processId} can not be killed");
     }
 }

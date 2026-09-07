@@ -1,212 +1,150 @@
-﻿using SystemTools.SystemToolsShared.Errors;
+﻿using SystemTools.SharedKernel;
 
 namespace ToolsManagement.Installer.Errors;
 
 public static class InstallerErrors
 {
-    public static readonly ErrorOmd IsServiceRegisteredProperlyError = new()
+    public static readonly Error IsServiceRegisteredProperlyError =
+        Error.Problem(nameof(IsServiceRegisteredProperlyError), "Error when check IsServiceRegisteredProperly");
+
+    public static readonly Error TheServiceWasNotRemoved =
+        Error.Problem(nameof(TheServiceWasNotRemoved), "The service was not Removed");
+
+    public static readonly Error TheServiceWasNotStopped =
+        Error.Problem(nameof(TheServiceWasNotStopped), "The service was not Stopped");
+
+    public static readonly Error TheServiceWasNotStarted =
+        Error.Problem(nameof(TheServiceWasNotStarted), "The service was not Started");
+
+    public static Error ProjectArchiveFileWasNotDownloaded =>
+        Error.Problem(nameof(ProjectArchiveFileWasNotDownloaded), "Project archive file not downloaded");
+
+    public static Error ProjectArchiveFilesNotFoundOnExchangeStorage =>
+        Error.Problem(nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
+            "Project archive files not found on exchange storage");
+
+    public static Error CannotUpdateSelf => Error.Problem(nameof(CannotUpdateSelf), "Cannot update self");
+
+    public static Error ExchangeFileManagerIsNull =>
+        Error.Problem(nameof(ExchangeFileManagerIsNull), "exchangeFileManager is null in UpdateProgramWithParameters");
+
+    public static Error FileNameIsEmpty => Error.Problem(nameof(FileNameIsEmpty), "File name is empty");
+
+    public static Error FolderNameIsEmpty => Error.Problem(nameof(FolderNameIsEmpty), "Folder name is empty");
+
+    public static Error CannotUpdateProject(string projectName, string environmentName)
     {
-        Code = nameof(IsServiceRegisteredProperlyError), Name = "ErrorOmd when check IsServiceRegisteredProperly"
-    };
-
-    public static readonly ErrorOmd TheServiceWasNotRemoved = new()
-    {
-        Code = nameof(TheServiceWasNotRemoved), Name = "The service was not Removed"
-    };
-
-    public static readonly ErrorOmd TheServiceWasNotStopped = new()
-    {
-        Code = nameof(TheServiceWasNotStopped), Name = "The service was not Stopped"
-    };
-
-    public static readonly ErrorOmd TheServiceWasNotStarted = new()
-    {
-        Code = nameof(TheServiceWasNotStarted), Name = "The service was not Started"
-    };
-
-    public static ErrorOmd ProjectArchiveFileWasNotDownloaded =>
-        new() { Code = nameof(ProjectArchiveFileWasNotDownloaded), Name = "Project archive file not downloaded" };
-
-    public static ErrorOmd ProjectArchiveFilesNotFoundOnExchangeStorage =>
-        new()
-        {
-            Code = nameof(ProjectArchiveFilesNotFoundOnExchangeStorage),
-            Name = "Project archive files not found on exchange storage"
-        };
-
-    public static ErrorOmd CannotUpdateSelf => new() { Code = nameof(CannotUpdateSelf), Name = "Cannot update self" };
-
-    public static ErrorOmd ExchangeFileManagerIsNull =>
-        new()
-        {
-            Code = nameof(ExchangeFileManagerIsNull),
-            Name = "exchangeFileManager is null in UpdateProgramWithParameters"
-        };
-
-    public static ErrorOmd FileNameIsEmpty => new() { Code = nameof(FileNameIsEmpty), Name = "File name is empty" };
-
-    public static ErrorOmd FolderNameIsEmpty =>
-        new() { Code = nameof(FolderNameIsEmpty), Name = "Folder name is empty" };
-
-    public static ErrorOmd CannotUpdateProject(string projectName, string environmentName)
-    {
-        return new ErrorOmd
-        {
-            Code = nameof(CannotUpdateProject), Name = $"Cannot Update {projectName}/{environmentName}"
-        };
+        return Error.Problem(nameof(CannotUpdateProject), $"Cannot Update {projectName}/{environmentName}");
     }
 
-    public static ErrorOmd CannotRegisterService(string serviceEnvName)
+    public static Error CannotRegisterService(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ExchangeFileManagerIsNull), Name = $"cannot register Service {serviceEnvName}"
-        };
+        return Error.Problem(nameof(ExchangeFileManagerIsNull), $"cannot register Service {serviceEnvName}");
     }
 
-    public static ErrorOmd FileCanNotBeDeleted(string fileName)
+    public static Error FileCanNotBeDeleted(string fileName)
     {
-        return new ErrorOmd { Code = nameof(FileCanNotBeDeleted), Name = $"File {fileName} can not Deleted" };
+        return Error.Problem(nameof(FileCanNotBeDeleted), $"File {fileName} can not Deleted");
     }
 
-    public static ErrorOmd FileIsNotExists(string fileName)
+    public static Error FileIsNotExists(string fileName)
     {
-        return new ErrorOmd { Code = nameof(FileIsNotExists), Name = $"File {fileName} is not exists" };
+        return Error.Problem(nameof(FileIsNotExists), $"File {fileName} is not exists");
     }
 
-    public static ErrorOmd FileOwnerCanNotBeChanged(string fileName)
+    public static Error FileOwnerCanNotBeChanged(string fileName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(FileOwnerCanNotBeChanged), Name = $"File {fileName} owner can not be changed"
-        };
+        return Error.Problem(nameof(FileOwnerCanNotBeChanged), $"File {fileName} owner can not be changed");
     }
 
-    public static ErrorOmd FolderCanNotBeDeleted(string folderName)
+    public static Error FolderCanNotBeDeleted(string folderName)
     {
-        return new ErrorOmd { Code = nameof(FileCanNotBeDeleted), Name = $"Folder {folderName} can not be Deleted" };
+        return Error.Problem(nameof(FileCanNotBeDeleted), $"Folder {folderName} can not be Deleted");
     }
 
-    public static ErrorOmd FolderIsNotExists(string folderName)
+    public static Error FolderIsNotExists(string folderName)
     {
-        return new ErrorOmd { Code = nameof(FolderIsNotExists), Name = $"File {folderName} is not exists" };
+        return Error.Problem(nameof(FolderIsNotExists), $"File {folderName} is not exists");
     }
 
-    public static ErrorOmd FolderOwnerCanNotBeChanged(string folderName)
+    public static Error FolderOwnerCanNotBeChanged(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(FolderOwnerCanNotBeChanged), Name = $"Folder {folderName} owner can not be changed"
-        };
+        return Error.Problem(nameof(FolderOwnerCanNotBeChanged), $"Folder {folderName} owner can not be changed");
     }
 
-    public static ErrorOmd InstallerFolderIsNotExists(string folderName)
+    public static Error InstallerFolderIsNotExists(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(InstallerFolderIsNotExists), Name = $"Installer install folder {folderName} is not exists"
-        };
+        return Error.Problem(nameof(InstallerFolderIsNotExists),
+            $"Installer install folder {folderName} is not exists");
     }
 
-    public static ErrorOmd InstallerInstallFolderDoesNotCreated(string folderName)
+    public static Error InstallerInstallFolderDoesNotCreated(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(InstallerInstallFolderDoesNotCreated),
-            Name = $"Installer work install folder {folderName} does not created"
-        };
+        return Error.Problem(nameof(InstallerInstallFolderDoesNotCreated),
+            $"Installer work install folder {folderName} does not created");
     }
 
-    public static ErrorOmd InstallerWorkFolderDoesNotCreated(string folderName)
+    public static Error InstallerWorkFolderDoesNotCreated(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(InstallerWorkFolderDoesNotCreated),
-            Name = $"Installer work folder {folderName} does not created"
-        };
+        return Error.Problem(nameof(InstallerWorkFolderDoesNotCreated),
+            $"Installer work folder {folderName} does not created");
     }
 
-    public static ErrorOmd ProcessIsRunningAndCannotBeUpdated(string projectName)
+    public static Error ProcessIsRunningAndCannotBeUpdated(string projectName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ProcessIsRunningAndCannotBeUpdated),
-            Name = $"Process {projectName} is running and cannot be updated"
-        };
+        return Error.Problem(nameof(ProcessIsRunningAndCannotBeUpdated),
+            $"Process {projectName} is running and cannot be updated");
     }
 
-    public static ErrorOmd ProjectFilesIsNotExtracted(string folderName)
+    public static Error ProjectFilesIsNotExtracted(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ProjectFilesIsNotExtracted), Name = $"Project files is not extracted to {folderName}"
-        };
+        return Error.Problem(nameof(ProjectFilesIsNotExtracted), $"Project files is not extracted to {folderName}");
     }
 
-    public static ErrorOmd ProjectInstallerFolderIsNotExists(string folderName)
+    public static Error ProjectInstallerFolderIsNotExists(string folderName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(InstallerFolderIsNotExists),
-            Name = $"Project Installer install folder {folderName} is not exists"
-        };
+        return Error.Problem(nameof(InstallerFolderIsNotExists),
+            $"Project Installer install folder {folderName} is not exists");
     }
 
-    public static ErrorOmd ServiceCanNotBeRemoved(string serviceEnvName)
+    public static Error ServiceCanNotBeRemoved(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceCanNotBeRemoved), Name = $"Service with name {serviceEnvName} can not be removed"
-        };
+        return Error.Problem(nameof(ServiceCanNotBeRemoved),
+            $"Service with name {serviceEnvName} can not be removed");
     }
 
-    public static ErrorOmd ServiceCanNotBeStarted(string serviceEnvName)
+    public static Error ServiceCanNotBeStarted(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceCanNotBeStarted), Name = $"Service with name {serviceEnvName} can not be started"
-        };
+        return Error.Problem(nameof(ServiceCanNotBeStarted),
+            $"Service with name {serviceEnvName} can not be started");
     }
 
-    public static ErrorOmd ServiceCanNotBeStopped(string serviceEnvName)
+    public static Error ServiceCanNotBeStopped(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceCanNotBeStopped), Name = $"Service with name {serviceEnvName} can not be stopped"
-        };
+        return Error.Problem(nameof(ServiceCanNotBeStopped),
+            $"Service with name {serviceEnvName} can not be stopped");
     }
 
-    public static ErrorOmd ServiceIsNotExists(string serviceEnvName)
+    public static Error ServiceIsNotExists(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceIsNotExists),
-            Name = $"Service {serviceEnvName} does not exists, cannot update settings file"
-        };
+        return Error.Problem(nameof(ServiceIsNotExists),
+            $"Service {serviceEnvName} does not exists, cannot update settings file");
     }
 
-    public static ErrorOmd ServiceIsNotStopped(string serviceEnvName)
+    public static Error ServiceIsNotStopped(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceIsNotStopped), Name = $"Service with name {serviceEnvName} is not be stopped"
-        };
+        return Error.Problem(nameof(ServiceIsNotStopped), $"Service with name {serviceEnvName} is not be stopped");
     }
 
-    public static ErrorOmd ServiceIsRunningAndCannotBeUpdated(string serviceEnvName)
+    public static Error ServiceIsRunningAndCannotBeUpdated(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceIsNotStopped), Name = $"Service {serviceEnvName} is running and cannot be updated"
-        };
+        return Error.Problem(nameof(ServiceIsNotStopped),
+            $"Service {serviceEnvName} is running and cannot be updated");
     }
 
-    public static ErrorOmd ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)
+    public static Error ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)
     {
-        return new ErrorOmd
-        {
-            Code = nameof(ServiceIsRunningAndCanNotBeRemoved),
-            Name = $"Service {serviceEnvName} is running and can not be removed"
-        };
+        return Error.Problem(nameof(ServiceIsRunningAndCanNotBeRemoved),
+            $"Service {serviceEnvName} is running and can not be removed");
     }
 }

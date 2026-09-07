@@ -1,8 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
-using OneOf;
-using SystemTools.SystemToolsShared.Errors;
+using SystemTools.SharedKernel;
 using WebAgentContracts.WebAgentProjectsApiContracts;
 
 namespace ToolsManagement.Installer.ProjectManagers;
@@ -17,7 +15,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
         _projectsApiClient = projectsApiClient;
     }
 
-    public ValueTask<Option<ErrorOmd[]>> UpdateAppParametersFile(string projectName, string environmentName,
+    public ValueTask<Result> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
@@ -25,7 +23,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
             parametersFileDateMask, parametersFileExtension, cancellationToken);
     }
 
-    public ValueTask<OneOf<string, ErrorOmd[]>> InstallProgram(string projectName, string environmentName,
+    public ValueTask<Result<string>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
@@ -33,7 +31,7 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
             programArchiveExtension, parametersFileDateMask, parametersFileExtension, cancellationToken);
     }
 
-    public ValueTask<OneOf<string, ErrorOmd[]>> InstallService(string projectName, string environmentName,
+    public ValueTask<Result<string>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)

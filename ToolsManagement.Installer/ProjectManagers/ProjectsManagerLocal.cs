@@ -1,9 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.Installer.Errors;
 using ToolsManagement.Installer.ServiceInstaller;
 
@@ -29,19 +28,19 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         _userName = userName;
     }
 
-    public async ValueTask<Option<ErrorOmd[]>> RemoveProjectAndService(string projectName, string environmentName,
+    public async ValueTask<Result> RemoveProjectAndService(string projectName, string environmentName,
         bool isService, CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<ErrorOmd[]> removeProjectAndServiceResult = await serviceInstaller.RemoveProjectAndService(projectName,
+        Result removeProjectAndServiceResult = await serviceInstaller.RemoveProjectAndService(projectName,
             environmentName, isService, _installFolder, cancellationToken);
 
-        if (removeProjectAndServiceResult.IsNone)
+        if (removeProjectAndServiceResult.IsSuccess)
         {
-            return null;
+            return Result.Success();
         }
 
         if (_messagesDataManager is not null)
@@ -51,47 +50,47 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         }
 
         _logger.LogError("Service {ProjectName}/{EnvironmentName} can not removed", projectName, environmentName);
-        return new[] { ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName) };
+        return ProjectManagersErrors.ProjectServiceCanNotRemoved(projectName, environmentName);
     }
 
-    public async ValueTask<Option<ErrorOmd[]>> StopService(string projectName, string environmentName,
+    public async ValueTask<Result> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<ErrorOmd[]> stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
-        return stopResult.IsNone
-            ? null
-            : new[] { ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName) };
+        Result stopResult = await serviceInstaller.Stop(projectName, environmentName, cancellationToken);
+        return stopResult.IsSuccess
+            ? Result.Success()
+            : Result.Failure(ProjectManagersErrors.ServiceCanNotBeStopped(projectName, environmentName));
     }
 
-    public async ValueTask<Option<ErrorOmd[]>> StartService(string projectName, string environmentName,
+    public async ValueTask<Result> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<ErrorOmd[]> startResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
-        return startResult.IsNone
-            ? null
-            : new[] { ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName) };
+        Result startResult = await serviceInstaller.Start(projectName, environmentName, cancellationToken);
+        return startResult.IsSuccess
+            ? Result.Success()
+            : Result.Failure(ProjectManagersErrors.ServiceCanNotBeStarted(projectName, environmentName));
     }
 
-    public async ValueTask<Option<ErrorOmd[]>> RemoveProject(string projectName, string environmentName,
+    public async ValueTask<Result> RemoveProject(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,
             _messagesDataManager, _userName, cancellationToken);
 
-        Option<ErrorOmd[]> removeProjectResult =
+        Result removeProjectResult =
             await serviceInstaller.RemoveProject(projectName, environmentName, _installFolder, cancellationToken);
-        if (removeProjectResult.IsNone)
+        if (removeProjectResult.IsSuccess)
         {
-            return null;
+            return Result.Success();
         }
 
         if (_messagesDataManager is not null)
@@ -101,7 +100,8 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         }
 
         _logger.LogError("Project {ProjectName} can not removed", projectName);
-        return ErrorOmd.RecreateErrors((ErrorOmd[])removeProjectResult,
-            ProjectManagersErrors.ProjectCanNotBeRemoved(projectName));
+        return Result.CreateValidationError([
+            .. removeProjectResult.Error.ToErrorArray(), ProjectManagersErrors.ProjectCanNotBeRemoved(projectName)
+        ]);
     }
 }

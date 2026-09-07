@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
 using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.Installer.Domain;
 using ToolsManagement.Installer.Errors;
 using ToolsManagement.Installer.ServiceInstaller;
@@ -91,7 +90,7 @@ public sealed class AppParametersFileUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<Option<ErrorOmd[]>> UpdateParameters(string projectName, string environmentName,
+    public async Task<Result> UpdateParameters(string projectName, string environmentName,
         string appSettingsFileName, CancellationToken cancellationToken = default)
     {
         if (projectName == _appName)

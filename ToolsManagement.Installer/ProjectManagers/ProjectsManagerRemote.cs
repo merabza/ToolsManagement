@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
-using SystemTools.SystemToolsShared.Errors;
+using SystemTools.SharedKernel;
 using WebAgentContracts.WebAgentProjectsApiContracts;
 
 namespace ToolsManagement.Installer.ProjectManagers;
@@ -16,19 +15,19 @@ public sealed class ProjectsManagerRemote : IProjectsManager
         _projectsApiClient = projectsApiClient;
     }
 
-    public ValueTask<Option<ErrorOmd[]>> RemoveProjectAndService(string projectName, string environmentName,
-        bool isService, CancellationToken cancellationToken = default)
+    public ValueTask<Result> RemoveProjectAndService(string projectName, string environmentName, bool isService,
+        CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.RemoveProjectAndService(projectName, environmentName, isService, cancellationToken);
     }
 
-    public ValueTask<Option<ErrorOmd[]>> StopService(string projectName, string environmentName,
+    public ValueTask<Result> StopService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.StopService(projectName, environmentName, cancellationToken);
     }
 
-    public ValueTask<Option<ErrorOmd[]>> StartService(string projectName, string environmentName,
+    public ValueTask<Result> StartService(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.StartService(projectName, environmentName, cancellationToken);

@@ -4,10 +4,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.FileManagersMain;
 using ToolsManagement.Installer.Domain;
 using ToolsManagement.Installer.Errors;
@@ -33,7 +32,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async ValueTask<OneOf<ApplicationUpdater, ErrorOmd[]>> Create(string appName, ILogger logger,
+    public static async ValueTask<Result<ApplicationUpdater>> Create(string appName, ILogger logger,
         bool useConsole, string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
@@ -51,7 +50,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("Installer was Not Created");
-            return new[] { ApplicationUpdaterErrors.InstallerWasNotCreated };
+            return ApplicationUpdaterErrors.InstallerWasNotCreated;
         }
 
         if (string.IsNullOrWhiteSpace(installerWorkFolder))
@@ -62,7 +61,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("installerWorkFolder is empty");
-            return new[] { ApplicationUpdaterErrors.InstallerWorkFolderIsEmpty };
+            return ApplicationUpdaterErrors.InstallerWorkFolderIsEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(filesUserName))
@@ -73,7 +72,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("filesUserName is empty");
-            return new[] { ApplicationUpdaterErrors.FilesUserNameIsEmpty };
+            return ApplicationUpdaterErrors.FilesUserNameIsEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(filesUsersGroupName))
@@ -84,7 +83,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("filesUsersGroupName is empty");
-            return new[] { ApplicationUpdaterErrors.FilesUsersGroupNameIsEmpty };
+            return ApplicationUpdaterErrors.FilesUsersGroupNameIsEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(serviceUserName))
@@ -95,7 +94,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("serviceUserName is empty");
-            return new[] { ApplicationUpdaterErrors.ServiceUserNameIsEmpty };
+            return ApplicationUpdaterErrors.ServiceUserNameIsEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(downloadTempExtension))
@@ -106,7 +105,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("downloadTempExtension is empty");
-            return new[] { ApplicationUpdaterErrors.DownloadTempExtensionIsEmpty };
+            return ApplicationUpdaterErrors.DownloadTempExtensionIsEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(installFolder))
@@ -117,7 +116,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("installFolder is empty");
-            return new[] { ApplicationUpdaterErrors.InstallFolderIsEmpty };
+            return ApplicationUpdaterErrors.InstallFolderIsEmpty;
         }
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrWhiteSpace(dotnetRunner))
@@ -129,7 +128,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             }
 
             logger.LogError("dotnetRunner is empty. This parameter required for this OS");
-            return new[] { ApplicationUpdaterErrors.DotnetRunnerIsEmpty };
+            return ApplicationUpdaterErrors.DotnetRunnerIsEmpty;
         }
 
         var applicationUpdaterParameters = new ApplicationUpdaterParameters(programArchiveExtension,
@@ -140,7 +139,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
             messagesDataManager, userName);
     }
 
-    public async Task<OneOf<string, ErrorOmd[]>> UpdateProgram(string projectName, string environmentName,
+    public async Task<Result<string>> UpdateProgram(string projectName, string environmentName,
         CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
@@ -194,27 +193,13 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
                 cancellationToken);
         }
 
-        OneOf<string?, ErrorOmd[]> assemblyVersionResult = await _installer.RunUpdateApplication(lastFileInfo.FileName,
-            projectName, environmentName, _applicationUpdaterParameters.FilesUserName,
-            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
-            _applicationUpdaterParameters.InstallFolder, cancellationToken);
-
-        if (assemblyVersionResult.IsT1)
-        {
-            return assemblyVersionResult.AsT1;
-        }
-
-        string? assemblyVersion = assemblyVersionResult.AsT0;
-        if (assemblyVersion != null)
-        {
-            return assemblyVersion;
-        }
-
-        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+        return await _installer.RunUpdateApplication(lastFileInfo.FileName, projectName, environmentName,
+            _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
+            _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder,
             cancellationToken);
     }
 
-    public async Task<OneOf<string, ErrorOmd[]>> UpdateServiceWithParameters(string projectName, string environmentName,
+    public async Task<Result<string>> UpdateServiceWithParameters(string projectName, string environmentName,
         string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -289,24 +274,10 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
         string resolvedServiceUserName = ResolveServiceUserName(serviceUserName);
 
-        OneOf<string?, ErrorOmd[]> runUpdateServiceResult = await _installer.RunUpdateService(lastFileInfo.FileName,
-            projectName, environmentName, appSettingsFile, resolvedServiceUserName,
-            _applicationUpdaterParameters.FilesUserName, _applicationUpdaterParameters.FilesUsersGroupName,
-            _applicationUpdaterParameters.InstallerWorkFolder, _applicationUpdaterParameters.InstallFolder,
-            serviceDescriptionSignature, projectDescription, cancellationToken);
-
-        if (runUpdateServiceResult.IsT1)
-        {
-            return runUpdateServiceResult.AsT1;
-        }
-
-        string? assemblyVersion = runUpdateServiceResult.AsT0;
-        if (assemblyVersion != null)
-        {
-            return assemblyVersion;
-        }
-
-        return await LogErrorAndSendMessageFromError(InstallerErrors.CannotUpdateProject(projectName, environmentName),
+        return await _installer.RunUpdateService(lastFileInfo.FileName, projectName, environmentName, appSettingsFile,
+            resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
+            _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
+            _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription,
             cancellationToken);
     }
 

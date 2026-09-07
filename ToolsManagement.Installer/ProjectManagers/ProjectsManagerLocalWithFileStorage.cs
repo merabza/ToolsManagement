@@ -1,11 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
-using OneOf;
 using ParametersManagement.LibFileParameters.Models;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.Installer.Domain;
 using ToolsManagement.Installer.Errors;
 
@@ -36,7 +34,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         _useConsole = useConsole;
     }
 
-    public async ValueTask<Option<ErrorOmd[]>> UpdateAppParametersFile(string projectName, string environmentName,
+    public async ValueTask<Result> UpdateAppParametersFile(string projectName, string environmentName,
         string appSettingsFileName, string parametersFileDateMask, string parametersFileExtension,
         CancellationToken cancellationToken = default)
     {
@@ -48,57 +46,52 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
 
         if (applicationUpdater is null)
         {
-            return new[] { ProjectManagersErrors.AppParametersFileUpdaterCreateError };
+            return ProjectManagersErrors.AppParametersFileUpdaterCreateError;
         }
 
         return await applicationUpdater.UpdateParameters(projectName, environmentName, appSettingsFileName,
             cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, ErrorOmd[]>> InstallProgram(string projectName, string environmentName,
+    public async ValueTask<Result<string>> InstallProgram(string projectName, string environmentName,
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, ErrorOmd[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
+        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
             _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
             _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner, _messagesDataManager,
             _userName, cancellationToken);
-        if (applicationUpdaterCreateResult.IsT1)
+        if (applicationUpdaterCreateResult.IsFailure)
         {
-            return applicationUpdaterCreateResult.AsT1;
+            return applicationUpdaterCreateResult.Error;
         }
 
-        ApplicationUpdater? applicationUpdater = applicationUpdaterCreateResult.AsT0;
-        if (applicationUpdater is null)
-        {
-            return new[] { ProjectManagersErrors.ApplicationUpdaterDoesNotCreated(projectName, environmentName) };
-        }
-
+        ApplicationUpdater applicationUpdater = applicationUpdaterCreateResult.Value;
         return await applicationUpdater.UpdateProgram(projectName, environmentName, cancellationToken);
     }
 
-    public async ValueTask<OneOf<string, ErrorOmd[]>> InstallService(string projectName, string environmentName,
+    public async ValueTask<Result<string>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        OneOf<ApplicationUpdater, ErrorOmd[]> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
+        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
             _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
             _localInstallerSettings.InstallFolder, _localInstallerSettings.DotnetRunner, _messagesDataManager,
             _userName, cancellationToken);
-        if (applicationUpdaterCreateResult.IsT1)
+        if (applicationUpdaterCreateResult.IsFailure)
         {
-            return applicationUpdaterCreateResult.AsT1;
+            return applicationUpdaterCreateResult.Error;
         }
 
-        ApplicationUpdater? applicationUpdater = applicationUpdaterCreateResult.AsT0;
-        OneOf<string, ErrorOmd[]> updateServiceWithParametersResult =
+        ApplicationUpdater applicationUpdater = applicationUpdaterCreateResult.Value;
+        Result<string> updateServiceWithParametersResult =
             await applicationUpdater.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
                 appSettingsFileName, serviceDescriptionSignature, projectDescription, cancellationToken);
         return updateServiceWithParametersResult;

@@ -8,12 +8,10 @@ using System.Security.Principal;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
-using OneOf;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.Installer.Errors;
 
 namespace ToolsManagement.Installer.ServiceInstaller;
@@ -57,7 +55,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 #pragma warning restore CA1416 // Validate platform compatibility
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> RemoveService(string serviceEnvName,
+    protected override async ValueTask<Result> RemoveService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -68,7 +66,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
         {
-            return new[] { InstallerErrors.ServiceIsRunningAndCanNotBeRemoved(serviceEnvName) };
+            return InstallerErrors.ServiceIsRunningAndCanNotBeRemoved(serviceEnvName);
         }
 #pragma warning restore CA1416 // Validate platform compatibility
 
@@ -83,7 +81,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
             nameof(InstallerErrors.ServiceCanNotBeRemoved), cancellationToken);
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> StopService(string serviceEnvName,
+    protected override async ValueTask<Result> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -94,7 +92,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
 
         if (sc.Status.Equals(ServiceControllerStatus.Stopped) || sc.Status.Equals(ServiceControllerStatus.StopPending))
         {
-            return null;
+            return Result.Success();
         }
 
         await LogInfoAndSendMessage("Stopping the {0} service...", serviceEnvName, cancellationToken);
@@ -118,10 +116,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
                 cancellationToken);
         }
 
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> StartService(string serviceEnvName,
+    protected override async ValueTask<Result> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -133,7 +131,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         if (!(sc.Status.Equals(ServiceControllerStatus.Stopped) ||
               sc.Status.Equals(ServiceControllerStatus.StopPending)))
         {
-            return null;
+            return Result.Success();
         }
 
         await LogInfoAndSendMessage("Starting the {0} service...", serviceEnvName, cancellationToken);
@@ -156,10 +154,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
                 cancellationToken);
         }
 
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected override async ValueTask<Result> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -191,10 +189,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
         file.SetAccessControl(dac);
 
 #pragma warning restore CA1416 // Validate platform compatibility
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected override async ValueTask<Result> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -227,10 +225,10 @@ public sealed class WindowsServiceInstaller : InstallerBase
         installFolder.SetAccessControl(dac);
 
 #pragma warning restore CA1416 // Validate platform compatibility
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<OneOf<bool, ErrorOmd[]>> IsServiceRegisteredProperly(string projectName,
+    protected override async ValueTask<Result<bool>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -255,7 +253,7 @@ public sealed class WindowsServiceInstaller : InstallerBase
         return await Task.FromResult(toReturn);
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> RegisterService(string projectName, string serviceEnvName,
+    protected override async ValueTask<Result> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
@@ -270,16 +268,16 @@ public sealed class WindowsServiceInstaller : InstallerBase
                 $"{serviceEnvName} service {_serviceDescriptionSignature ?? string.Empty} {_projectDescription ?? string.Empty}")
             .AddParameter("BinaryPathName", exeFilePath).AddParameter("StartupType", "Automatic");
 
-        Option<ErrorOmd[]> invokeResult = await InvokePowerShellAndCheckErrors(ps, nameof(RegisterService),
+        Result invokeResult = await InvokePowerShellAndCheckErrors(ps, nameof(RegisterService),
             nameof(InstallerErrors.CannotRegisterService), cancellationToken);
-        if (invokeResult.IsSome)
+        if (invokeResult.IsFailure)
         {
             return invokeResult;
         }
 
         if (IsServiceExists(serviceEnvName))
         {
-            return null;
+            return Result.Success();
         }
 
         return await LogErrorAndSendMessageFromError(InstallerErrors.ServiceIsNotExists(serviceEnvName),
@@ -287,8 +285,8 @@ public sealed class WindowsServiceInstaller : InstallerBase
     }
 
     //PowerShell-ის ბრძანების გაშვება და შეცდომების გაანალიზება.
-    //ტერმინირებად (exception) და არატერმინირებად (ErrorOmd ნაკადი) შეცდომებს გამოვიტანთ მომხმარებლისთვის და ვაბრუნებთ ErrorOmd-ებად.
-    private async ValueTask<Option<ErrorOmd[]>> InvokePowerShellAndCheckErrors(PowerShell ps, string methodName,
+    //ტერმინირებად (exception) და არატერმინირებად (Error ნაკადი) შეცდომებს გამოვიტანთ მომხმარებლისთვის და ვაბრუნებთ Error-ებად.
+    private async ValueTask<Result> InvokePowerShellAndCheckErrors(PowerShell ps, string methodName,
         string streamErrorCode, CancellationToken cancellationToken = default)
     {
         try
@@ -298,22 +296,22 @@ public sealed class WindowsServiceInstaller : InstallerBase
         catch (Exception ex)
         {
             //PowerShell-ის ტერმინირებადი შეცდომა (მაგალითად, ადმინისტრატორის უფლებების უქონლობა) — გამოვიტანოთ მისი ტექსტი მომხმარებლისთვის
-            return new[] { await LogErrorAndSendMessageFromException(ex, methodName, cancellationToken) };
+            return await LogErrorAndSendMessageFromException(ex, methodName, cancellationToken);
         }
 
-        //PowerShell-ის არატერმინირებადი შეცდომები გროვდება ErrorOmd ნაკადში — წავიკითხოთ და გამოვიტანოთ მომხმარებლისთვის
+        //PowerShell-ის არატერმინირებადი შეცდომები გროვდება Error ნაკადში — წავიკითხოთ და გამოვიტანოთ მომხმარებლისთვის
         if (ps.Streams.Error.Count <= 0)
         {
-            return null;
+            return Result.Success();
         }
 
-        var errors = new List<ErrorOmd>();
+        var errors = new List<Error>();
         foreach (ErrorRecord errorRecord in ps.Streams.Error)
         {
-            errors.AddRange(await LogErrorAndSendMessageFromError(streamErrorCode, errorRecord.ToString(),
+            errors.Add(await LogErrorAndSendMessageFromError(streamErrorCode, errorRecord.ToString(),
                 cancellationToken));
         }
 
-        return errors.ToArray();
+        return errors.Count == 1 ? errors[0] : Result.CreateValidationError([.. errors]);
     }
 }

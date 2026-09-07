@@ -3,11 +3,9 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using Microsoft.Extensions.Logging;
-using OneOf;
+using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
-using SystemTools.SystemToolsShared.Errors;
 using ToolsManagement.Installer.Errors;
 
 namespace ToolsManagement.Installer.ServiceInstaller;
@@ -50,47 +48,52 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         //is-active აბრუნებს 0-ს active მდგომარეობისას, 3-ს — გაჩერებულის/არარსებულის.
         //3 დასაშვებ კოდად ითვლება, რომ გაჩერებულმა სერვისმა (ნორმალური შემთხვევა) error-ლოგი არ გამოიწვიოს.
-        OneOf<(string, int), ErrorOmd[]> result = StShared.RunProcessWithOutput(UseConsole, _logger, "systemctl",
+        Result<(string, int)> result = StShared.RunProcessWithOutput(UseConsole, _logger, "systemctl",
             $"--no-ask-password --quiet is-active {serviceEnvName}", [3]);
-        return result.IsT0 && result.AsT0.Item2 == 0;
+        return result.IsSuccess && result.Value.Item2 == 0;
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> RemoveService(string serviceEnvName,
+    protected override async ValueTask<Result> RemoveService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        Option<ErrorOmd[]> disableProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Result disableProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet disable {serviceEnvName}", [1]);
 
-        if (disableProcessResult.IsSome)
+        if (disableProcessResult.IsFailure)
         {
-            return await Task.FromResult(ErrorOmd.RecreateErrors((ErrorOmd[])disableProcessResult,
-                InstallerErrors.TheServiceWasNotRemoved));
+            return await Task.FromResult(Result.CreateValidationError([
+                .. disableProcessResult.Error.ToErrorArray(), InstallerErrors.TheServiceWasNotRemoved
+            ]));
         }
 
         File.Delete(serviceConfigFileName);
 
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> StopService(string serviceEnvName,
+    protected override async ValueTask<Result> StopService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
         //--no-block განზრახ მოშორებულია: stop უნდა იყოს სინქრონული, რომ systemd დაელოდოს
         //უნიტის სრულ გაჩერებას (საჭიროების შემთხვევაში მოკვლას TimeoutStopSec-ის შემდეგ),
         //თორემ ძველი პროცესი კვლავ იკავებს TCP პორტს და განახლება ჩაიშლება.
-        Option<ErrorOmd[]> stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Result stopProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --quiet stop {serviceEnvName}");
 
-        return stopProcessResult.IsSome
-            ? await Task.FromResult(ErrorOmd.RecreateErrors((ErrorOmd[])stopProcessResult,
-                InstallerErrors.TheServiceWasNotStopped))
-            : null;
+        if (stopProcessResult.IsFailure)
+        {
+            return await Task.FromResult(Result.CreateValidationError([
+                .. stopProcessResult.Error.ToErrorArray(), InstallerErrors.TheServiceWasNotStopped
+            ]));
+        }
+
+        return Result.Success();
     }
 
     //ძველი (შესაძლოა ობოლი) პროცესის PID-ის დადგენა მთავარი dll-ის გზით და მისი მოკვლა PID-ით.
-    protected override async ValueTask<Option<ErrorOmd[]>> KillProcessByPid(string serviceEnvName, string projectName,
+    protected override async ValueTask<Result> KillProcessByPid(string serviceEnvName, string projectName,
         string installFolderPath, CancellationToken cancellationToken = default)
     {
         //გაშვებული პროცესის ამოცნობა ხდება მთავარი dll-ის სრული გზით — ეს მუშაობს მაშინაც,
@@ -99,24 +102,24 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         //pgrep -f პოულობს პროცესებს, რომელთა ბრძანების ხაზი შეიცავს ამ გზას, და აბრუნებს PID-ებს.
         //pgrep აბრუნებს 1-ს, თუ ვერცერთი პროცესი ვერ მოიძებნა — ეს ნორმალური (უშეცდომო) შემთხვევაა.
-        OneOf<(string, int), ErrorOmd[]> pgrepResult =
+        Result<(string, int)> pgrepResult =
             StShared.RunProcessWithOutput(UseConsole, _logger, "pgrep", $"-f \"{mainDllFileName}\"", [1]);
-        if (pgrepResult.IsT1)
+        if (pgrepResult.IsFailure)
         {
             //pgrep ვერ შესრულდა (მაგ. დაყენებული არ არის) — გავაფრთხილოთ და გავაგრძელოთ.
             await LogWarningAndSendMessage("Cannot determine running process PID for {0}", mainDllFileName,
                 cancellationToken);
-            return null;
+            return Result.Success();
         }
 
-        (string pgrepOutput, _) = pgrepResult.AsT0;
+        (string pgrepOutput, _) = pgrepResult.Value;
 
         string[] pidStrings =
             pgrepOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (pidStrings.Length == 0)
         {
             await LogInfoAndSendMessage("No running process found for {0}", mainDllFileName, cancellationToken);
-            return null;
+            return Result.Success();
         }
 
         foreach (string pidString in pidStrings)
@@ -131,65 +134,70 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
             //ვკლავთ კონკრეტული PID-ის მიხედვით SIGKILL-ით. თუ პროცესი უკვე აღარ არსებობს,
             //kill აბრუნებს 1-ს — ამ შემთხვევას დასაშვებად ვთვლით.
-            Option<ErrorOmd[]> killResult = StShared.RunProcess(UseConsole, _logger, "kill", $"-9 {processId}", [1]);
-            if (killResult.IsSome)
+            Result killResult = StShared.RunProcess(UseConsole, _logger, "kill", $"-9 {processId}", [1]);
+            if (killResult.IsFailure)
             {
                 return await LogErrorAndSendMessageFromError(
                     LinuxServiceInstallerErrors.ProcessCanNotBeKilled(processId), cancellationToken);
             }
         }
 
-        return null;
+        return Result.Success();
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> StartService(string serviceEnvName,
+    protected override async ValueTask<Result> StartService(string serviceEnvName,
         CancellationToken cancellationToken = default)
     {
-        Option<ErrorOmd[]> startProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Result startProcessResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet start {serviceEnvName}");
 
-        return startProcessResult.IsSome
-            ? await Task.FromResult(ErrorOmd.RecreateErrors((ErrorOmd[])startProcessResult,
-                InstallerErrors.TheServiceWasNotStarted))
-            : null;
+        if (startProcessResult.IsFailure)
+        {
+            return await Task.FromResult(Result.CreateValidationError([
+                .. startProcessResult.Error.ToErrorArray(), InstallerErrors.TheServiceWasNotStarted
+            ]));
+        }
+
+        return Result.Success();
     }
 
-    protected override async ValueTask<OneOf<bool, ErrorOmd[]>> IsServiceRegisteredProperly(string projectName,
+    protected override async ValueTask<Result<bool>> IsServiceRegisteredProperly(string projectName,
         string serviceEnvName, string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        OneOf<string, ErrorOmd[]> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
+        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
             serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature,
             projectDescription, cancellationToken);
 
-        if (generateServiceFileTextResult.IsT1)
+        if (generateServiceFileTextResult.IsFailure)
         {
-            return generateServiceFileTextResult.AsT1;
+            return generateServiceFileTextResult.Error;
         }
 
-        string? serviceFileText = generateServiceFileTextResult.AsT0;
+        string serviceFileText = generateServiceFileTextResult.Value;
 
         string existingServiceFileText = await File.ReadAllTextAsync(serviceConfigFileName, cancellationToken);
 
         return serviceFileText == existingServiceFileText;
     }
 
-    private async ValueTask<OneOf<string, ErrorOmd[]>> GenerateServiceFileText(string projectName,
+    private async ValueTask<Result<string>> GenerateServiceFileText(string projectName,
         string serviceDescription, string installFolderPath, string serviceUserName, string dotnetRunner,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        OneOf<string, ErrorOmd[]> checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
-        if (checkedDotnetRunnerResult.IsT1)
+        Result<string> checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
+        if (checkedDotnetRunnerResult.IsFailure)
         {
-            ErrorOmd[] errors = ErrorOmd.RecreateErrors(checkedDotnetRunnerResult.AsT1,
-                LinuxServiceInstallerErrors.DotnetLocationIsNotFound);
+            ValidationError error = Result.CreateValidationError([
+                .. checkedDotnetRunnerResult.Error.ToErrorArray(), LinuxServiceInstallerErrors.DotnetLocationIsNotFound
+            ]);
 
-            return await LogErrorsAndSendMessageFromError(errors, cancellationToken);
+            return await LogErrorAndSendMessageFromError(error, cancellationToken);
         }
 
-        string? checkedDotnetRunner = checkedDotnetRunnerResult.AsT0;
+        string checkedDotnetRunner = checkedDotnetRunnerResult.Value;
 
         string mainDllFileName = Path.Combine(installFolderPath, $"{projectName}.dll");
         string syslogIdentifier = serviceDescription.Replace(".", string.Empty);
@@ -216,30 +224,30 @@ public sealed class LinuxServiceInstaller : InstallerBase
                 """;
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> RegisterService(string projectName, string serviceEnvName,
+    protected override async ValueTask<Result> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default)
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        OneOf<string, ErrorOmd[]> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
+        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
             serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature,
             projectDescription, cancellationToken);
-        if (generateServiceFileTextResult.IsT1)
+        if (generateServiceFileTextResult.IsFailure)
         {
-            return generateServiceFileTextResult.AsT1;
+            return generateServiceFileTextResult.Error;
         }
 
-        string? serviceFileText = generateServiceFileTextResult.AsT0;
+        string serviceFileText = generateServiceFileTextResult.Value;
 
         await LogInfoAndSendMessage("Create service file {0}", serviceConfigFileName, cancellationToken);
         await File.WriteAllTextAsync(serviceConfigFileName, serviceFileText, cancellationToken);
 
         await LogInfoAndSendMessage("Enable service {0}", serviceEnvName, cancellationToken);
-        Option<ErrorOmd[]> processResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
+        Result processResult = StShared.RunProcess(UseConsole, _logger, "systemctl",
             $"--no-ask-password --no-block --quiet enable {serviceEnvName}");
 
-        if (processResult.IsSome)
+        if (processResult.IsFailure)
         {
             return await LogErrorAndSendMessageFromError(
                 LinuxServiceInstallerErrors.ServiceCanNotBeEnabled(serviceEnvName), cancellationToken);
@@ -247,38 +255,39 @@ public sealed class LinuxServiceInstaller : InstallerBase
 
         if (IsServiceExists(serviceEnvName))
         {
-            return null;
+            return Result.Success();
         }
 
         return await LogErrorAndSendMessageFromError(LinuxServiceInstallerErrors.ServiceIsNotEnabled(serviceEnvName),
             cancellationToken);
     }
 
-    private OneOf<string, ErrorOmd[]> CheckDotnetRunner(string? dotnetRunner)
+    private Result<string> CheckDotnetRunner(string? dotnetRunner)
     {
         if (!string.IsNullOrWhiteSpace(dotnetRunner) && File.Exists(dotnetRunner))
         {
             return dotnetRunner;
         }
 
-        OneOf<(string, int), ErrorOmd[]> runProcessWithOutputResult =
+        Result<(string, int)> runProcessWithOutputResult =
             StShared.RunProcessWithOutput(UseConsole, _logger, "which", "dotnet");
-        if (runProcessWithOutputResult.IsT1)
+        if (runProcessWithOutputResult.IsFailure)
         {
-            return ErrorOmd.RecreateErrors(runProcessWithOutputResult.AsT1,
-                LinuxServiceInstallerErrors.WhichDotnetError);
+            return Result.CreateValidationError([
+                .. runProcessWithOutputResult.Error.ToErrorArray(), LinuxServiceInstallerErrors.WhichDotnetError
+            ]);
         }
 
-        string newDotnetRunner = runProcessWithOutputResult.AsT0.Item1.Trim('\0', ' ', '\t', '\r', '\n');
+        string newDotnetRunner = runProcessWithOutputResult.Value.Item1.Trim('\0', ' ', '\t', '\r', '\n');
         if (!string.IsNullOrWhiteSpace(newDotnetRunner) && File.Exists(newDotnetRunner))
         {
             return newDotnetRunner;
         }
 
-        return new[] { LinuxServiceInstallerErrors.DotnetDetectError };
+        return LinuxServiceInstallerErrors.DotnetDetectError;
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> ChangeOneFileOwner(string filePath, string? filesUserName,
+    protected override async ValueTask<Result> ChangeOneFileOwner(string filePath, string? filesUserName,
         string? filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
@@ -289,7 +298,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
             await LogWarningAndSendMessage("user name is empty. owner not changed", cancellationToken);
-            return null;
+            return Result.Success();
         }
 
         if (File.Exists(filePath))
@@ -301,7 +310,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return await LogErrorAndSendMessageFromError(InstallerErrors.FileIsNotExists(filePath), cancellationToken);
     }
 
-    protected override async ValueTask<Option<ErrorOmd[]>> ChangeFolderOwner(string folderPath, string filesUserName,
+    protected override async ValueTask<Result> ChangeFolderOwner(string folderPath, string filesUserName,
         string filesUsersGroupName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(folderPath))
@@ -312,7 +321,7 @@ public sealed class LinuxServiceInstaller : InstallerBase
         if (string.IsNullOrWhiteSpace(filesUserName))
         {
             await LogWarningAndSendMessage("user name is empty. owner not changed", cancellationToken);
-            return null;
+            return Result.Success();
         }
 
         if (Directory.Exists(folderPath))
