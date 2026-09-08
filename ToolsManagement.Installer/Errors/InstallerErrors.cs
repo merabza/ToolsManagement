@@ -109,20 +109,17 @@ public static class InstallerErrors
 
     public static Error ServiceCanNotBeRemoved(string serviceEnvName)
     {
-        return Error.Problem(nameof(ServiceCanNotBeRemoved),
-            $"Service with name {serviceEnvName} can not be removed");
+        return Error.Problem(nameof(ServiceCanNotBeRemoved), $"Service with name {serviceEnvName} can not be removed");
     }
 
     public static Error ServiceCanNotBeStarted(string serviceEnvName)
     {
-        return Error.Problem(nameof(ServiceCanNotBeStarted),
-            $"Service with name {serviceEnvName} can not be started");
+        return Error.Problem(nameof(ServiceCanNotBeStarted), $"Service with name {serviceEnvName} can not be started");
     }
 
     public static Error ServiceCanNotBeStopped(string serviceEnvName)
     {
-        return Error.Problem(nameof(ServiceCanNotBeStopped),
-            $"Service with name {serviceEnvName} can not be stopped");
+        return Error.Problem(nameof(ServiceCanNotBeStopped), $"Service with name {serviceEnvName} can not be stopped");
     }
 
     public static Error ServiceIsNotExists(string serviceEnvName)
@@ -138,8 +135,7 @@ public static class InstallerErrors
 
     public static Error ServiceIsRunningAndCannotBeUpdated(string serviceEnvName)
     {
-        return Error.Problem(nameof(ServiceIsNotStopped),
-            $"Service {serviceEnvName} is running and cannot be updated");
+        return Error.Problem(nameof(ServiceIsNotStopped), $"Service {serviceEnvName} is running and cannot be updated");
     }
 
     public static Error ServiceIsRunningAndCanNotBeRemoved(string serviceEnvName)

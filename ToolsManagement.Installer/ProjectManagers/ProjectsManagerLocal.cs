@@ -28,8 +28,8 @@ public sealed class ProjectsManagerLocal : IProjectsManager
         _userName = userName;
     }
 
-    public async ValueTask<Result> RemoveProjectAndService(string projectName, string environmentName,
-        bool isService, CancellationToken cancellationToken = default)
+    public async ValueTask<Result> RemoveProjectAndService(string projectName, string environmentName, bool isService,
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ რა პლატფორმაზეა გაშვებული პროგრამა: ვინდოუსი თუ ლინუქსი
         InstallerBase serviceInstaller = await InstallerFactory.CreateInstaller(_logger, _useConsole,

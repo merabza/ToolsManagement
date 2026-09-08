@@ -57,8 +57,8 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, CancellationToken cancellationToken = default)
     {
-        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
-            _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName, _logger,
+            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
@@ -78,8 +78,8 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
         string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
     {
-        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName,
-            _logger, _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
+        Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName, _logger,
+            _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
             parametersFileExtension, _fileStorageForUpload, _localInstallerSettings.InstallerWorkFolder,
             _localInstallerSettings.FilesUserName, _localInstallerSettings.FilesUsersGroupName,
             _localInstallerSettings.ServiceUserName, _localInstallerSettings.DownloadTempExtension,
@@ -91,9 +91,9 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         }
 
         ApplicationUpdater applicationUpdater = applicationUpdaterCreateResult.Value;
-        Result<string> updateServiceWithParametersResult =
-            await applicationUpdater.UpdateServiceWithParameters(projectName, environmentName, serviceUserName,
-                appSettingsFileName, serviceDescriptionSignature, projectDescription, cancellationToken);
+        Result<string> updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(
+            projectName, environmentName, serviceUserName, appSettingsFileName, serviceDescriptionSignature,
+            projectDescription, cancellationToken);
         return updateServiceWithParametersResult;
     }
 }

@@ -167,9 +167,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
-            serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature,
-            projectDescription, cancellationToken);
+        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
+            installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature, projectDescription,
+            cancellationToken);
 
         if (generateServiceFileTextResult.IsFailure)
         {
@@ -183,9 +183,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
         return serviceFileText == existingServiceFileText;
     }
 
-    private async ValueTask<Result<string>> GenerateServiceFileText(string projectName,
-        string serviceDescription, string installFolderPath, string serviceUserName, string dotnetRunner,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
+    private async ValueTask<Result<string>> GenerateServiceFileText(string projectName, string serviceDescription,
+        string installFolderPath, string serviceUserName, string dotnetRunner, string? serviceDescriptionSignature,
+        string? projectDescription, CancellationToken cancellationToken = default)
     {
         Result<string> checkedDotnetRunnerResult = CheckDotnetRunner(dotnetRunner);
         if (checkedDotnetRunnerResult.IsFailure)
@@ -230,9 +230,9 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         string serviceConfigFileName = GetServiceConfigFileName(serviceEnvName);
 
-        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName,
-            serviceEnvName, installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature,
-            projectDescription, cancellationToken);
+        Result<string> generateServiceFileTextResult = await GenerateServiceFileText(projectName, serviceEnvName,
+            installFolderPath, serviceUserName, _dotnetRunner, serviceDescriptionSignature, projectDescription,
+            cancellationToken);
         if (generateServiceFileTextResult.IsFailure)
         {
             return generateServiceFileTextResult.Error;

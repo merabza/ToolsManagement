@@ -32,8 +32,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         _installer = serviceInstaller;
     }
 
-    public static async ValueTask<Result<ApplicationUpdater>> Create(string appName, ILogger logger,
-        bool useConsole, string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
+    public static async ValueTask<Result<ApplicationUpdater>> Create(string appName, ILogger logger, bool useConsole,
+        string programArchiveDateMask, string programArchiveExtension, string parametersFileDateMask,
         string parametersFileExtension, FileStorageData fileStorageForUpload, string? installerWorkFolder,
         string? filesUserName, string? filesUsersGroupName, string? serviceUserName, string? downloadTempExtension,
         string? installFolder, string? dotnetRunner, IMessagesDataManager? messagesDataManager, string? userName,
