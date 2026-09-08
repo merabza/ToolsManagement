@@ -5,7 +5,6 @@ namespace ToolsManagement.DatabasesManagement.Models;
 
 public sealed class BackupRestoreParameters
 {
-    
     public BackupRestoreParameters(IDatabaseManager databaseManager, FileManager fileManager, SmartSchema? smartSchema,
         string databaseName, string dbServerFoldersSetName, FileStorageData fileStorage)
     {

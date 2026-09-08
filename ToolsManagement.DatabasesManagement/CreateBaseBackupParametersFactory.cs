@@ -21,7 +21,6 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
     private readonly string _appName;
     private readonly ILogger _logger;
 
-    
     public CreateBaseBackupParametersFactory(string appName, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName, bool useConsole) : base(logger, messagesDataManager, userName, useConsole)
     {
@@ -29,10 +28,10 @@ public sealed class CreateBaseBackupParametersFactory : MessageLogger
         _logger = logger;
     }
 
-    public async Task<Result<BaseBackupParameters>> CreateBaseBackupParameters(
-        IHttpClientFactory httpClientFactory, DatabaseParameters fromDatabaseParameters,
-        DatabaseServerConnections databaseServerConnections, ApiClients apiClients, FileStorages fileStorages,
-        SmartSchemas smartSchemas, DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
+    public async Task<Result<BaseBackupParameters>> CreateBaseBackupParameters(IHttpClientFactory httpClientFactory,
+        DatabaseParameters fromDatabaseParameters, DatabaseServerConnections databaseServerConnections,
+        ApiClients apiClients, FileStorages fileStorages, SmartSchemas smartSchemas,
+        DatabasesBackupFilesExchangeParameters? databasesBackupFilesExchangeParameters,
         CancellationToken cancellationToken = default)
     {
         string? localPath = databasesBackupFilesExchangeParameters?.LocalPath;

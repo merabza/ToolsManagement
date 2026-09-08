@@ -6,7 +6,6 @@ namespace ToolsManagement.DatabasesManagement.Models;
 
 public sealed class BaseBackupParameters
 {
-    
     public BaseBackupParameters(BackupRestoreParameters backupRestoreParameters,
         EDatabaseRecoveryModel databaseRecoveryModel, bool needDownload, string downloadTempExtension,
         FileManager localFileManager, SmartSchema? localSmartSchema, bool needUploadToExchange,

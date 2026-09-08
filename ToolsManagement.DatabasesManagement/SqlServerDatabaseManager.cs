@@ -27,7 +27,6 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     private readonly bool _useConsole;
     private readonly string? _userName;
 
-    
     public SqlServerDatabaseManager(string appName, ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
         IMessagesDataManager? messagesDataManager, string? userName)

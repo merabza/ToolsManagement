@@ -17,7 +17,6 @@ public sealed class RemoteDatabaseManager : IDatabaseManager
 {
     private readonly ILogger _logger;
 
-    
     public RemoteDatabaseManager(ILogger logger, DatabaseApiClient databaseApiClient)
     {
         _logger = logger;

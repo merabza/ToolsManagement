@@ -17,7 +17,6 @@ public sealed class BaseBackupRestoreTool
     private readonly BaseBackupParameters _baseBackupParameters;
     private readonly ILogger _logger;
 
-    
     public BaseBackupRestoreTool(ILogger logger, BaseBackupParameters baseBackupParameters)
     {
         _logger = logger;
