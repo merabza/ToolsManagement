@@ -5,18 +5,18 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="0.20.6" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.32.0.713" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="Polly.Core" Version="8.7.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.6.4" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Management" Version="7.6.4" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.4" />
-    <PackageVersion Include="Microsoft.PowerShell.ConsoleHost" Version="7.6.4" />
-    <PackageVersion Include="Microsoft.WSMan.Management" Version="7.6.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.6.6" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Management" Version="7.6.6" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.6" />
+    <PackageVersion Include="Microsoft.PowerShell.ConsoleHost" Version="7.6.6" />
+    <PackageVersion Include="Microsoft.WSMan.Management" Version="7.6.6" />
     <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
-    <PackageVersion Include="System.Management.Automation" Version="7.6.4" />
-    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.11" />
+    <PackageVersion Include="System.Management.Automation" Version="7.6.6" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.12" />
   </ItemGroup>
 </Project>
