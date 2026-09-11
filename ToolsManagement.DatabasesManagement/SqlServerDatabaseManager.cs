@@ -332,7 +332,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         if (databaseRecoveryModel == EDatabaseRecoveryModel.Full)
         {
-            return null;
+            return Result.Success();
         }
 
         Result changeDatabaseRecoveryModelResult =
@@ -343,7 +343,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
             return changeDatabaseRecoveryModelResult;
         }
 
-        return null;
+        return Result.Success();
     }
 
     //დამზადდეს ბაზის სარეზერვო ასლი სერვერის მხარეს.
