@@ -28,6 +28,9 @@
         <Project Path="../SystemTools/SystemTools.StringMessagesApiContracts/SystemTools.StringMessagesApiContracts.csproj" />
         <Project Path="../SystemTools/SystemTools.SystemToolsShared/SystemTools.SystemToolsShared.csproj" />
     </Folder>
+    <Folder Name="/Tests/">
+        <Project Path="ToolsManagement.DatabasesManagement.Tests/ToolsManagement.DatabasesManagement.Tests.csproj" />
+    </Folder>
     <Folder Name="/WebAgentContracts/">
         <Project Path="../WebAgentContracts/WebAgentContracts.WebAgentDatabasesApiContracts/WebAgentContracts.WebAgentDatabasesApiContracts.csproj" />
         <Project Path="../WebAgentContracts/WebAgentContracts.WebAgentProjectsApiContracts/WebAgentContracts.WebAgentProjectsApiContracts.csproj" />

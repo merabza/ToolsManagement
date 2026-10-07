@@ -20,23 +20,34 @@ namespace ToolsManagement.DatabasesManagement;
 
 public sealed class SqlServerDatabaseManager : IDatabaseManager
 {
-    private readonly string _appName;
     private readonly DatabaseServerConnectionDataDomain _databaseServerConnectionDataDomain;
+    private readonly Func<EDatabaseProvider, string?, DbClient?> _dbClientFactory;
     private readonly ILogger _logger;
     private readonly IMessagesDataManager? _messagesDataManager;
-    private readonly bool _useConsole;
     private readonly string? _userName;
 
     public SqlServerDatabaseManager(string appName, ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        IMessagesDataManager? messagesDataManager, string? userName)
+        IMessagesDataManager? messagesDataManager, string? userName) : this(logger, databaseServerConnectionDataDomain,
+        messagesDataManager, userName,
+        (dataProvider, databaseName) => DbClientFactory.GetDbClient(logger, useConsole, dataProvider,
+            databaseServerConnectionDataDomain.ServerAddress, databaseServerConnectionDataDomain.DbAuthSettings,
+            databaseServerConnectionDataDomain.TrustServerCertificate, appName, databaseName, messagesDataManager,
+            userName))
     {
-        _appName = appName;
+    }
+
+    //internal საჭიროა ტესტებისთვის: DbClient-ის შექმნა შეიძლება ჩანაცვლდეს
+    internal SqlServerDatabaseManager(ILogger logger,
+        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
+        IMessagesDataManager? messagesDataManager, string? userName,
+        Func<EDatabaseProvider, string?, DbClient?> dbClientFactory)
+    {
         _logger = logger;
-        _useConsole = useConsole;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
         _messagesDataManager = messagesDataManager;
         _userName = userName;
+        _dbClientFactory = dbClientFactory;
     }
 
     public async ValueTask<Result> CheckRepairDatabase(string databaseName,
@@ -400,7 +411,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
 
         //ბექაპის პროცესის გაშვება
         Result backupDatabaseResult = await dc.BackupDatabase(backupBaseName, backupFileFullName, backupName,
-            EBackupType.Full, databaseBackupParameters.Compress, cancellationToken);
+            databaseBackupParameters.BackupType, databaseBackupParameters.Compress, cancellationToken);
 
         if (backupDatabaseResult.IsFailure)
             //return await Task.FromResult<BackupFileParameters?>(null);
@@ -432,10 +443,7 @@ public sealed class SqlServerDatabaseManager : IDatabaseManager
     private async ValueTask<Result<DbClient>> GetDatabaseClient(EDatabaseProvider dataProvider,
         string? databaseName = null, CancellationToken cancellationToken = default)
     {
-        DbClient? dc = DbClientFactory.GetDbClient(_logger, _useConsole, dataProvider,
-            _databaseServerConnectionDataDomain.ServerAddress, _databaseServerConnectionDataDomain.DbAuthSettings,
-            _databaseServerConnectionDataDomain.TrustServerCertificate, _appName, databaseName, _messagesDataManager,
-            _userName);
+        DbClient? dc = _dbClientFactory(dataProvider, databaseName);
 
         if (dc is not null)
         {
