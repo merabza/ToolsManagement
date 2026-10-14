@@ -948,7 +948,7 @@ public sealed class SqlServerDatabaseManagerTests
     private void VerifyErrorLogged(string message)
     {
         _logger.Verify(l => l.Log(LogLevel.Error, It.IsAny<EventId>(),
-            It.Is<It.IsAnyType>((state, _) => state.ToString() == message), It.IsAny<Exception?>(),
+            It.Is<It.IsAnyType>((state, _) => state!.ToString() == message), It.IsAny<Exception?>(),
             It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 }
