@@ -10,18 +10,18 @@
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="Polly.Core" Version="8.8.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.6.6" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Management" Version="7.6.6" />
-    <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.6" />
-    <PackageVersion Include="Microsoft.PowerShell.ConsoleHost" Version="7.6.6" />
-    <PackageVersion Include="Microsoft.WSMan.Management" Version="7.6.6" />
-    <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
-    <PackageVersion Include="System.Management.Automation" Version="7.6.6" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
-    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.12" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
-    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.6.7" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Management" Version="7.6.7" />
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.7" />
+    <PackageVersion Include="Microsoft.PowerShell.ConsoleHost" Version="7.6.7" />
+    <PackageVersion Include="Microsoft.WSMan.Management" Version="7.6.7" />
+    <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+    <PackageVersion Include="System.Management.Automation" Version="7.6.7" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
 </Project>
