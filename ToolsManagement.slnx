@@ -7,6 +7,7 @@
     <Folder Name="/DatabaseTools/">
         <Project Path="../DatabaseTools/DatabaseTools.DbTools/DatabaseTools.DbTools.csproj" />
         <Project Path="../DatabaseTools/DatabaseTools.DbToolsFactory/DatabaseTools.DbToolsFactory.csproj" />
+        <Project Path="../DatabaseTools/DatabaseTools.MariaDbTools/DatabaseTools.MariaDbTools.csproj" />
         <Project Path="../DatabaseTools/DatabaseTools.OleDbTools/DatabaseTools.OleDbTools.csproj" />
         <Project Path="../DatabaseTools/DatabaseTools.SqLiteDbTools/DatabaseTools.SqLiteDbTools.csproj" />
         <Project Path="../DatabaseTools/DatabaseTools.SqlServerDbTools/DatabaseTools.SqlServerDbTools.csproj" />

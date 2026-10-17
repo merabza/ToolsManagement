@@ -12,6 +12,7 @@ using ParametersManagement.LibDatabaseParameters;
 using SystemTools.SharedKernel;
 using SystemTools.SystemToolsShared;
 using ToolsManagement.ApiClientsManagement;
+using ToolsManagement.DatabasesManagement.Errors;
 using WebAgentContracts.WebAgentDatabasesApiContracts;
 
 namespace ToolsManagement.DatabasesManagement;
@@ -78,6 +79,9 @@ public static class DatabaseManagersFactory
                 return CreateSqLiteDatabaseManager();
             case EDatabaseProvider.OleDb:
                 return CreateOleDatabaseManager();
+            case EDatabaseProvider.MariaDb:
+                return await CreateMariaDbDatabaseManager(logger, useConsole, databaseServerConnection,
+                    messagesDataManager, userName, cancellationToken);
             case EDatabaseProvider.WebAgent:
                 if (apiClients is not null && httpClientFactory is not null)
                 {
@@ -188,5 +192,38 @@ public static class DatabaseManagersFactory
 
         return new SqlServerDatabaseManager(appName, logger, useConsole, databaseServerConnectionDataDomain,
             messagesDataManager, userName);
+    }
+
+    private static async ValueTask<Result<IDatabaseManager>> CreateMariaDbDatabaseManager(ILogger logger,
+        bool useConsole, DatabaseServerConnectionData databaseServerConnectionData,
+        IMessagesDataManager? messagesDataManager, string? userName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(databaseServerConnectionData.ServerAddress))
+        {
+            if (messagesDataManager is not null)
+            {
+                await messagesDataManager.SendMessage(userName,
+                    "ServerAddress is empty, Cannot create MariaDbDatabaseManager", cancellationToken);
+            }
+
+            logger.LogError("ServerAddress is empty, Cannot create MariaDbDatabaseManager");
+            return MariaDbDatabaseManagerErrors.ServerAddressIsEmpty;
+        }
+
+        //MariaDB-ს Windows-ის ავთენტიფიკაცია არ აქვს — მომხმარებელი და პაროლი სავალდებულოა
+        Result<DbAuthSettingsBase> dbAuthSettingsCreatorCreateResult = DbAuthSettingsCreator.Create(false,
+            databaseServerConnectionData.ServerUser, databaseServerConnectionData.ServerPass, useConsole);
+
+        if (dbAuthSettingsCreatorCreateResult.IsFailure)
+        {
+            return dbAuthSettingsCreatorCreateResult.Error;
+        }
+
+        var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(EDatabaseProvider.MariaDb,
+            databaseServerConnectionData.ServerAddress, dbAuthSettingsCreatorCreateResult.Value,
+            databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.DatabaseFoldersSets ?? []);
+
+        return new MariaDbDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain, messagesDataManager,
+            userName);
     }
 }
