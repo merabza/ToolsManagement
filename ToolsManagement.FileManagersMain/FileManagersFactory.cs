@@ -92,13 +92,10 @@ public static class FileManagersFactory
             throw new Exception("fileStorageData.FileStoragePath is null");
         }
 
+        //დაშორებული საცავი დისკის ფოლდერად არ უნდა ჩაითვალოს, თუ მასთან დაკავშირება ვერ მოხერხდა
         if (!FileStat.IsFileSchema(fileStorageData.FileStoragePath))
         {
-            var rfm = RemoteFileManager.Create(fileStorageData, useConsole, logger, localPatchChecked);
-            if (rfm != null)
-            {
-                return rfm;
-            }
+            return RemoteFileManager.Create(fileStorageData, useConsole, logger, localPatchChecked);
         }
 
         //if (fileStorageData.FileStoragePath == null)
