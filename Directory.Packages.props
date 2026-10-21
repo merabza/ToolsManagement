@@ -4,12 +4,12 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ConnectionTools.ConnectTools" Version="1.0.9790.27097" />
-    <PackageVersion Include="ConnectionTools.CToolsFactory" Version="1.0.9790.27097" />
-    <PackageVersion Include="DatabaseTools.DbToolsFactory" Version="1.0.9790.27167" />
+    <PackageVersion Include="ConnectionTools.ConnectTools" Version="1.0.9790.30478" />
+    <PackageVersion Include="ConnectionTools.CToolsFactory" Version="1.0.9790.30478" />
+    <PackageVersion Include="DatabaseTools.DbToolsFactory" Version="1.0.9790.30615" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="0.20.6" />
-    <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9790.27216" />
-    <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9790.27216" />
+    <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9790.30721" />
+    <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9790.30721" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
@@ -26,9 +26,9 @@
     <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.13" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="Moq" Version="4.21.0" />
-    <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9790.27014" />
-    <PackageVersion Include="SystemTools.SharedKernel" Version="1.0.9790.27014" />
-    <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9790.27014" />
+    <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9790.30360" />
+    <PackageVersion Include="SystemTools.SharedKernel" Version="1.0.9790.30360" />
+    <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9790.30360" />
     <PackageVersion Include="WebAgentContracts.WebAgentDatabasesApiContracts" Version="1.0.9790.26563" />
     <PackageVersion Include="WebAgentContracts.WebAgentProjectsApiContracts" Version="1.0.9790.26563" />
     <PackageVersion Include="xunit" Version="2.9.3" />
