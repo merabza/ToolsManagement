@@ -221,7 +221,8 @@ public static class DatabaseManagersFactory
 
         var databaseServerConnectionDataDomain = new DatabaseServerConnectionDataDomain(EDatabaseProvider.MariaDb,
             databaseServerConnectionData.ServerAddress, dbAuthSettingsCreatorCreateResult.Value,
-            databaseServerConnectionData.TrustServerCertificate, databaseServerConnectionData.DatabaseFoldersSets ?? []);
+            databaseServerConnectionData.TrustServerCertificate,
+            databaseServerConnectionData.DatabaseFoldersSets ?? []);
 
         return new MariaDbDatabaseManager(logger, useConsole, databaseServerConnectionDataDomain, messagesDataManager,
             userName);

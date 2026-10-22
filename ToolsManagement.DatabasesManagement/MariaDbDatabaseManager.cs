@@ -25,8 +25,7 @@ public sealed class MariaDbDatabaseManager : IDatabaseManager
 
     public MariaDbDatabaseManager(ILogger logger, bool useConsole,
         DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        IMessagesDataManager? messagesDataManager, string? userName) : this(logger,
-        databaseServerConnectionDataDomain,
+        IMessagesDataManager? messagesDataManager, string? userName) : this(logger, databaseServerConnectionDataDomain,
         databaseName => DbClientFactory.GetDbClient(logger, useConsole, EDatabaseProvider.MariaDb,
             databaseServerConnectionDataDomain.ServerAddress, databaseServerConnectionDataDomain.DbAuthSettings,
             databaseServerConnectionDataDomain.TrustServerCertificate, null, databaseName, messagesDataManager,
@@ -36,8 +35,7 @@ public sealed class MariaDbDatabaseManager : IDatabaseManager
 
     //internal საჭიროა ტესტებისთვის: DbClient-ის შექმნა შეიძლება ჩანაცვლდეს
     internal MariaDbDatabaseManager(ILogger logger,
-        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain,
-        Func<string?, DbClient?> dbClientFactory)
+        DatabaseServerConnectionDataDomain databaseServerConnectionDataDomain, Func<string?, DbClient?> dbClientFactory)
     {
         _logger = logger;
         _databaseServerConnectionDataDomain = databaseServerConnectionDataDomain;
@@ -115,13 +113,12 @@ public sealed class MariaDbDatabaseManager : IDatabaseManager
 
     public Task<Result<List<string>>> GetDatabaseFoldersSetNames(CancellationToken cancellationToken)
     {
-        return Task.FromResult<Result<List<string>>>(_databaseServerConnectionDataDomain.DatabaseFoldersSets.Keys
-            .ToList());
+        return Task.FromResult<Result<List<string>>>(
+            _databaseServerConnectionDataDomain.DatabaseFoldersSets.Keys.ToList());
     }
 
-    public ValueTask<Result<BackupFileParameters>> CreateBackup(
-        DatabaseBackupParametersDomain databaseBackupParameters, string backupBaseName, string dbServerFoldersSetName,
-        CancellationToken cancellationToken = default)
+    public ValueTask<Result<BackupFileParameters>> CreateBackup(DatabaseBackupParametersDomain databaseBackupParameters,
+        string backupBaseName, string dbServerFoldersSetName, CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult<Result<BackupFileParameters>>(
             MariaDbDatabaseManagerErrors.OperationIsNotSupported(nameof(CreateBackup)));
