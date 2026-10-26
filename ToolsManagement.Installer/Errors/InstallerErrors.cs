@@ -16,6 +16,9 @@ public static class InstallerErrors
     public static readonly Error TheServiceWasNotStarted =
         Error.Problem(nameof(TheServiceWasNotStarted), "The service was not Started");
 
+    public static readonly Error FirewallIsNotFound = Error.Problem(nameof(FirewallIsNotFound),
+        "Neither firewalld nor nftables (nft) is found, the port can not be opened");
+
     public static Error ProjectArchiveFileWasNotDownloaded =>
         Error.Problem(nameof(ProjectArchiveFileWasNotDownloaded), "Project archive file not downloaded");
 
@@ -115,6 +118,11 @@ public static class InstallerErrors
     public static Error ServiceCanNotBeStarted(string serviceEnvName)
     {
         return Error.Problem(nameof(ServiceCanNotBeStarted), $"Service with name {serviceEnvName} can not be started");
+    }
+
+    public static Error PortCanNotBeOpened(int port, string serviceEnvName)
+    {
+        return Error.Problem(nameof(PortCanNotBeOpened), $"Port {port} for service {serviceEnvName} can not be opened");
     }
 
     public static Error ServiceCanNotBeStopped(string serviceEnvName)
