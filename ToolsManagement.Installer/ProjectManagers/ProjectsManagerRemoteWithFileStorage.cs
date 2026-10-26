@@ -38,8 +38,9 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
         string? projectDescription, IReadOnlyCollection<int> portsToOpen,
         CancellationToken cancellationToken = default)
     {
-        return _projectsApiClient.InstallService(projectName, environmentName, serviceUserName, appSettingsFileName,
-            programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
-            serviceDescriptionSignature, projectDescription, portsToOpen, cancellationToken);
+        //return _projectsApiClient.InstallService(projectName, environmentName, serviceUserName, appSettingsFileName,
+        //    programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
+        //    serviceDescriptionSignature, projectDescription, portsToOpen, cancellationToken);
+        return ValueTask.FromResult(Result.Success(string.Empty));
     }
 }
