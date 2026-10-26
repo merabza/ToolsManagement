@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using SystemTools.SharedKernel;
 using WebAgentContracts.WebAgentProjectsApiContracts;
@@ -34,10 +35,11 @@ public sealed class ProjectsManagerRemoteWithFileStorage : IIProjectsManagerWith
     public ValueTask<Result<string>> InstallService(string projectName, string environmentName, string serviceUserName,
         string appSettingsFileName, string programArchiveDateMask, string programArchiveExtension,
         string parametersFileDateMask, string parametersFileExtension, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken = default)
+        string? projectDescription, IReadOnlyCollection<int> portsToOpen,
+        CancellationToken cancellationToken = default)
     {
         return _projectsApiClient.InstallService(projectName, environmentName, serviceUserName, appSettingsFileName,
             programArchiveDateMask, programArchiveExtension, parametersFileDateMask, parametersFileExtension,
-            serviceDescriptionSignature, projectDescription, cancellationToken);
+            serviceDescriptionSignature, projectDescription, portsToOpen, cancellationToken);
     }
 }

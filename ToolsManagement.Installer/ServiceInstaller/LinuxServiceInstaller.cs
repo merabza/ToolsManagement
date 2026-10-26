@@ -12,6 +12,9 @@ namespace ToolsManagement.Installer.ServiceInstaller;
 
 public sealed class LinuxServiceInstaller : InstallerBase
 {
+    private const string NftablesConfFileName = "/etc/nftables.conf";
+    private const string WebminTable = "webmin_profile_hosting";
+    private const string WebminTcpPortsSet = "profile_hosting_tcp_ports";
     private readonly string _dotnetRunner;
     private readonly ILogger _logger;
 
@@ -28,6 +31,105 @@ public sealed class LinuxServiceInstaller : InstallerBase
     {
         _logger = logger;
         _dotnetRunner = string.Empty;
+    }
+
+    //პორტი იხსნება firewalld-ში, თუ ის მუშაობს; თუ არა, Webmin-ის (Virtualmin-ის) nftables-ის ცხრილის tcp პორტების
+    //სიმრავლეში (ამ ცხრილის input chain-ს policy drop აქვს, ამიტომ სხვა ცხრილის accept წესი პორტს ვერ ხსნის); თუ არც
+    //ის არის, nftables-ის inet filter input chain-ის წესით. nftables-ის ცვლილება /etc/nftables.conf-შიც ჩაიწერება, რომ
+    //გადატვირთვის შემდეგაც დარჩეს
+    protected override async ValueTask<Result> OpenPort(string serviceEnvName, int port,
+        CancellationToken cancellationToken = default)
+    {
+        //firewall-cmd --state: 0 მუშაობს, 252 არ მუშაობს
+        if (IsCommandAvailable("firewall-cmd") && ExitsWithZero("firewall-cmd", "--state", [252]))
+        {
+            Result addPortResult =
+                StShared.RunProcess(UseConsole, _logger, "firewall-cmd", $"--permanent --add-port={port}/tcp");
+            return addPortResult.IsFailure
+                ? addPortResult
+                : StShared.RunProcess(UseConsole, _logger, "firewall-cmd", "--reload");
+        }
+
+        if (!IsCommandAvailable("nft"))
+        {
+            return InstallerErrors.FirewallIsNotFound;
+        }
+
+        //nft list set / get element: 1 ნიშნავს, რომ სიმრავლე ან ელემენტი არ არის
+        string portElement = $"{{ {port} }}";
+        if (ExitsWithZero("nft", $"list set inet {WebminTable} {WebminTcpPortsSet}", [1]))
+        {
+            //სიმრავლეში უკვე არსებული პორტი (შესაძლოა დიაპაზონის ნაწილი) ფაილს არ ეხება
+            if (ExitsWithZero("nft", $"get element inet {WebminTable} {WebminTcpPortsSet} {portElement}", [1]))
+            {
+                await LogInfoAndSendMessage("Port {0} is already open in nftables set {1}", port, WebminTcpPortsSet,
+                    cancellationToken);
+                return Result.Success();
+            }
+
+            Result addElementResult = StShared.RunProcess(UseConsole, _logger, "nft",
+                $"add element inet {WebminTable} {WebminTcpPortsSet} {portElement}");
+            if (addElementResult.IsFailure)
+            {
+                return addElementResult;
+            }
+
+            await AddPortToWebminSetInNftablesConf(port, cancellationToken);
+            return Result.Success();
+        }
+
+        string rule = $"add rule inet filter input tcp dport {port} accept";
+        string conf = File.Exists(NftablesConfFileName)
+            ? await File.ReadAllTextAsync(NftablesConfFileName, cancellationToken)
+            : string.Empty;
+        if (conf.Contains(rule, StringComparison.Ordinal))
+        {
+            return Result.Success();
+        }
+
+        Result addRuleResult = StShared.RunProcess(UseConsole, _logger, "nft", rule);
+        if (addRuleResult.IsFailure)
+        {
+            return addRuleResult;
+        }
+
+        await File.AppendAllTextAsync(NftablesConfFileName, $"{rule}\n", cancellationToken);
+        return Result.Success();
+    }
+
+    //პორტი /etc/nftables.conf-ში Webmin-ის სიმრავლის elements-ის სიის ბოლოს
+    private async ValueTask AddPortToWebminSetInNftablesConf(int port, CancellationToken cancellationToken)
+    {
+        string conf = File.Exists(NftablesConfFileName)
+            ? await File.ReadAllTextAsync(NftablesConfFileName, cancellationToken)
+            : string.Empty;
+        string? newConf = NftablesConf.AddPortToSetElements(conf, WebminTcpPortsSet, port);
+        if (newConf is null)
+        {
+            await LogWarningAndSendMessage(
+                $"Port {port} is open now, but {NftablesConfFileName} has no elements of set {WebminTcpPortsSet}: add the port there by hand",
+                cancellationToken);
+            return;
+        }
+
+        if (!ReferenceEquals(newConf, conf))
+        {
+            await File.WriteAllTextAsync(NftablesConfFileName, newConf, cancellationToken);
+        }
+    }
+
+    private bool ExitsWithZero(string programFileName, string arguments, int[] allowExitCodes)
+    {
+        Result<(string, int)> result = StShared.RunProcessWithOutput(UseConsole, _logger, programFileName,
+            arguments, allowExitCodes, false);
+        return result.IsSuccess && result.Value.Item2 == 0;
+    }
+
+    private static bool IsCommandAvailable(string commandName)
+    {
+        string? path = Environment.GetEnvironmentVariable("PATH");
+        return path is not null && Array.Exists(path.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries),
+            folder => File.Exists(Path.Combine(folder, commandName)));
     }
 
     protected override bool IsServiceExists(string serviceEnvName)

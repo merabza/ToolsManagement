@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ParametersManagement.LibFileParameters.Models;
@@ -76,7 +77,8 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
     public async ValueTask<Result<string>> InstallService(string projectName, string environmentName,
         string serviceUserName, string appSettingsFileName, string programArchiveDateMask,
         string programArchiveExtension, string parametersFileDateMask, string parametersFileExtension,
-        string? serviceDescriptionSignature, string? projectDescription, CancellationToken cancellationToken = default)
+        string? serviceDescriptionSignature, string? projectDescription, IReadOnlyCollection<int> portsToOpen,
+        CancellationToken cancellationToken = default)
     {
         Result<ApplicationUpdater> applicationUpdaterCreateResult = await ApplicationUpdater.Create(_appName, _logger,
             _useConsole, programArchiveDateMask, programArchiveExtension, parametersFileDateMask,
@@ -93,7 +95,7 @@ public sealed class ProjectsManagerLocalWithFileStorage : IIProjectsManagerWithF
         ApplicationUpdater applicationUpdater = applicationUpdaterCreateResult.Value;
         Result<string> updateServiceWithParametersResult = await applicationUpdater.UpdateServiceWithParameters(
             projectName, environmentName, serviceUserName, appSettingsFileName, serviceDescriptionSignature,
-            projectDescription, cancellationToken);
+            projectDescription, portsToOpen, cancellationToken);
         return updateServiceWithParametersResult;
     }
 }
