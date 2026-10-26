@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -50,6 +51,10 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     protected abstract ValueTask<Result> RegisterService(string projectName, string serviceEnvName,
         string serviceUserName, string installFolderPath, string? serviceDescriptionSignature,
         string? projectDescription, CancellationToken cancellationToken = default);
+
+    //TCP პორტის გახსნა სერვერის firewall-ში; უკვე გახსნილი პორტი შეცდომა არ არის
+    protected abstract ValueTask<Result> OpenPort(string serviceEnvName, int port,
+        CancellationToken cancellationToken = default);
 
     protected abstract bool IsServiceExists(string serviceEnvName);
 
@@ -241,7 +246,8 @@ public /*open*/ abstract class InstallerBase : MessageLogger
     public async ValueTask<Result<string>> RunUpdateService(string archiveFileName, string projectName,
         string environmentName, FileNameAndTextContent? appSettingsFile, string serviceUserName, string filesUserName,
         string filesUsersGroupName, string installWorkFolder, string installFolder, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken = default)
+        string? projectDescription, IReadOnlyCollection<int> portsToOpen,
+        CancellationToken cancellationToken = default)
     {
         //დავადგინოთ არსებობს თუ არა {_workFolder} სახელით ქვეფოლდერი სამუშაო ფოლდერში
         //და თუ არ არსებობს, შევქმნათ
@@ -465,6 +471,18 @@ public /*open*/ abstract class InstallerBase : MessageLogger
             {
                 return await LogErrorAndSendMessageFromError(InstallerErrors.CannotRegisterService(serviceEnvName),
                     cancellationToken);
+            }
+        }
+
+        //სერვისის პორტების გახსნა firewall-ში (ServerInfo-ს OpenPort-ის ჩართვისას SupportTools-ი გადმოსცემს)
+        foreach (int port in portsToOpen)
+        {
+            await LogInfoAndSendMessage("Open port {0} for service {1}...", port, serviceEnvName, cancellationToken);
+            Result openPortResult = await OpenPort(serviceEnvName, port, cancellationToken);
+            if (openPortResult.IsFailure)
+            {
+                return await LogErrorAndSendMessageFromError(
+                    InstallerErrors.PortCanNotBeOpened(port, serviceEnvName), cancellationToken);
             }
         }
 

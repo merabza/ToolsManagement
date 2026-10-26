@@ -18,6 +18,7 @@ namespace ToolsManagement.Installer.ServiceInstaller;
 
 public sealed class WindowsServiceInstaller : InstallerBase
 {
+    private readonly ILogger _logger;
     private readonly string? _projectDescription;
     private readonly string? _serviceDescriptionSignature;
 
@@ -25,8 +26,27 @@ public sealed class WindowsServiceInstaller : InstallerBase
     public WindowsServiceInstaller(bool useConsole, ILogger logger, IMessagesDataManager? messagesDataManager,
         string? userName) : base(useConsole, logger, "win-x64", messagesDataManager, userName)
     {
+        _logger = logger;
         _serviceDescriptionSignature = null;
         _projectDescription = null;
+    }
+
+    //Windows Defender Firewall-ის შემავალი წესი "{serviceEnvName} port {port}"; არსებული წესი თავიდან არ ემატება
+    protected override ValueTask<Result> OpenPort(string serviceEnvName, int port,
+        CancellationToken cancellationToken = default)
+    {
+        string ruleName = $"{serviceEnvName} port {port}";
+
+        //show rule: 1 ნიშნავს, რომ ასეთი წესი არ არის
+        Result<(string, int)> showRuleResult = StShared.RunProcessWithOutput(UseConsole, _logger, "netsh",
+            $"advfirewall firewall show rule name=\"{ruleName}\"", [1], false);
+        if (showRuleResult.IsSuccess && showRuleResult.Value.Item2 == 0)
+        {
+            return ValueTask.FromResult(Result.Success());
+        }
+
+        return ValueTask.FromResult(StShared.RunProcess(UseConsole, _logger, "netsh",
+            $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=allow protocol=TCP localport={port}"));
     }
 
     protected override bool IsServiceExists(string serviceEnvName)

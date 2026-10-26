@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -201,7 +202,8 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
 
     public async Task<Result<string>> UpdateServiceWithParameters(string projectName, string environmentName,
         string serviceUserName, string? appSettingsFileName, string? serviceDescriptionSignature,
-        string? projectDescription, CancellationToken cancellationToken = default)
+        string? projectDescription, IReadOnlyCollection<int> portsToOpen,
+        CancellationToken cancellationToken = default)
     {
         await LogInfoAndSendMessage(
             "starting UpdateProgramWithParameters with parameters: projectName={0}, environmentName={1}, serviceUserName={2}",
@@ -277,7 +279,7 @@ public sealed class ApplicationUpdater : ApplicationUpdaterBase
         return await _installer.RunUpdateService(lastFileInfo.FileName, projectName, environmentName, appSettingsFile,
             resolvedServiceUserName, _applicationUpdaterParameters.FilesUserName,
             _applicationUpdaterParameters.FilesUsersGroupName, _applicationUpdaterParameters.InstallerWorkFolder,
-            _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription,
+            _applicationUpdaterParameters.InstallFolder, serviceDescriptionSignature, projectDescription, portsToOpen,
             cancellationToken);
     }
 
