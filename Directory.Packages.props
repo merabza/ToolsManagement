@@ -4,12 +4,12 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ConnectionTools.ConnectTools" Version="1.0.9808.33346" />
-    <PackageVersion Include="ConnectionTools.CToolsFactory" Version="1.0.9808.33346" />
-    <PackageVersion Include="DatabaseTools.DbToolsFactory" Version="1.0.9808.33396" />
+    <PackageVersion Include="ConnectionTools.ConnectTools" Version="1.0.9808.42567" />
+    <PackageVersion Include="ConnectionTools.CToolsFactory" Version="1.0.9808.42567" />
+    <PackageVersion Include="DatabaseTools.DbToolsFactory" Version="1.0.9808.42613" />
     <PackageVersion Include="Microsoft.Identity.Client.NativeInterop" Version="0.20.6" />
-    <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9808.33436" />
-    <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9808.33436" />
+    <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9808.42649" />
+    <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9808.42649" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
@@ -29,8 +29,8 @@
     <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9808.33287" />
     <PackageVersion Include="SystemTools.SharedKernel" Version="1.0.9808.33287" />
     <PackageVersion Include="SystemTools.SystemToolsShared" Version="1.0.9808.33287" />
-    <PackageVersion Include="WebAgentContracts.WebAgentDatabasesApiContracts" Version="1.0.9808.33509" />
-    <PackageVersion Include="WebAgentContracts.WebAgentProjectsApiContracts" Version="1.0.9808.33509" />
+    <PackageVersion Include="WebAgentContracts.WebAgentDatabasesApiContracts" Version="1.0.9808.42716" />
+    <PackageVersion Include="WebAgentContracts.WebAgentProjectsApiContracts" Version="1.0.9808.42716" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
