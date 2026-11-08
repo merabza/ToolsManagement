@@ -2,12 +2,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ToolsManagement.FileManagersMain\ToolsManagement.FileManagersMain.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="ParametersManagement.LibFileParameters" />
-      <PackageReference Include="SystemTools.BackgroundTasks" />
-      <PackageReference Include="SystemTools.SystemToolsShared" />
+        <ProjectReference Include="..\..\ParametersManagement\ParametersManagement.LibFileParameters\ParametersManagement.LibFileParameters.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.BackgroundTasks\SystemTools.BackgroundTasks.csproj" />
+        <ProjectReference Include="..\..\SystemTools\SystemTools.SystemToolsShared\SystemTools.SystemToolsShared.csproj" />
     </ItemGroup>
 
 </Project>
