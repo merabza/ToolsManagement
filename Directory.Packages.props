@@ -11,11 +11,11 @@
     <PackageVersion Include="ParametersManagement.LibDatabaseParameters" Version="1.0.9808.42649" />
     <PackageVersion Include="ParametersManagement.LibFileParameters" Version="1.0.9808.42649" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="Polly.Core" Version="8.9.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.14" />
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="11.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
     <PackageVersion Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.6.9" />
     <PackageVersion Include="Microsoft.PowerShell.Commands.Management" Version="7.6.9" />
     <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.9" />
@@ -23,7 +23,7 @@
     <PackageVersion Include="Microsoft.WSMan.Management" Version="7.6.9" />
     <PackageVersion Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageVersion Include="System.Management.Automation" Version="7.6.9" />
-    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.14" />
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="11.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="SystemTools.BackgroundTasks" Version="1.0.9808.33287" />

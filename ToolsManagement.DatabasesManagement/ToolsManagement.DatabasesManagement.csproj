@@ -2,7 +2,6 @@
 
     <ItemGroup>
         <PackageReference Include="DatabaseTools.DbToolsFactory" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
         <PackageReference Include="ParametersManagement.LibDatabaseParameters" />
         <PackageReference Include="ParametersManagement.LibFileParameters" />
         <PackageReference Include="SystemTools.SharedKernel" />
